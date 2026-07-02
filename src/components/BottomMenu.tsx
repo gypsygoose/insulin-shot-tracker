@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-import ConfirmDialog from './ConfirmDialog';
-import LegendModal from './LegendModal';
+import { useState } from "react";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import Svg, { Path } from "react-native-svg";
+import ConfirmDialog from "./ConfirmDialog";
+import LegendModal from "./LegendModal";
 
 interface Props {
   canUndo: boolean;
@@ -13,7 +13,7 @@ interface Props {
 // Icon components matching Figma icon shapes (node-id 26-3, file grYg39698ogy0nEBd88Fup)
 
 function UndoIcon({ disabled }: { disabled: boolean }) {
-  const c = disabled ? '#4A5568' : '#FFFFFF';
+  const c = disabled ? "#4A5568" : "#FFFFFF";
   return (
     <Svg width={22} height={22} viewBox="0 0 22 22" fill="none">
       <Path
@@ -52,10 +52,34 @@ function LegendIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <Path d="M12.8333 3.66667H19.25" stroke="#FFFFFF" strokeWidth={1.83333} strokeLinecap="round" strokeLinejoin="round" />
-      <Path d="M12.8333 8.25H19.25" stroke="#FFFFFF" strokeWidth={1.83333} strokeLinecap="round" strokeLinejoin="round" />
-      <Path d="M12.8333 13.75H19.25" stroke="#FFFFFF" strokeWidth={1.83333} strokeLinecap="round" strokeLinejoin="round" />
-      <Path d="M12.8333 18.3333H19.25" stroke="#FFFFFF" strokeWidth={1.83333} strokeLinecap="round" strokeLinejoin="round" />
+      <Path
+        d="M12.8333 3.66667H19.25"
+        stroke="#FFFFFF"
+        strokeWidth={1.83333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M12.8333 8.25H19.25"
+        stroke="#FFFFFF"
+        strokeWidth={1.83333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M12.8333 13.75H19.25"
+        stroke="#FFFFFF"
+        strokeWidth={1.83333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M12.8333 18.3333H19.25"
+        stroke="#FFFFFF"
+        strokeWidth={1.83333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </Svg>
   );
 }
@@ -63,7 +87,13 @@ function LegendIcon() {
 function ClearIcon() {
   return (
     <Svg width={22} height={22} viewBox="0 0 22 22" fill="none">
-      <Path d="M2.75 5.5H19.25" stroke="#FFFFFF" strokeWidth={1.83333} strokeLinecap="round" strokeLinejoin="round" />
+      <Path
+        d="M2.75 5.5H19.25"
+        stroke="#FFFFFF"
+        strokeWidth={1.83333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       <Path
         d="M17.4167 5.5V18.3333C17.4167 19.25 16.5 20.1667 15.5833 20.1667H6.41667C5.5 20.1667 4.58333 19.25 4.58333 18.3333V5.5"
         stroke="#FFFFFF"
@@ -80,8 +110,20 @@ function ClearIcon() {
         strokeLinejoin="round"
         fill="none"
       />
-      <Path d="M9.16667 10.0833V15.5833" stroke="#FFFFFF" strokeWidth={1.83333} strokeLinecap="round" strokeLinejoin="round" />
-      <Path d="M12.8333 10.0833V15.5833" stroke="#FFFFFF" strokeWidth={1.83333} strokeLinecap="round" strokeLinejoin="round" />
+      <Path
+        d="M9.16667 10.0833V15.5833"
+        stroke="#FFFFFF"
+        strokeWidth={1.83333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M12.8333 10.0833V15.5833"
+        stroke="#FFFFFF"
+        strokeWidth={1.83333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </Svg>
   );
 }
@@ -93,21 +135,39 @@ export default function BottomMenu({ canUndo, onUndo, onClear }: Props) {
 
   return (
     <>
+      {/* Rendered before the bar so the bar paints on top and stays
+          visible/tappable while the legend sheet is open. */}
+      <LegendModal visible={showLegend} onClose={() => setShowLegend(false)} />
+
       <View style={styles.bar}>
         <TouchableOpacity
           style={[styles.btn, !canUndo && styles.btnDisabled]}
-          onPress={() => setShowUndo(true)}
+          onPress={() => {
+            setShowLegend(false);
+            setShowUndo(true);
+          }}
           disabled={!canUndo}
           activeOpacity={0.6}
         >
           <UndoIcon disabled={!canUndo} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.btn} onPress={() => setShowLegend(true)} activeOpacity={0.6}>
+        <TouchableOpacity
+          style={styles.btn}
+          onPress={() => setShowLegend((v) => !v)}
+          activeOpacity={0.6}
+        >
           <LegendIcon />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.btn} onPress={() => setShowClear(true)} activeOpacity={0.6}>
+        <TouchableOpacity
+          style={styles.btn}
+          onPress={() => {
+            setShowLegend(false);
+            setShowClear(true);
+          }}
+          activeOpacity={0.6}
+        >
           <ClearIcon />
         </TouchableOpacity>
       </View>
@@ -117,7 +177,10 @@ export default function BottomMenu({ canUndo, onUndo, onClear }: Props) {
         title="Отменить последний укол?"
         message="Последняя зафиксированная инъекция будет удалена. Это действие нельзя отменить повторно."
         confirmLabel="Отменить укол"
-        onConfirm={() => { setShowUndo(false); onUndo(); }}
+        onConfirm={() => {
+          setShowUndo(false);
+          onUndo();
+        }}
         onCancel={() => setShowUndo(false)}
       />
 
@@ -127,29 +190,30 @@ export default function BottomMenu({ canUndo, onUndo, onClear }: Props) {
         message="Вся история инъекций будет удалена. Все точки станут белыми. Это действие нельзя отменить."
         confirmLabel="Очистить"
         cancelLabel="Отмена"
-        onConfirm={() => { setShowClear(false); onClear(); }}
+        onConfirm={() => {
+          setShowClear(false);
+          onClear();
+        }}
         onCancel={() => setShowClear(false)}
         destructive
       />
-
-      <LegendModal visible={showLegend} onClose={() => setShowLegend(false)} />
     </>
   );
 }
 
 const styles = StyleSheet.create({
   bar: {
-    flexDirection: 'row',
-    backgroundColor: '#080C18',
+    flexDirection: "row",
+    backgroundColor: "#080C18",
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.08)',
+    borderTopColor: "rgba(255,255,255,0.08)",
     paddingBottom: 28,
     paddingTop: 4,
   },
   btn: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 12,
   },
   btnDisabled: {
