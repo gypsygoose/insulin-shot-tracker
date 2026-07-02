@@ -12,8 +12,8 @@ import { COLOR_HEX, checkmarkColor } from "../logic/stateMachine";
 
 // Sizes match the Figma "with buttons" frame (node 27:744, file
 // grYg39698ogy0nEBd88Fup): glow halo ~30px diameter, knob ~20px diameter.
-const GLOW_SIZE = 30;
-const KNOB_SIZE = 20;
+const GLOW_SIZE = 35;
+const KNOB_SIZE = 25;
 
 interface Props {
   id: string;
@@ -78,7 +78,12 @@ export default function InjectionButton({
             <Stop offset="1" stopColor={glowColor} stopOpacity={0} />
           </RadialGradient>
         </Defs>
-        <Circle cx={GLOW_SIZE / 2} cy={GLOW_SIZE / 2} r={GLOW_SIZE / 2} fill={`url(#${gradientId})`} />
+        <Circle
+          cx={GLOW_SIZE / 2}
+          cy={GLOW_SIZE / 2}
+          r={GLOW_SIZE / 2}
+          fill={`url(#${gradientId})`}
+        />
         <Circle
           cx={GLOW_SIZE / 2}
           cy={GLOW_SIZE / 2}
@@ -89,7 +94,9 @@ export default function InjectionButton({
           strokeOpacity={0.9}
         />
       </Svg>
-      {showCheckmark ? <Text style={[styles.check, { color: ck }]}>✓</Text> : null}
+      {showCheckmark ? (
+        <Text style={[styles.check, { color: ck }]}>✓</Text>
+      ) : null}
     </TouchableOpacity>
   );
 }
