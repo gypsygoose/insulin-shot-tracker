@@ -191,6 +191,7 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
   // instead of now, reusing the normal press state machine.
   const markButtonAt = useCallback((buttonId: string, timestamp: number) => {
     setState((prev) => {
+      const now = Date.now();
       const btn = BUTTON_MAP[buttonId];
       if (!btn) return prev;
 
@@ -213,7 +214,7 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
       const nextEvents = [...prev.events, event];
       const next: AppStorage = { buttonStates: nextButtonStates, events: nextEvents };
       scheduleSave(next);
-      return { ...prev, ...next };
+      return { ...prev, ...next, now };
     });
   }, []);
 
