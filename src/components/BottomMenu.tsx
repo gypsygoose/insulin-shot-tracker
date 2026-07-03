@@ -9,6 +9,8 @@ interface Props {
   canUndo: boolean;
   onUndo: () => void;
   onClear: () => void;
+  mirrored: boolean;
+  onToggleMirrored: (value: boolean) => void;
 }
 
 // Icon components matching Figma icon shapes (node-id 26-3, file grYg39698ogy0nEBd88Fup)
@@ -92,7 +94,13 @@ function MenuIcon() {
   );
 }
 
-export default function BottomMenu({ canUndo, onUndo, onClear }: Props) {
+export default function BottomMenu({
+  canUndo,
+  onUndo,
+  onClear,
+  mirrored,
+  onToggleMirrored,
+}: Props) {
   const [showUndo, setShowUndo] = useState(false);
   const [showClear, setShowClear] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -106,6 +114,8 @@ export default function BottomMenu({ canUndo, onUndo, onClear }: Props) {
       <MenuSheet
         visible={showMenu}
         onClose={() => setShowMenu(false)}
+        mirrored={mirrored}
+        onToggleMirrored={onToggleMirrored}
         onClear={() => {
           setShowMenu(false);
           setShowClear(true);

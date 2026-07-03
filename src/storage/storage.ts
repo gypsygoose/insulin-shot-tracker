@@ -3,6 +3,7 @@ import { AppStorage, StoredButtonState } from '../types';
 import { BUTTONS } from '../data/zones';
 
 const STORAGE_KEY = '@t1d_shot_v1';
+const MIRROR_KEY = '@t1d_shot_mirror_v1';
 
 function defaultStorage(): AppStorage {
   const buttonStates: Record<string, StoredButtonState> = {};
@@ -38,4 +39,16 @@ export async function clearStorage(): Promise<AppStorage> {
   const fresh = defaultStorage();
   await saveStorage(fresh);
   return fresh;
+}
+
+export async function loadMirrored(): Promise<boolean> {
+  try {
+    return (await AsyncStorage.getItem(MIRROR_KEY)) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export async function saveMirrored(mirrored: boolean): Promise<void> {
+  await AsyncStorage.setItem(MIRROR_KEY, mirrored ? '1' : '0');
 }

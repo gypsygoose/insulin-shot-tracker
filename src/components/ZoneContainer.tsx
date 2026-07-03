@@ -1,6 +1,11 @@
 import { View, StyleSheet, DimensionValue } from "react-native";
 import InjectionButton from "./InjectionButton";
-import { ZONE_COLORS, ZONE_LAYOUT, BUTTONS_BY_ZONE } from "../data/zones";
+import {
+  ZONE_COLORS,
+  ZONE_LAYOUT,
+  ZONE_MIRROR_MAP,
+  BUTTONS_BY_ZONE,
+} from "../data/zones";
 import { ButtonColor } from "../types";
 
 // Combined fill/stroke opacity baked into the colour (matches the
@@ -19,6 +24,7 @@ function chunk<T>(items: T[], size: number): T[][] {
 
 interface Props {
   zoneId: string;
+  mirrored: boolean;
   getColor: (buttonId: string) => ButtonColor;
   isCheckmarked: (buttonId: string) => boolean;
   onPress: (buttonId: string) => void;
@@ -31,14 +37,20 @@ interface Props {
 // global (x, y) coordinates — same row/column counts as the source design.
 export default function ZoneContainer({
   zoneId,
+  mirrored,
   getColor,
   isCheckmarked,
   onPress,
   onLongPress,
 }: Props) {
-  const layout = ZONE_LAYOUT[zoneId];
+  // Mirror mode swaps a zone into its left/right counterpart's screen
+  // position (button identity/colour stays tied to zoneId), and flips the
+  // left-to-right order of buttons within each row to match.
+  const layout = ZONE_LAYOUT[mirrored ? ZONE_MIRROR_MAP[zoneId] : zoneId];
   const colors = ZONE_COLORS[zoneId];
-  const rows = chunk(BUTTONS_BY_ZONE[zoneId], layout.cols);
+  const rows = chunk(BUTTONS_BY_ZONE[zoneId], layout.cols).map((row) =>
+    mirrored ? [...row].reverse() : row,
+  );
 
   return (
     <View

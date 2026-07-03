@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { AppStorage, AppEvent, StoredButtonState, ZoneGroup } from '../types';
-import { loadStorage, saveStorage, clearStorage } from '../storage/storage';
+import {
+  loadStorage,
+  saveStorage,
+  clearStorage,
+  loadMirrored,
+  saveMirrored,
+} from '../storage/storage';
 import { onPress } from '../logic/stateMachine';
 import { BUTTON_MAP, ZONE_MAP } from '../data/zones';
 function uuid(): string {
@@ -10,6 +16,7 @@ function uuid(): string {
 export interface AppState extends AppStorage {
   now: number;
   isLoaded: boolean;
+  mirrored: boolean;
 }
 
 export interface AppActions {
@@ -19,6 +26,7 @@ export interface AppActions {
   clearButton(buttonId: string): void;
   undo(): void;
   clearAll(): void;
+  setMirrored(mirrored: boolean): void;
 }
 
 // Derive last-pressed buttonId per group from event log
@@ -47,6 +55,7 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
     events: [],
     now: Date.now(),
     isLoaded: false,
+    mirrored: false,
   });
   const saveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -54,6 +63,9 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
   useEffect(() => {
     loadStorage().then((stored) => {
       setState((prev) => ({ ...prev, ...stored, isLoaded: true }));
+    });
+    loadMirrored().then((mirrored) => {
+      setState((prev) => ({ ...prev, mirrored }));
     });
   }, []);
 
@@ -212,10 +224,15 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
     });
   }, []);
 
+  const setMirrored = useCallback((mirrored: boolean) => {
+    setState((prev) => ({ ...prev, mirrored }));
+    saveMirrored(mirrored);
+  }, []);
+
   const lastInGroup = lastPressedByGroup(state.events);
 
   return [
     { ...state, lastInGroup },
-    { pressButton, blockButton, markButtonAt, clearButton, undo, clearAll },
+    { pressButton, blockButton, markButtonAt, clearButton, undo, clearAll, setMirrored },
   ];
 }

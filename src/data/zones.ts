@@ -16,6 +16,18 @@ export const ZONE_MAP: Record<string, Zone> = Object.fromEntries(
   ZONES.map((z) => [z.id, z]),
 );
 
+// Maps each zone to its left/right counterpart, used when mirror mode is on:
+// a zone then renders in the screen position its counterpart normally
+// occupies (see ZONE_LAYOUT), while keeping its own colour/button identity.
+export const ZONE_MIRROR_MAP: Record<string, string> = {
+  "shoulder-right": "shoulder-left",
+  "shoulder-left": "shoulder-right",
+  "belly-right": "belly-left",
+  "belly-left": "belly-right",
+  "thigh-right": "thigh-left",
+  "thigh-left": "thigh-right",
+};
+
 // Per-zone accent colours, taken from the Figma "with buttons" frame
 // (node 27:744, file grYg39698ogy0nEBd88Fup): `accent` is the zone container
 // fill/border colour, `glow` is the darker shade used for the radial shadow

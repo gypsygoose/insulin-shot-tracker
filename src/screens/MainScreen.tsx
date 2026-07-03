@@ -19,6 +19,8 @@ import { ZONES, BUTTON_MAP, ZONE_MAP } from "../data/zones";
 
 // Figma body image aspect ratio: 393.46 wide × 621.91 tall
 const IMG_ASPECT = 393.46 / 621.91;
+const LEFT_SIDE_LABEL = "левая\nсторона";
+const RIGHT_SIDE_LABEL = "правая\nсторона";
 
 export default function MainScreen() {
   const [state, actions] = useAppStore();
@@ -53,9 +55,16 @@ export default function MainScreen() {
       {/* Header */}
       <SafeAreaView style={styles.headerSafe} edges={["top"]}>
         <View style={styles.header}>
-          <Text style={styles.title}>T1D SHOT</Text>
+          <Text style={styles.title}>T1D Shot</Text>
         </View>
       </SafeAreaView>
+
+      <View
+        style={[styles.sideLabels, state.mirrored && styles.sideLabelsMirrored]}
+      >
+        <Text style={styles.sideLabel}>{RIGHT_SIDE_LABEL}</Text>
+        <Text style={styles.sideLabel}>{LEFT_SIDE_LABEL}</Text>
+      </View>
 
       {/* Body image + buttons overlay */}
       <View style={styles.bodyWrap}>
@@ -70,6 +79,7 @@ export default function MainScreen() {
             <ZoneContainer
               key={zone.id}
               zoneId={zone.id}
+              mirrored={state.mirrored}
               getColor={(buttonId) =>
                 computeButtonColor(state.buttonStates[buttonId], state.now)
               }
@@ -89,6 +99,8 @@ export default function MainScreen() {
         canUndo={state.events.length > 0}
         onUndo={actions.undo}
         onClear={actions.clearAll}
+        mirrored={state.mirrored}
+        onToggleMirrored={actions.setMirrored}
       />
 
       {/* Long-press menu for a single button */}
@@ -160,6 +172,24 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     letterSpacing: 3.1,
     textTransform: "uppercase",
+  },
+  sideLabels: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    width: "100%",
+    boxSizing: "border-box",
+  },
+  sideLabelsMirrored: {
+    flexDirection: "row-reverse",
+  },
+  sideLabel: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 12,
+    fontWeight: "400",
+    textTransform: "uppercase",
+    textAlign: "center",
   },
   bodyWrap: {
     flex: 1,
