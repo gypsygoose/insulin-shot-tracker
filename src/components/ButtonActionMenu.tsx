@@ -1,9 +1,12 @@
 import { Modal, View, Text, TouchableOpacity, Pressable, StyleSheet } from 'react-native';
+import { ButtonColor } from '../types';
 
 interface Props {
   visible: boolean;
   zoneLabel?: string;
+  color?: ButtonColor;
   onBlock: () => void;
+  onUnblock: () => void;
   onMark: () => void;
   onClear: () => void;
   onCancel: () => void;
@@ -12,11 +15,16 @@ interface Props {
 export default function ButtonActionMenu({
   visible,
   zoneLabel,
+  color,
   onBlock,
+  onUnblock,
   onMark,
   onClear,
   onCancel,
 }: Props) {
+  const isGray = color === 'gray';
+  const isBlack = color === 'black';
+
   return (
     <Modal
       visible={visible}
@@ -32,15 +40,28 @@ export default function ButtonActionMenu({
             {zoneLabel ? `Точка · ${zoneLabel}` : 'Действия с точкой'}
           </Text>
 
-          <TouchableOpacity style={styles.row} onPress={onBlock} activeOpacity={0.7}>
-            <Text style={styles.rowLabel}>Заблокировать</Text>
-          </TouchableOpacity>
-          <View style={styles.divider} />
+          {isGray ? (
+            <>
+              <TouchableOpacity style={styles.row} onPress={onUnblock} activeOpacity={0.7}>
+                <Text style={styles.rowLabel}>Разблокировать</Text>
+              </TouchableOpacity>
+              <View style={styles.divider} />
+            </>
+          ) : null}
 
-          <TouchableOpacity style={styles.row} onPress={onMark} activeOpacity={0.7}>
-            <Text style={styles.rowLabel}>Отметить</Text>
-          </TouchableOpacity>
-          <View style={styles.divider} />
+          {!isGray && !isBlack ? (
+            <>
+              <TouchableOpacity style={styles.row} onPress={onBlock} activeOpacity={0.7}>
+                <Text style={styles.rowLabel}>Заблокировать</Text>
+              </TouchableOpacity>
+              <View style={styles.divider} />
+
+              <TouchableOpacity style={styles.row} onPress={onMark} activeOpacity={0.7}>
+                <Text style={styles.rowLabel}>Отметить</Text>
+              </TouchableOpacity>
+              <View style={styles.divider} />
+            </>
+          ) : null}
 
           <TouchableOpacity style={styles.row} onPress={onClear} activeOpacity={0.7}>
             <Text style={[styles.rowLabel, styles.destructiveLabel]}>Очистить</Text>

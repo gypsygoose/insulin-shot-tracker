@@ -66,7 +66,6 @@ export default function InjectionButton({
       style={styles.outer}
       accessible
       accessibilityRole="button"
-      accessibilityState={{ disabled: isBlocked }}
     >
       <Svg width={GLOW_SIZE} height={GLOW_SIZE} style={StyleSheet.absoluteFill}>
         <Defs>

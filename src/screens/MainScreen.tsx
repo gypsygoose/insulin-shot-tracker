@@ -39,6 +39,9 @@ export default function MainScreen() {
   const menuZoneLabel = menuButtonId
     ? ZONE_MAP[BUTTON_MAP[menuButtonId]?.zoneId]?.label
     : undefined;
+  const menuButtonColor = menuButtonId
+    ? computeButtonColor(state.buttonStates[menuButtonId], state.now)
+    : undefined;
 
   if (!state.isLoaded) {
     return (
@@ -107,8 +110,13 @@ export default function MainScreen() {
       <ButtonActionMenu
         visible={menuButtonId !== null}
         zoneLabel={menuZoneLabel}
+        color={menuButtonColor}
         onBlock={() => {
           if (menuButtonId) actions.blockButton(menuButtonId);
+          setMenuButtonId(null);
+        }}
+        onUnblock={() => {
+          if (menuButtonId) actions.unblockButton(menuButtonId);
           setMenuButtonId(null);
         }}
         onMark={() => {

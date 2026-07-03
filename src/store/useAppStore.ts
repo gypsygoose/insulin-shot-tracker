@@ -22,6 +22,7 @@ export interface AppState extends AppStorage {
 export interface AppActions {
   pressButton(buttonId: string): void;
   blockButton(buttonId: string): void;
+  unblockButton(buttonId: string): void;
   markButtonAt(buttonId: string, timestamp: number): void;
   clearButton(buttonId: string): void;
   undo(): void;
@@ -145,6 +146,36 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
     });
   }, []);
 
+  const unblockButton = useCallback((buttonId: string) => {
+    setState((prev) => {
+      const now = Date.now();
+      const btn = BUTTON_MAP[buttonId];
+      if (!btn) return prev;
+
+      const currentBtnState = prev.buttonStates[buttonId];
+      if (!currentBtnState) return prev;
+      const newBtnState: StoredButtonState = {
+        ...currentBtnState,
+        isManuallyBlocked: false,
+      };
+
+      const event: AppEvent = {
+        id: uuid(),
+        timestamp: now,
+        type: 'manual-unblock',
+        buttonId,
+        zoneId: btn.zoneId,
+        prevButtonState: { ...currentBtnState },
+      };
+
+      const nextButtonStates = { ...prev.buttonStates, [buttonId]: newBtnState };
+      const nextEvents = [...prev.events, event];
+      const next: AppStorage = { buttonStates: nextButtonStates, events: nextEvents };
+      scheduleSave(next);
+      return { ...prev, ...next, now };
+    });
+  }, []);
+
   // Records the button as if it had been pressed at the given timestamp
   // instead of now, reusing the normal press state machine.
   const markButtonAt = useCallback((buttonId: string, timestamp: number) => {
@@ -233,6 +264,15 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
 
   return [
     { ...state, lastInGroup },
-    { pressButton, blockButton, markButtonAt, clearButton, undo, clearAll, setMirrored },
+    {
+      pressButton,
+      blockButton,
+      unblockButton,
+      markButtonAt,
+      clearButton,
+      undo,
+      clearAll,
+      setMirrored,
+    },
   ];
 }
