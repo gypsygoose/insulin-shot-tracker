@@ -18,21 +18,10 @@ interface Props {
 function UndoIcon({ disabled }: { disabled: boolean }) {
   const c = disabled ? "#4A5568" : "#FFFFFF";
   return (
-    <Svg width={22} height={22} viewBox="0 0 22 22" fill="none">
+    <Svg width={22} height={22} viewBox="-0.5 -2 24 24" fill="none">
       <Path
-        d="M8.25 12.8333L3.66667 8.25L8.25 3.66667"
-        stroke={c}
-        strokeWidth={1.83333}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Path
-        d="M3.66667 8.25H13.2917C13.9537 8.25 14.6093 8.38041 15.221 8.63378C15.8327 8.88715 16.3885 9.25851 16.8567 9.72668C17.3248 10.1948 17.6962 10.7506 17.9495 11.3623C18.2029 11.974 18.3333 12.6296 18.3333 13.2917C18.3333 13.9538 18.2029 14.6093 17.9495 15.221C17.6962 15.8327 17.3248 16.3885 16.8567 16.8567C16.3885 17.3248 15.8327 17.6962 15.221 17.9496C14.6093 18.2029 13.9537 18.3333 13.2917 18.3333H10.0833"
-        stroke={c}
-        strokeWidth={1.83333}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
+        d="M5.308 7.612l1.352-.923a.981.981 0 0 1 1.372.27 1.008 1.008 0 0 1-.266 1.388l-3.277 2.237a.981.981 0 0 1-1.372-.27L.907 6.998a1.007 1.007 0 0 1 .266-1.389.981.981 0 0 1 1.372.27l.839 1.259C4.6 3.01 8.38 0 12.855 0c5.458 0 9.882 4.477 9.882 10s-4.424 10-9.882 10a.994.994 0 0 1-.988-1c0-.552.443-1 .988-1 4.366 0 7.906-3.582 7.906-8s-3.54-8-7.906-8C9.311 2 6.312 4.36 5.308 7.612z"
+        fill={c}
       />
     </Svg>
   );
@@ -70,21 +59,42 @@ function MenuIcon() {
   return (
     <Svg width={22} height={22} viewBox="0 0 22 22" fill="none">
       <Path
-        d="M2.75 5.5H19.25"
+        d="M8.25 2.75H3.66667C3.16041 2.75 2.75 3.16041 2.75 3.66667V8.25C2.75 8.75626 3.16041 9.16667 3.66667 9.16667H8.25C8.75626 9.16667 9.16667 8.75626 9.16667 8.25V3.66667C9.16667 3.16041 8.75626 2.75 8.25 2.75Z"
         stroke="#FFFFFF"
         strokeWidth={1.83333}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
-        d="M2.75 11H19.25"
+        d="M8.25 12.8333H3.66667C3.16041 12.8333 2.75 13.2437 2.75 13.75V18.3333C2.75 18.8396 3.16041 19.25 3.66667 19.25H8.25C8.75626 19.25 9.16667 18.8396 9.16667 18.3333V13.75C9.16667 13.2437 8.75626 12.8333 8.25 12.8333Z"
         stroke="#FFFFFF"
         strokeWidth={1.83333}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
-        d="M2.75 16.5H19.25"
+        d="M12.8333 3.66667H19.25"
+        stroke="#FFFFFF"
+        strokeWidth={1.83333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M12.8333 8.25H19.25"
+        stroke="#FFFFFF"
+        strokeWidth={1.83333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M12.8333 13.75H19.25"
+        stroke="#FFFFFF"
+        strokeWidth={1.83333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M12.8333 18.3333H19.25"
         stroke="#FFFFFF"
         strokeWidth={1.83333}
         strokeLinecap="round"
