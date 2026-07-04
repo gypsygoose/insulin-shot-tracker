@@ -17,17 +17,17 @@ import Toast from "../components/Toast";
 import { useAppStore } from "../store/useAppStore";
 import { computeButtonColor } from "../logic/stateMachine";
 import { ZONES, BUTTON_MAP, ZONE_MAP } from "../data/zones";
-
-const BLOCKED_TOAST_MESSAGE = "Точка заблокирована и не может быть отмечена";
-const TOAST_DURATION_MS = 2000;
-const INTERFACE_LOCKED_TOAST_MESSAGE =
-  "Интерфейс залокирован. Чтобы отметить точку укола, разблокируйте интерфейс в нижнем меню либо отметьте через всплывающее меню точки (долгое нажатие).";
-const INTERFACE_LOCKED_TOAST_DURATION_MS = 4000;
-
-// Figma body image aspect ratio: 393.46 wide × 621.91 tall
-const IMG_ASPECT = 393.46 / 621.91;
-const LEFT_SIDE_LABEL = "левая\nсторона";
-const RIGHT_SIDE_LABEL = "правая\nсторона";
+import {
+  BACKGROUND_COLOR,
+  BLOCKED_TOAST_MESSAGE,
+  ICON_COLOR,
+  IMG_ASPECT,
+  INTERFACE_LOCKED_TOAST_DURATION_MS,
+  INTERFACE_LOCKED_TOAST_MESSAGE,
+  LEFT_SIDE_LABEL,
+  RIGHT_SIDE_LABEL,
+  TOAST_DURATION_MS,
+} from "../constants";
 
 export default function MainScreen() {
   const [state, actions] = useAppStore();
@@ -89,14 +89,14 @@ export default function MainScreen() {
   if (!state.isLoaded) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#FFFFFF" />
+        <ActivityIndicator size="large" color={ICON_COLOR} />
       </View>
     );
   }
 
   return (
     <View style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor="#080C18" />
+      <StatusBar barStyle="light-content" backgroundColor={BACKGROUND_COLOR} />
 
       <Toast message={toastMessage} />
 
@@ -156,6 +156,12 @@ export default function MainScreen() {
         onToggleInterfaceLocked={() =>
           actions.setInterfaceLocked(!state.interfaceLocked)
         }
+        autoLockEnabled={state.autoLockEnabled}
+        autoLockAfterMarkSeconds={state.autoLockAfterMarkSeconds}
+        autoLockAfterUnlockSeconds={state.autoLockAfterUnlockSeconds}
+        onEnableAutoLock={actions.enableAutoLock}
+        onDisableAutoLock={actions.disableAutoLock}
+        onUpdateAutoLockTimes={actions.updateAutoLockTimes}
         onExport={actions.exportData}
         onPickImportFile={actions.pickImportFile}
         onApplyImport={actions.applyImport}
@@ -215,16 +221,16 @@ export default function MainScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#080C18",
+    backgroundColor: BACKGROUND_COLOR,
   },
   loading: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#080C18",
+    backgroundColor: BACKGROUND_COLOR,
   },
   headerSafe: {
-    backgroundColor: "#080C18",
+    backgroundColor: BACKGROUND_COLOR,
   },
   header: {
     paddingTop: 12,
@@ -252,6 +258,8 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   image: {
+    width: "100%",
+    height: "100%",
     maxWidth: "100%",
     maxHeight: "100%",
   },

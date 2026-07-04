@@ -8,6 +8,11 @@ import {
   saveMirrored,
   loadInterfaceLocked,
   saveInterfaceLocked,
+  loadAutoLock,
+  saveAutoLock,
+  StoredAutoLock,
+  DEFAULT_AUTO_LOCK_AFTER_MARK_SECONDS,
+  DEFAULT_AUTO_LOCK_AFTER_UNLOCK_SECONDS,
   exportStorageToFile,
   pickImportFile as pickImportFileFromDisk,
   importStorage,
@@ -24,6 +29,12 @@ export interface AppState extends AppStorage {
   isLoaded: boolean;
   mirrored: boolean;
   interfaceLocked: boolean;
+  autoLockEnabled: boolean;
+  autoLockAfterMarkSeconds: number;
+  autoLockAfterUnlockSeconds: number;
+  // Timestamp at which the interface should auto-lock next, or null if no
+  // auto-lock is currently pending (e.g. already locked, or disabled).
+  autoLockDeadline: number | null;
 }
 
 export interface AppActions {
@@ -36,6 +47,9 @@ export interface AppActions {
   clearAll(): void;
   setMirrored(mirrored: boolean): void;
   setInterfaceLocked(locked: boolean): void;
+  enableAutoLock(afterMarkSeconds: number, afterUnlockSeconds: number): void;
+  disableAutoLock(): void;
+  updateAutoLockTimes(afterMarkSeconds: number, afterUnlockSeconds: number): void;
   exportData(): Promise<void>;
   pickImportFile(): Promise<ImportResult>;
   applyImport(data: ExportedAppData): void;
@@ -84,19 +98,54 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
     isLoaded: false,
     mirrored: false,
     interfaceLocked: false,
+    autoLockEnabled: false,
+    autoLockAfterMarkSeconds: DEFAULT_AUTO_LOCK_AFTER_MARK_SECONDS,
+    autoLockAfterUnlockSeconds: DEFAULT_AUTO_LOCK_AFTER_UNLOCK_SECONDS,
+    autoLockDeadline: null,
   });
   const saveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load from storage on mount
+  // Load from storage on mount. Loaded together (rather than each in its own
+  // .then()) so the just-reopened-the-app auto-lock check below always sees
+  // the real persisted interfaceLocked value instead of racing against it.
   useEffect(() => {
-    loadStorage().then((stored) => {
-      setState((prev) => ({ ...prev, ...stored, isLoaded: true }));
-    });
-    loadMirrored().then((mirrored) => {
-      setState((prev) => ({ ...prev, mirrored }));
-    });
-    loadInterfaceLocked().then((interfaceLocked) => {
-      setState((prev) => ({ ...prev, interfaceLocked }));
+    Promise.all([
+      loadStorage(),
+      loadMirrored(),
+      loadInterfaceLocked(),
+      loadAutoLock(),
+    ]).then(([stored, mirrored, storedInterfaceLocked, autoLock]) => {
+      const now = Date.now();
+      let interfaceLocked = storedInterfaceLocked;
+      let deadline = autoLock.deadline;
+      // App may have been closed past the deadline — lock immediately
+      // instead of waiting for a timer that already should have fired.
+      if (
+        autoLock.enabled &&
+        !interfaceLocked &&
+        deadline !== null &&
+        now >= deadline
+      ) {
+        interfaceLocked = true;
+        deadline = null;
+      }
+      if (interfaceLocked !== storedInterfaceLocked) {
+        saveInterfaceLocked(interfaceLocked);
+      }
+      if (deadline !== autoLock.deadline) {
+        saveAutoLock({ ...autoLock, deadline });
+      }
+      setState((prev) => ({
+        ...prev,
+        ...stored,
+        mirrored,
+        interfaceLocked,
+        autoLockEnabled: autoLock.enabled,
+        autoLockAfterMarkSeconds: autoLock.afterMarkSeconds,
+        autoLockAfterUnlockSeconds: autoLock.afterUnlockSeconds,
+        autoLockDeadline: deadline,
+        isLoaded: true,
+      }));
     });
   }, []);
 
@@ -107,6 +156,42 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
     }, 60_000);
     return () => clearInterval(id);
   }, []);
+
+  // Fires the pending auto-lock deadline (set by an unlock or a mark, see
+  // setInterfaceLocked/pressButton below) while the app is running. Reruns
+  // whenever the deadline is pushed out, so the latest one always wins.
+  useEffect(() => {
+    if (!state.isLoaded) return;
+    if (!state.autoLockEnabled) return;
+    if (state.interfaceLocked) return;
+    if (state.autoLockDeadline === null) return;
+
+    const fire = () => {
+      setState((prev) => ({ ...prev, interfaceLocked: true, autoLockDeadline: null }));
+      saveInterfaceLocked(true);
+      saveAutoLock({
+        enabled: state.autoLockEnabled,
+        afterMarkSeconds: state.autoLockAfterMarkSeconds,
+        afterUnlockSeconds: state.autoLockAfterUnlockSeconds,
+        deadline: null,
+      });
+    };
+
+    const delay = state.autoLockDeadline - Date.now();
+    if (delay <= 0) {
+      fire();
+      return;
+    }
+    const id = setTimeout(fire, delay);
+    return () => clearTimeout(id);
+  }, [
+    state.isLoaded,
+    state.autoLockEnabled,
+    state.interfaceLocked,
+    state.autoLockDeadline,
+    state.autoLockAfterMarkSeconds,
+    state.autoLockAfterUnlockSeconds,
+  ]);
 
   // Debounced persist to AsyncStorage
   function scheduleSave(nextState: AppStorage) {
@@ -140,7 +225,20 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
       const nextEvents = [...prev.events, event];
       const next: AppStorage = { buttonStates: nextButtonStates, events: nextEvents };
       scheduleSave(next);
-      return { ...prev, ...next, now };
+
+      // Marking a zone re-arms the auto-lock countdown.
+      let autoLockDeadline = prev.autoLockDeadline;
+      if (prev.autoLockEnabled) {
+        autoLockDeadline = now + prev.autoLockAfterMarkSeconds * 1000;
+        saveAutoLock({
+          enabled: prev.autoLockEnabled,
+          afterMarkSeconds: prev.autoLockAfterMarkSeconds,
+          afterUnlockSeconds: prev.autoLockAfterUnlockSeconds,
+          deadline: autoLockDeadline,
+        });
+      }
+
+      return { ...prev, ...next, now, autoLockDeadline };
     });
   }, []);
 
@@ -294,20 +392,119 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
   }, []);
 
   const setInterfaceLocked = useCallback((locked: boolean) => {
-    setState((prev) => ({ ...prev, interfaceLocked: locked }));
+    setState((prev) => {
+      // Unlocking (re-)arms the auto-lock countdown; locking cancels it.
+      let autoLockDeadline: number | null = locked
+        ? null
+        : prev.autoLockDeadline;
+      if (!locked && prev.autoLockEnabled) {
+        autoLockDeadline = Date.now() + prev.autoLockAfterUnlockSeconds * 1000;
+      }
+      if (autoLockDeadline !== prev.autoLockDeadline) {
+        saveAutoLock({
+          enabled: prev.autoLockEnabled,
+          afterMarkSeconds: prev.autoLockAfterMarkSeconds,
+          afterUnlockSeconds: prev.autoLockAfterUnlockSeconds,
+          deadline: autoLockDeadline,
+        });
+      }
+      return { ...prev, interfaceLocked: locked, autoLockDeadline };
+    });
     saveInterfaceLocked(locked);
   }, []);
+
+  const enableAutoLock = useCallback(
+    (afterMarkSeconds: number, afterUnlockSeconds: number) => {
+      setState((prev) => {
+        const deadline = prev.interfaceLocked
+          ? null
+          : Date.now() + afterUnlockSeconds * 1000;
+        const stored: StoredAutoLock = {
+          enabled: true,
+          afterMarkSeconds,
+          afterUnlockSeconds,
+          deadline,
+        };
+        saveAutoLock(stored);
+        return {
+          ...prev,
+          autoLockEnabled: true,
+          autoLockAfterMarkSeconds: afterMarkSeconds,
+          autoLockAfterUnlockSeconds: afterUnlockSeconds,
+          autoLockDeadline: deadline,
+        };
+      });
+    },
+    [],
+  );
+
+  const disableAutoLock = useCallback(() => {
+    setState((prev) => {
+      const stored: StoredAutoLock = {
+        enabled: false,
+        afterMarkSeconds: prev.autoLockAfterMarkSeconds,
+        afterUnlockSeconds: prev.autoLockAfterUnlockSeconds,
+        deadline: null,
+      };
+      saveAutoLock(stored);
+      return { ...prev, autoLockEnabled: false, autoLockDeadline: null };
+    });
+  }, []);
+
+  // Edits the configured durations without touching whether auto-lock is
+  // currently on or any countdown already in flight.
+  const updateAutoLockTimes = useCallback(
+    (afterMarkSeconds: number, afterUnlockSeconds: number) => {
+      setState((prev) => {
+        const stored: StoredAutoLock = {
+          enabled: prev.autoLockEnabled,
+          afterMarkSeconds,
+          afterUnlockSeconds,
+          deadline: prev.autoLockDeadline,
+        };
+        saveAutoLock(stored);
+        return {
+          ...prev,
+          autoLockAfterMarkSeconds: afterMarkSeconds,
+          autoLockAfterUnlockSeconds: afterUnlockSeconds,
+        };
+      });
+    },
+    [],
+  );
 
   const exportData = useCallback(async () => {
     await exportStorageToFile({
       buttonStates: state.buttonStates,
       events: state.events,
       mirrored: state.mirrored,
+      autoLockEnabled: state.autoLockEnabled,
+      autoLockAfterMarkSeconds: state.autoLockAfterMarkSeconds,
+      autoLockAfterUnlockSeconds: state.autoLockAfterUnlockSeconds,
     });
-  }, [state.buttonStates, state.events, state.mirrored]);
+  }, [
+    state.buttonStates,
+    state.events,
+    state.mirrored,
+    state.autoLockEnabled,
+    state.autoLockAfterMarkSeconds,
+    state.autoLockAfterUnlockSeconds,
+  ]);
 
   const applyImport = useCallback((data: ExportedAppData) => {
-    setState((prev) => ({ ...prev, ...data }));
+    setState((prev) => {
+      const deadline =
+        data.autoLockEnabled && !prev.interfaceLocked
+          ? Date.now() + data.autoLockAfterUnlockSeconds * 1000
+          : null;
+      saveAutoLock({
+        enabled: data.autoLockEnabled,
+        afterMarkSeconds: data.autoLockAfterMarkSeconds,
+        afterUnlockSeconds: data.autoLockAfterUnlockSeconds,
+        deadline,
+      });
+      return { ...prev, ...data, autoLockDeadline: deadline };
+    });
     importStorage(data);
   }, []);
 
@@ -325,6 +522,9 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
       clearAll,
       setMirrored,
       setInterfaceLocked,
+      enableAutoLock,
+      disableAutoLock,
+      updateAutoLockTimes,
       exportData,
       pickImportFile: pickImportFileFromDisk,
       applyImport,

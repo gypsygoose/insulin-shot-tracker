@@ -4,6 +4,7 @@ import Svg, { Path, Rect } from "react-native-svg";
 import ConfirmDialog from "./ConfirmDialog";
 import HelpSheet from "./HelpSheet";
 import MenuSheet from "./MenuSheet";
+import AutoLockDialog from "./AutoLockDialog";
 import { ExportedAppData } from "../types";
 import { ImportResult } from "../storage/storage";
 import { DISABLED_ICON_COLOR, ICON_COLOR } from "../constants";
@@ -16,6 +17,12 @@ interface Props {
   onToggleMirrored: (value: boolean) => void;
   interfaceLocked: boolean;
   onToggleInterfaceLocked: () => void;
+  autoLockEnabled: boolean;
+  autoLockAfterMarkSeconds: number;
+  autoLockAfterUnlockSeconds: number;
+  onEnableAutoLock: (afterMarkSeconds: number, afterUnlockSeconds: number) => void;
+  onDisableAutoLock: () => void;
+  onUpdateAutoLockTimes: (afterMarkSeconds: number, afterUnlockSeconds: number) => void;
   onExport: () => Promise<void>;
   onPickImportFile: () => Promise<ImportResult>;
   onApplyImport: (data: ExportedAppData) => void;
@@ -164,6 +171,12 @@ export default function BottomMenu({
   onToggleMirrored,
   interfaceLocked,
   onToggleInterfaceLocked,
+  autoLockEnabled,
+  autoLockAfterMarkSeconds,
+  autoLockAfterUnlockSeconds,
+  onEnableAutoLock,
+  onDisableAutoLock,
+  onUpdateAutoLockTimes,
   onExport,
   onPickImportFile,
   onApplyImport,
@@ -172,9 +185,26 @@ export default function BottomMenu({
   const [showClear, setShowClear] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [autoLockDialogIntent, setAutoLockDialogIntent] = useState<
+    "enable" | "edit" | null
+  >(null);
   const [pendingImport, setPendingImport] = useState<ExportedAppData | null>(
     null,
   );
+
+  const handleToggleAutoLock = (value: boolean) => {
+    if (value) {
+      setShowMenu(false);
+      setAutoLockDialogIntent("enable");
+    } else {
+      onDisableAutoLock();
+    }
+  };
+
+  const handleEditAutoLockSettings = () => {
+    setShowMenu(false);
+    setAutoLockDialogIntent("edit");
+  };
 
   const handleImport = async () => {
     setShowMenu(false);
@@ -200,6 +230,11 @@ export default function BottomMenu({
         onClose={() => setShowMenu(false)}
         mirrored={mirrored}
         onToggleMirrored={onToggleMirrored}
+        autoLockEnabled={autoLockEnabled}
+        autoLockAfterMarkSeconds={autoLockAfterMarkSeconds}
+        autoLockAfterUnlockSeconds={autoLockAfterUnlockSeconds}
+        onToggleAutoLocked={handleToggleAutoLock}
+        onEditAutoLockSettings={handleEditAutoLockSettings}
         onImport={handleImport}
         onExport={() => {
           setShowMenu(false);
@@ -209,6 +244,23 @@ export default function BottomMenu({
           setShowMenu(false);
           setShowClear(true);
         }}
+      />
+
+      <AutoLockDialog
+        visible={autoLockDialogIntent !== null}
+        mode={autoLockDialogIntent ?? "enable"}
+        initialAfterMarkSeconds={autoLockAfterMarkSeconds}
+        initialAfterUnlockSeconds={autoLockAfterUnlockSeconds}
+        onConfirm={(afterMarkSeconds, afterUnlockSeconds) => {
+          const intent = autoLockDialogIntent;
+          setAutoLockDialogIntent(null);
+          if (intent === "enable") {
+            onEnableAutoLock(afterMarkSeconds, afterUnlockSeconds);
+          } else {
+            onUpdateAutoLockTimes(afterMarkSeconds, afterUnlockSeconds);
+          }
+        }}
+        onCancel={() => setAutoLockDialogIntent(null)}
       />
 
       <View style={styles.bar}>

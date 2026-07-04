@@ -6,9 +6,20 @@ interface Props {
   onClose: () => void;
   mirrored: boolean;
   onToggleMirrored: (value: boolean) => void;
+  autoLockEnabled: boolean;
+  autoLockAfterMarkSeconds: number;
+  autoLockAfterUnlockSeconds: number;
+  onToggleAutoLocked: (value: boolean) => void;
+  onEditAutoLockSettings: () => void;
   onImport: () => void;
   onExport: () => void;
   onClear: () => void;
+}
+
+function formatDuration(totalSeconds: number): string {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 export default function MenuSheet({
@@ -16,6 +27,11 @@ export default function MenuSheet({
   onClose,
   mirrored,
   onToggleMirrored,
+  autoLockEnabled,
+  autoLockAfterMarkSeconds,
+  autoLockAfterUnlockSeconds,
+  onToggleAutoLocked,
+  onEditAutoLockSettings,
   onImport,
   onExport,
   onClear,
@@ -27,6 +43,28 @@ export default function MenuSheet({
         <Switch
           value={mirrored}
           onValueChange={onToggleMirrored}
+          trackColor={{ false: "rgba(255,255,255,0.15)", true: "#16A34A" }}
+          thumbColor="#FFFFFF"
+        />
+      </View>
+
+      <View style={styles.row}>
+        <TouchableOpacity
+          style={styles.autoLockInfo}
+          onPress={onEditAutoLockSettings}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.rowLabel}>Автоблокировка интерфейса</Text>
+          <Text style={styles.rowDescription}>
+            После отметки — {formatDuration(autoLockAfterMarkSeconds)}
+          </Text>
+          <Text style={styles.rowDescription}>
+            После разблокировки — {formatDuration(autoLockAfterUnlockSeconds)}
+          </Text>
+        </TouchableOpacity>
+        <Switch
+          value={autoLockEnabled}
+          onValueChange={onToggleAutoLocked}
           trackColor={{ false: "rgba(255,255,255,0.15)", true: "#16A34A" }}
           thumbColor="#FFFFFF"
         />
@@ -74,5 +112,14 @@ const styles = StyleSheet.create({
   },
   destructiveLabel: {
     color: "#DC2626",
+  },
+  autoLockInfo: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  rowDescription: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.5)",
+    marginTop: 4,
   },
 });

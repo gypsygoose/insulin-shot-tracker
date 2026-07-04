@@ -14,6 +14,19 @@ import { BUTTONS } from "../data/zones";
 const STORAGE_KEY = "@t1d_shot_v1";
 const MIRROR_KEY = "@t1d_shot_mirror_v1";
 const INTERFACE_LOCKED_KEY = "@t1d_shot_interface_locked_v1";
+const AUTO_LOCK_KEY = "@t1d_shot_autolock_v1";
+
+export const DEFAULT_AUTO_LOCK_AFTER_MARK_SECONDS = 30;
+export const DEFAULT_AUTO_LOCK_AFTER_UNLOCK_SECONDS = 5 * 60;
+
+// Persisted auto-lock settings, plus the pending lock deadline (if any) so
+// the countdown survives the app being closed and reopened.
+export interface StoredAutoLock {
+  enabled: boolean;
+  afterMarkSeconds: number;
+  afterUnlockSeconds: number;
+  deadline: number | null;
+}
 
 function defaultStorage(): AppStorage {
   const buttonStates: Record<string, StoredButtonState> = {};
@@ -80,6 +93,30 @@ export async function saveInterfaceLocked(locked: boolean): Promise<void> {
   await AsyncStorage.setItem(INTERFACE_LOCKED_KEY, locked ? "1" : "0");
 }
 
+function defaultAutoLock(): StoredAutoLock {
+  return {
+    enabled: false,
+    afterMarkSeconds: DEFAULT_AUTO_LOCK_AFTER_MARK_SECONDS,
+    afterUnlockSeconds: DEFAULT_AUTO_LOCK_AFTER_UNLOCK_SECONDS,
+    deadline: null,
+  };
+}
+
+export async function loadAutoLock(): Promise<StoredAutoLock> {
+  try {
+    const raw = await AsyncStorage.getItem(AUTO_LOCK_KEY);
+    if (!raw) return defaultAutoLock();
+    const parsed = JSON.parse(raw) as Partial<StoredAutoLock>;
+    return { ...defaultAutoLock(), ...parsed };
+  } catch {
+    return defaultAutoLock();
+  }
+}
+
+export async function saveAutoLock(data: StoredAutoLock): Promise<void> {
+  await AsyncStorage.setItem(AUTO_LOCK_KEY, JSON.stringify(data));
+}
+
 // ---------------------------------------------------------------------------
 // Export / import full app state to/from a JSON file
 // ---------------------------------------------------------------------------
@@ -142,6 +179,21 @@ function isValidAppStorage(data: unknown): data is ExportedAppData {
     typeof candidate.mirrored !== "boolean"
   )
     return false;
+  if (
+    candidate.autoLockEnabled !== undefined &&
+    typeof candidate.autoLockEnabled !== "boolean"
+  )
+    return false;
+  if (
+    candidate.autoLockAfterMarkSeconds !== undefined &&
+    typeof candidate.autoLockAfterMarkSeconds !== "number"
+  )
+    return false;
+  if (
+    candidate.autoLockAfterUnlockSeconds !== undefined &&
+    typeof candidate.autoLockAfterUnlockSeconds !== "number"
+  )
+    return false;
   return true;
 }
 
@@ -185,7 +237,17 @@ export async function pickImportFile(): Promise<ImportResult> {
     const normalized = normalizeStorage(parsed);
     return {
       kind: "success",
-      data: { ...normalized, mirrored: parsed.mirrored ?? false },
+      data: {
+        ...normalized,
+        mirrored: parsed.mirrored ?? false,
+        autoLockEnabled: parsed.autoLockEnabled ?? false,
+        autoLockAfterMarkSeconds:
+          parsed.autoLockAfterMarkSeconds ??
+          DEFAULT_AUTO_LOCK_AFTER_MARK_SECONDS,
+        autoLockAfterUnlockSeconds:
+          parsed.autoLockAfterUnlockSeconds ??
+          DEFAULT_AUTO_LOCK_AFTER_UNLOCK_SECONDS,
+      },
     };
   } catch {
     return { kind: "invalid" };

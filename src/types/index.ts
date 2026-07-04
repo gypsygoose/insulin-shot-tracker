@@ -67,4 +67,7 @@ export interface AppStorage {
 // settings (like mirror mode) that live outside AppStorage in AsyncStorage.
 export interface ExportedAppData extends AppStorage {
   mirrored: boolean;
+  autoLockEnabled: boolean;
+  autoLockAfterMarkSeconds: number;
+  autoLockAfterUnlockSeconds: number;
 }

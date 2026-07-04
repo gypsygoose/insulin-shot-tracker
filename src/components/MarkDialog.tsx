@@ -61,7 +61,6 @@ export default function MarkDialog({ visible, onConfirm, onCancel }: Props) {
 
           <View style={styles.pickerWrap}>
             <DateTimePicker
-              key={`date-${resetKey}`}
               value={date}
               mode="datetime"
               display={Platform.OS === "ios" ? "compact" : "default"}
