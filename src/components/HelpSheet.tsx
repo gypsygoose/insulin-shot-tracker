@@ -105,6 +105,47 @@ export default function HelpSheet({ visible, onClose }: Props) {
           <Text style={styles.bold}>✓ Галочка</Text> — последнее использованное
           место в группе.
         </Text>
+
+        <Text style={styles.sectionTitle}>Нижняя панель</Text>
+        <Text style={styles.hint}>
+          <Text style={styles.bold}>Отменить</Text> — отменить последнее
+          действие (укол, блокировку или разблокировку места).
+        </Text>
+        <Text style={styles.hint}>
+          <Text style={styles.bold}>Меню</Text> — открыть меню настроек и
+          данных.
+        </Text>
+        <Text style={styles.hint}>
+          <Text style={styles.bold}>Справка</Text> — открыть этот экран.
+        </Text>
+        <Text style={styles.hint}>
+          <Text style={styles.bold}>Замок</Text> — заблокировать или
+          разблокировать интерфейс, чтобы избежать случайных нажатий.
+        </Text>
+
+        <Text style={styles.sectionTitle}>Пункты меню</Text>
+        <Text style={styles.hint}>
+          <Text style={styles.bold}>Зеркальное отображение</Text> — отразить
+          силуэт тела по горизонтали.
+        </Text>
+        <Text style={styles.hint}>
+          <Text style={styles.bold}>Автоблокировка интерфейса</Text> —
+          автоматически включать блокировку через заданное время после
+          отметки укола и после ручной разблокировки. Нажатие на строку
+          открывает настройку задержек.
+        </Text>
+        <Text style={styles.hint}>
+          <Text style={styles.bold}>Экспорт...</Text> — сохранить все данные
+          в файл.
+        </Text>
+        <Text style={styles.hint}>
+          <Text style={styles.bold}>Импорт...</Text> — загрузить данные из
+          файла (текущие данные будут заменены).
+        </Text>
+        <Text style={styles.hint}>
+          <Text style={styles.bold}>Очистить</Text> — удалить всю историю
+          инъекций без возможности восстановления.
+        </Text>
         <View style={styles.bottomPad} />
       </ScrollView>
     </BottomSheet>
