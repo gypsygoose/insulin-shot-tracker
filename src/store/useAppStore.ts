@@ -147,6 +147,7 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
         ...currentBtnState,
         buttonId,
         isManuallyBlocked: true,
+        manuallyBlockedAt: now,
       };
 
       const event: AppEvent = {
@@ -179,6 +180,7 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
       const newBtnState: StoredButtonState = {
         ...currentBtnState,
         isManuallyBlocked: false,
+        manuallyBlockedAt: undefined,
       };
 
       const event: AppEvent = {

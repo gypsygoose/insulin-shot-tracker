@@ -42,6 +42,7 @@ export interface StoredButtonState {
   blackoutStartedAt?: number;
   blackoutDurationDays?: number;
   isManuallyBlocked: boolean;
+  manuallyBlockedAt?: number;
 }
 
 // Event in undo history

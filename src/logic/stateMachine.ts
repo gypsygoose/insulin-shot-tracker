@@ -1,6 +1,6 @@
 import { ButtonColor, StoredButtonState } from "../types";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+export const DAY_MS = 24 * 60 * 60 * 1000;
 
 // ---------------------------------------------------------------------------
 // Color computation
@@ -78,6 +78,14 @@ export function computeButtonColor(
   if (state.lastInjectionAt === undefined) return "white";
   const days = Math.floor((now - state.lastInjectionAt) / DAY_MS);
   return injectionCycleColor(days);
+}
+
+// Timestamp when the current system blackout (black state) will end, if any.
+export function getBlackoutEndAt(state: StoredButtonState): number | undefined {
+  if (state.blackoutStartedAt === undefined || state.blackoutDurationDays === undefined) {
+    return undefined;
+  }
+  return state.blackoutStartedAt + state.blackoutDurationDays * DAY_MS;
 }
 
 // ---------------------------------------------------------------------------

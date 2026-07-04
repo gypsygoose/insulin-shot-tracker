@@ -66,8 +66,11 @@ export default function MainScreen() {
   const menuZoneLabel = menuButtonId
     ? ZONE_MAP[BUTTON_MAP[menuButtonId]?.zoneId]?.label
     : undefined;
-  const menuButtonColor = menuButtonId
-    ? computeButtonColor(state.buttonStates[menuButtonId], state.now)
+  const menuButtonState = menuButtonId
+    ? state.buttonStates[menuButtonId]
+    : undefined;
+  const menuButtonColor = menuButtonState
+    ? computeButtonColor(menuButtonState, state.now)
     : undefined;
 
   if (!state.isLoaded) {
@@ -143,6 +146,8 @@ export default function MainScreen() {
         visible={menuButtonId !== null}
         zoneLabel={menuZoneLabel}
         color={menuButtonColor}
+        buttonState={menuButtonState}
+        now={state.now}
         onBlock={() => {
           if (menuButtonId) actions.blockButton(menuButtonId);
           setMenuButtonId(null);
