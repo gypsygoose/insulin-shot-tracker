@@ -54,7 +54,7 @@ export const ZONE_COLORS: Record<string, { accent: string; glow: string }> = {
 export const ZONE_LAYOUT: Record<string, ZoneLayout> = {
   "shoulder-right": {
     x: 0.08,
-    y: 0.2,
+    y: 0.15,
     width: 0.12,
     height: 0.2,
     rows: 3,
@@ -62,7 +62,7 @@ export const ZONE_LAYOUT: Record<string, ZoneLayout> = {
   },
   "shoulder-left": {
     x: 0.815,
-    y: 0.2,
+    y: 0.15,
     width: 0.12,
     height: 0.2,
     rows: 3,
@@ -70,7 +70,7 @@ export const ZONE_LAYOUT: Record<string, ZoneLayout> = {
   },
   "belly-right": {
     x: 0.215,
-    y: 0.33,
+    y: 0.29,
     width: 0.28,
     height: 0.2,
     rows: 3,
@@ -78,7 +78,7 @@ export const ZONE_LAYOUT: Record<string, ZoneLayout> = {
   },
   "belly-left": {
     x: 0.52,
-    y: 0.33,
+    y: 0.29,
     width: 0.28,
     height: 0.2,
     rows: 3,
@@ -86,7 +86,7 @@ export const ZONE_LAYOUT: Record<string, ZoneLayout> = {
   },
   "thigh-right": {
     x: 0.21,
-    y: 0.7,
+    y: 0.65,
     width: 0.21,
     height: 0.2,
     rows: 3,
@@ -94,7 +94,7 @@ export const ZONE_LAYOUT: Record<string, ZoneLayout> = {
   },
   "thigh-left": {
     x: 0.605,
-    y: 0.7,
+    y: 0.65,
     width: 0.2,
     height: 0.2,
     rows: 3,
