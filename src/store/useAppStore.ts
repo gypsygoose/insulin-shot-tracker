@@ -6,6 +6,8 @@ import {
   clearStorage,
   loadMirrored,
   saveMirrored,
+  loadInterfaceLocked,
+  saveInterfaceLocked,
   exportStorageToFile,
   pickImportFile as pickImportFileFromDisk,
   importStorage,
@@ -21,6 +23,7 @@ export interface AppState extends AppStorage {
   now: number;
   isLoaded: boolean;
   mirrored: boolean;
+  interfaceLocked: boolean;
 }
 
 export interface AppActions {
@@ -32,6 +35,7 @@ export interface AppActions {
   undo(): void;
   clearAll(): void;
   setMirrored(mirrored: boolean): void;
+  setInterfaceLocked(locked: boolean): void;
   exportData(): Promise<void>;
   pickImportFile(): Promise<ImportResult>;
   applyImport(data: ExportedAppData): void;
@@ -79,6 +83,7 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
     now: Date.now(),
     isLoaded: false,
     mirrored: false,
+    interfaceLocked: false,
   });
   const saveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -89,6 +94,9 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
     });
     loadMirrored().then((mirrored) => {
       setState((prev) => ({ ...prev, mirrored }));
+    });
+    loadInterfaceLocked().then((interfaceLocked) => {
+      setState((prev) => ({ ...prev, interfaceLocked }));
     });
   }, []);
 
@@ -285,6 +293,11 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
     saveMirrored(mirrored);
   }, []);
 
+  const setInterfaceLocked = useCallback((locked: boolean) => {
+    setState((prev) => ({ ...prev, interfaceLocked: locked }));
+    saveInterfaceLocked(locked);
+  }, []);
+
   const exportData = useCallback(async () => {
     await exportStorageToFile({
       buttonStates: state.buttonStates,
@@ -311,6 +324,7 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
       undo,
       clearAll,
       setMirrored,
+      setInterfaceLocked,
       exportData,
       pickImportFile: pickImportFileFromDisk,
       applyImport,

@@ -20,6 +20,9 @@ import { ZONES, BUTTON_MAP, ZONE_MAP } from "../data/zones";
 
 const BLOCKED_TOAST_MESSAGE = "Точка заблокирована и не может быть отмечена";
 const TOAST_DURATION_MS = 2000;
+const INTERFACE_LOCKED_TOAST_MESSAGE =
+  "Интерфейс залокирован. Чтобы отметить точку укола, разблокируйте интерфейс в нижнем меню либо отметьте через всплывающее меню точки (долгое нажатие).";
+const INTERFACE_LOCKED_TOAST_DURATION_MS = 4000;
 
 // Figma body image aspect ratio: 393.46 wide × 621.91 tall
 const IMG_ASPECT = 393.46 / 621.91;
@@ -42,24 +45,34 @@ export default function MainScreen() {
     };
   }, []);
 
-  const showBlockedToast = useCallback(() => {
+  const showToast = useCallback((message: string, duration: number) => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    setToastMessage(BLOCKED_TOAST_MESSAGE);
+    setToastMessage(message);
     toastTimerRef.current = setTimeout(() => {
       setToastMessage(null);
-    }, TOAST_DURATION_MS);
+    }, duration);
   }, []);
 
   const handlePress = useCallback(
     (id: string) => {
       const color = computeButtonColor(state.buttonStates[id], state.now);
+
       if (color === "gray" || color === "black") {
-        showBlockedToast();
+        showToast(BLOCKED_TOAST_MESSAGE, TOAST_DURATION_MS);
         return;
       }
+
+      if (state.interfaceLocked) {
+        showToast(
+          INTERFACE_LOCKED_TOAST_MESSAGE,
+          INTERFACE_LOCKED_TOAST_DURATION_MS,
+        );
+        return;
+      }
+
       actions.pressButton(id);
     },
-    [actions, state.buttonStates, state.now, showBlockedToast],
+    [actions, state.buttonStates, state.now, state.interfaceLocked, showToast],
   );
   const handleLongPress = useCallback((id: string) => setMenuButtonId(id), []);
 
@@ -139,6 +152,10 @@ export default function MainScreen() {
         onClear={actions.clearAll}
         mirrored={state.mirrored}
         onToggleMirrored={actions.setMirrored}
+        interfaceLocked={state.interfaceLocked}
+        onToggleInterfaceLocked={() =>
+          actions.setInterfaceLocked(!state.interfaceLocked)
+        }
         onExport={actions.exportData}
         onPickImportFile={actions.pickImportFile}
         onApplyImport={actions.applyImport}
