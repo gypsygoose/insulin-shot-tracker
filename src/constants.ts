@@ -8,6 +8,7 @@ export const INTERFACE_LOCKED_TOAST_DURATION_MS = 4000;
 export const BACKGROUND_COLOR = "#080C18";
 export const ICON_COLOR = "#FFFFFF";
 export const DISABLED_ICON_COLOR = "#4A5568";
+export const ICON_SIZE = 22; // bottom-menu icon width/height (src/components/icons)
 export const LEFT_SIDE_LABEL = "левая\nсторона";
 export const RIGHT_SIDE_LABEL = "правая\nсторона";
 

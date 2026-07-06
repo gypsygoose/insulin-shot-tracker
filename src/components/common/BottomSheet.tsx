@@ -9,7 +9,7 @@ import {
   Pressable,
   Dimensions,
 } from "react-native";
-import { CARD_BORDER_COLOR, PRIMARY_TEXT_COLOR, SURFACE_COLOR } from "../constants";
+import { CARD_BORDER_COLOR, PRIMARY_TEXT_COLOR, SURFACE_COLOR } from "../../constants";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const DISMISS_DISTANCE = 80;

@@ -11,7 +11,7 @@ import {
   PRIMARY_TEXT_COLOR,
   SECONDARY_TEXT_COLOR,
   SURFACE_COLOR,
-} from "../constants";
+} from "../../constants";
 
 interface Props {
   visible: boolean;

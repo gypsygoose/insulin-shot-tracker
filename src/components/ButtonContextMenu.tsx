@@ -1,6 +1,6 @@
 import { ButtonColor, StoredButtonState } from "../types";
 import { getBlackoutEndAt } from "../logic/stateMachine";
-import { ContextMenu, ContextMenuItem } from "./ContextMenu";
+import { ContextMenu, ContextMenuItem } from "./common/ContextMenu";
 import { CLEAR_LABEL, MARK_LABEL, MINUTES_PER_DAY } from "../constants";
 import { pad2 } from "../format";
 

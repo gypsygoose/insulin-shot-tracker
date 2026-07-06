@@ -11,7 +11,7 @@ import {
   SECONDARY_TEXT_COLOR,
   PRIMARY_SECTION_LABEL_COLOR,
   SURFACE_COLOR,
-} from "../constants";
+} from "../../constants";
 
 export interface ContextMenuItem {
   key: string;

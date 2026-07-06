@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { PRIMARY_TEXT_COLOR, SURFACE_COLOR } from '../constants';
+import { PRIMARY_TEXT_COLOR, SURFACE_COLOR } from '../../constants';
 
 interface Props {
   message: string | null;

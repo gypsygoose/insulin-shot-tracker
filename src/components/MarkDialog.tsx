@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Dialog } from "./Dialog";
+import { Dialog } from "./common/Dialog";
 import { MARK_LABEL } from "../constants";
 
 interface Props {

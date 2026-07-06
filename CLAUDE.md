@@ -35,9 +35,15 @@ src/
 ├── components/
 │   ├── InjectionButton.tsx — single injection point button
 │   ├── BottomMenu.tsx      — Undo / Menu / Help / Lock bar
-│   ├── Modal.tsx           — shared full-screen overlay + backdrop
-│   ├── Dialog.tsx          — shared confirm/cancel modal (built on Modal)
-│   └── ContextMenu.tsx     — shared action-list modal (built on Modal)
+│   ├── icons/              — one file per icon component (e.g. UndoIcon.tsx, MenuIcon.tsx)
+│   └── common/             — generic, domain-agnostic UI primitives, reusable outside this app
+│       ├── Modal.tsx       — full-screen overlay + backdrop
+│       ├── Dialog.tsx      — confirm/cancel modal (built on Modal)
+│       ├── ContextMenu.tsx — action-list modal (built on Modal)
+│       ├── ConfirmDialog.tsx — title/message confirm wrapper (built on Dialog)
+│       ├── BottomSheet.tsx — swipe-to-dismiss bottom sheet
+│       ├── Toast.tsx       — transient message banner
+│       └── TimeField.tsx   — minutes/seconds picker pair (used by AutoLockDialog)
 └── screens/MainScreen.tsx  — root screen composing all components
 App.tsx                     — entry point
 ```
@@ -59,6 +65,7 @@ App.tsx                     — entry point
 ## Coding conventions
 
 - Use named exports for all components, functions, and modules — no `export default`. Import with `import { Foo } from "./Foo"`.
+- Every component (including small presentational helpers like icons or a single form field extracted from a screen) lives in its own file named after the component. Do not define a second component — even an unexported local one only used within the file — alongside another component in the same file. Icon components go in `src/components/icons/`. Generic, domain-agnostic UI primitives with no knowledge of app types (`Modal`, `Dialog`, `ConfirmDialog`, `ContextMenu`, `BottomSheet`, `Toast`, `TimeField`) go in `src/components/common/`; components that reference app domain types (e.g. `ButtonColor`, `ZoneId`, `AutoLockDialogMode`) or compose the app's screens stay directly under `src/components/`.
 - Types that enumerate string constants must be TypeScript `enum`s, not string-literal unions (e.g. `ButtonColor`, `ZoneGroup`, `ZoneId`, `AppEventType`, `AutoLockDialogMode` in `src/types/index.ts`). Reference values as `EnumName.Member`, never as raw string literals.
 - Discriminated-union result types (e.g. `PressResult` in `src/logic/stateMachine.ts`, `ImportResult` in `src/storage/storage.ts`) use `type` as the discriminant field name (not `kind`), backed by its own enum (e.g. `PressResultType`, `ImportResultType`).
 - No inline color literals (hex/`rgba`) in component styles. A color literal used in 2+ places with the same semantic role (e.g. dialog title text, modal backdrop, hairline border) is a shared constant in `src/constants.ts`. A literal that's meaningful but used in only one place is still a named constant, declared locally in the file/component where it applies (not inlined). Two literals that happen to share a value by coincidence, but mean different things (e.g. a UI accent color vs. an unrelated injection-cycle color in `stateMachine.ts`), are kept as separate constants — never merged just because the value matches.

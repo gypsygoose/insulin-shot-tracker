@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Modal as RNModal, View, Pressable, StyleSheet } from "react-native";
-import { MODAL_OVERLAY_COLOR } from "../constants";
+import { MODAL_OVERLAY_COLOR } from "../../constants";
 
 interface Props {
   visible: boolean;

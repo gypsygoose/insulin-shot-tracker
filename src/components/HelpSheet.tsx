@@ -2,7 +2,7 @@ import { ScrollView, Text, View, StyleSheet } from "react-native";
 import { ButtonColor, ZoneId } from "../types";
 import { COLOR_HEX, COLOR_LABEL } from "../logic/stateMachine";
 import { ZONE_COLORS } from "../data/zones";
-import { BottomSheet } from "./BottomSheet";
+import { BottomSheet } from "./common/BottomSheet";
 import {
   AUTO_LOCK_ROW_LABEL,
   CLEAR_LABEL,

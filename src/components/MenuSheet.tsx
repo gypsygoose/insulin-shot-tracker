@@ -1,5 +1,5 @@
 import { Text, TouchableOpacity, View, Switch, StyleSheet } from "react-native";
-import { BottomSheet } from "./BottomSheet";
+import { BottomSheet } from "./common/BottomSheet";
 import {
   AFTER_MARK_LABEL,
   AFTER_UNLOCK_LABEL,
