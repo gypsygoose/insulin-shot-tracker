@@ -1,41 +1,12 @@
 import { useEffect, useState } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-} from "react-native";
+import { View, StyleSheet, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import {
-  CANCEL_BUTTON_BORDER_COLOR,
-  CANCEL_BUTTON_TEXT_COLOR,
-  CARD_BORDER_COLOR,
-  MODAL_OVERLAY_COLOR,
-  MUTED_TEXT_COLOR,
-  PRIMARY_ACTION_COLOR,
-  PRIMARY_TEXT_COLOR,
-  SECONDARY_TEXT_COLOR,
-  SURFACE_COLOR,
-} from "../constants";
+import { Dialog } from "./Dialog";
 
 interface Props {
   visible: boolean;
   onConfirm: (timestamp: number) => void;
   onCancel: () => void;
-}
-
-function pad(n: number): string {
-  return n.toString().padStart(2, "0");
-}
-
-function formatDate(d: Date): string {
-  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
-}
-
-function formatTime(d: Date): string {
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 export function MarkDialog({ visible, onConfirm, onCancel }: Props) {
@@ -57,137 +28,41 @@ export function MarkDialog({ visible, onConfirm, onCancel }: Props) {
   };
 
   return (
-    <Modal
+    <Dialog
       visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onCancel}
+      title="Отметить укол"
+      message="Укажите дату и время, когда была сделана инъекция."
+      confirmLabel="Отметить"
+      onConfirm={handleConfirm}
+      onCancel={onCancel}
     >
-      <View style={styles.overlay}>
-        <View style={styles.box}>
-          <Text style={styles.title}>Отметить укол</Text>
-          <Text style={styles.message}>
-            Укажите дату и время, когда была сделана инъекция.
-          </Text>
-
-          <View style={styles.pickerWrap}>
-            <DateTimePicker
-              value={date}
-              mode="datetime"
-              display={Platform.OS === "ios" ? "compact" : "default"}
-              onChange={(_, selected) => {
-                if (selected) {
-                  const next = new Date(date);
-                  next.setFullYear(
-                    selected.getFullYear(),
-                    selected.getMonth(),
-                    selected.getDate(),
-                  );
-                  setDate(next);
-                }
-              }}
-              maximumDate={new Date()}
-              themeVariant="dark"
-            />
-          </View>
-
-          <View style={styles.actions}>
-            <TouchableOpacity
-              style={styles.cancelBtn}
-              onPress={onCancel}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.cancelLabel}>Отмена</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.confirmBtn}
-              onPress={handleConfirm}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.confirmLabel}>Отметить</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+      <View style={styles.pickerWrap}>
+        <DateTimePicker
+          value={date}
+          mode="datetime"
+          display={Platform.OS === "ios" ? "compact" : "default"}
+          onChange={(_, selected) => {
+            if (selected) {
+              const next = new Date(date);
+              next.setFullYear(
+                selected.getFullYear(),
+                selected.getMonth(),
+                selected.getDate(),
+              );
+              setDate(next);
+            }
+          }}
+          maximumDate={new Date()}
+          themeVariant="dark"
+        />
       </View>
-    </Modal>
+    </Dialog>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: MODAL_OVERLAY_COLOR,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-  },
-  box: {
-    backgroundColor: SURFACE_COLOR,
-    borderRadius: 16,
-    padding: 24,
-    width: "100%",
-    maxWidth: 360,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: CARD_BORDER_COLOR,
-  },
-  title: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: PRIMARY_TEXT_COLOR,
-    marginBottom: 8,
-  },
-  message: {
-    fontSize: 14,
-    color: SECONDARY_TEXT_COLOR,
-    lineHeight: 21,
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: MUTED_TEXT_COLOR,
-    marginBottom: 6,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
   pickerWrap: {
     alignItems: "flex-start",
     marginBottom: 16,
-  },
-  preview: {
-    fontSize: 13,
-    color: MUTED_TEXT_COLOR,
-    marginTop: -8,
-    marginBottom: 16,
-  },
-  actions: {
-    marginTop: 16,
-    flexDirection: "row",
-    gap: 12,
-  },
-  cancelBtn: {
-    flex: 1,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: CANCEL_BUTTON_BORDER_COLOR,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  cancelLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: CANCEL_BUTTON_TEXT_COLOR,
-  },
-  confirmBtn: {
-    flex: 1,
-    borderRadius: 10,
-    backgroundColor: PRIMARY_ACTION_COLOR,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  confirmLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: PRIMARY_TEXT_COLOR,
   },
 });

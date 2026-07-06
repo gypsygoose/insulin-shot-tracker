@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ZoneContainer } from "../components/ZoneContainer";
 import { BottomMenu } from "../components/BottomMenu";
-import { ButtonActionMenu } from "../components/ButtonActionMenu";
+import { ButtonContextMenu } from "../components/ButtonContextMenu";
 import { MarkDialog } from "../components/MarkDialog";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { Toast } from "../components/Toast";
@@ -171,7 +171,7 @@ export function MainScreen() {
       />
 
       {/* Long-press menu for a single button */}
-      <ButtonActionMenu
+      <ButtonContextMenu
         visible={menuButtonId !== null}
         zoneLabel={menuZoneLabel}
         color={menuButtonColor}

@@ -1,26 +1,9 @@
 import { useEffect, useState } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  Platform,
-} from "react-native";
+import { View, Text, StyleSheet, Platform } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { AutoLockDialogMode } from "../types";
-import {
-  CANCEL_BUTTON_BORDER_COLOR,
-  CANCEL_BUTTON_TEXT_COLOR,
-  CARD_BORDER_COLOR,
-  MODAL_OVERLAY_COLOR,
-  MUTED_TEXT_COLOR,
-  PRIMARY_ACTION_COLOR,
-  PRIMARY_TEXT_COLOR,
-  SECONDARY_TEXT_COLOR,
-  SURFACE_COLOR,
-} from "../constants";
+import { Dialog } from "./Dialog";
+import { MUTED_TEXT_COLOR, PRIMARY_TEXT_COLOR } from "../constants";
 
 interface Props {
   visible: boolean;
@@ -152,103 +135,34 @@ export function AutoLockDialog({
   };
 
   return (
-    <Modal
+    <Dialog
       visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onCancel}
+      title="Автоблокировка интерфейса"
+      message="Вы можете включить автоматическую блокировку интерфейса, чтобы избежать случайного нажатия на точку укола. Блокировка сработает через заданное время после нажатия на точку или после простоя в разблокированном режиме. Разблокировать интерфейс можно будет нажав на соответствующую кнопку в нижнем меню."
+      confirmLabel={confirmLabel}
+      onConfirm={handleConfirm}
+      onCancel={onCancel}
+      scrollable
     >
-      <View style={styles.overlay}>
-        <View style={styles.box}>
-          <Text style={styles.title}>Автоблокировка интерфейса</Text>
-
-          <ScrollView
-            style={styles.scroll}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <Text style={styles.message}>
-              Вы можете включить автоматическую блокировку интерфейса, чтобы
-              избежать случайного нажатия на точку укола. Блокировка сработает
-              через заданное время после нажатия на точку или после простоя в
-              разблокированном режиме. Разблокировать интерфейс можно будет
-              нажав на соответствующую кнопку в нижнем меню.
-            </Text>
-
-            <TimeField
-              label="После отметки"
-              minutes={markMinutes}
-              seconds={markSeconds}
-              onChangeMinutes={setMarkMinutes}
-              onChangeSeconds={setMarkSeconds}
-            />
-            <TimeField
-              label="После разблокировки"
-              minutes={unlockMinutes}
-              seconds={unlockSeconds}
-              onChangeMinutes={handleChangeUnlockMinutes}
-              onChangeSeconds={handleChangeUnlockSeconds}
-            />
-          </ScrollView>
-
-          <View style={styles.actions}>
-            <TouchableOpacity
-              style={styles.cancelBtn}
-              onPress={onCancel}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.cancelLabel}>Отмена</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.confirmBtn}
-              onPress={handleConfirm}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.confirmLabel}>{confirmLabel}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
+      <TimeField
+        label="После отметки"
+        minutes={markMinutes}
+        seconds={markSeconds}
+        onChangeMinutes={setMarkMinutes}
+        onChangeSeconds={setMarkSeconds}
+      />
+      <TimeField
+        label="После разблокировки"
+        minutes={unlockMinutes}
+        seconds={unlockSeconds}
+        onChangeMinutes={handleChangeUnlockMinutes}
+        onChangeSeconds={handleChangeUnlockSeconds}
+      />
+    </Dialog>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: MODAL_OVERLAY_COLOR,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-  },
-  box: {
-    backgroundColor: SURFACE_COLOR,
-    borderRadius: 16,
-    padding: 24,
-    width: "100%",
-    maxWidth: 360,
-    maxHeight: "80%",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: CARD_BORDER_COLOR,
-  },
-  title: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: PRIMARY_TEXT_COLOR,
-    marginBottom: 8,
-  },
-  scroll: {
-    flexShrink: 1,
-  },
-  scrollContent: {
-    paddingBottom: 4,
-  },
-  message: {
-    fontSize: 14,
-    color: SECONDARY_TEXT_COLOR,
-    lineHeight: 21,
-    marginBottom: 20,
-  },
   field: {
     marginBottom: 16,
   },
@@ -271,35 +185,5 @@ const styles = StyleSheet.create({
     color: PRIMARY_TEXT_COLOR,
     fontSize: 18,
     height: 120,
-  },
-  actions: {
-    marginTop: 8,
-    flexDirection: "row",
-    gap: 12,
-  },
-  cancelBtn: {
-    flex: 1,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: CANCEL_BUTTON_BORDER_COLOR,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  cancelLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: CANCEL_BUTTON_TEXT_COLOR,
-  },
-  confirmBtn: {
-    flex: 1,
-    borderRadius: 10,
-    backgroundColor: PRIMARY_ACTION_COLOR,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  confirmLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: PRIMARY_TEXT_COLOR,
   },
 });
