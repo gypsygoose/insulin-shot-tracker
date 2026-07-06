@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import Svg, { Path, Rect } from "react-native-svg";
+import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { HelpSheet } from "./HelpSheet";
 import { MenuSheet } from "./MenuSheet";
@@ -25,9 +25,15 @@ interface Props {
   autoLockEnabled: boolean;
   autoLockAfterMarkSeconds: number;
   autoLockAfterUnlockSeconds: number;
-  onEnableAutoLock: (afterMarkSeconds: number, afterUnlockSeconds: number) => void;
+  onEnableAutoLock: (
+    afterMarkSeconds: number,
+    afterUnlockSeconds: number,
+  ) => void;
   onDisableAutoLock: () => void;
-  onUpdateAutoLockTimes: (afterMarkSeconds: number, afterUnlockSeconds: number) => void;
+  onUpdateAutoLockTimes: (
+    afterMarkSeconds: number,
+    afterUnlockSeconds: number,
+  ) => void;
   onExport: () => Promise<void>;
   onPickImportFile: () => Promise<ImportResult>;
   onApplyImport: (data: ExportedAppData) => void;
@@ -49,25 +55,30 @@ function UndoIcon({ disabled }: { disabled: boolean }) {
 
 function HelpIcon() {
   return (
-    <Svg width={22} height={22} viewBox="0 0 22 22" fill="none">
+    <Svg width={22} height={22} viewBox="0 0 36 36" fill="none">
       <Path
-        d="M11 20.1667C16.0626 20.1667 20.1667 16.0626 20.1667 11C20.1667 5.93743 16.0626 1.83333 11 1.83333C5.93743 1.83333 1.83333 5.93743 1.83333 11C1.83333 16.0626 5.93743 20.1667 11 20.1667Z"
+        d="M18,2A16,16,0,1,0,34,18,16,16,0,0,0,18,2Zm0,30A14,14,0,1,1,32,18,14,14,0,0,1,18,32Z"
+        fill={ICON_COLOR}
         stroke={ICON_COLOR}
-        strokeWidth={1.83333}
+        strokeWidth={1}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
-        d="M8.33333 8.25C8.58983 7.52014 9.09572 6.90371 9.76109 6.51461C10.4265 6.1255 11.2084 5.98882 11.9655 6.12882C12.7226 6.26883 13.4067 6.6766 13.8918 7.27834C14.377 7.88008 14.6318 8.63615 14.6115 9.41077C14.6115 11.5 11.4583 12.5417 11.4583 12.5417"
+        d="M18.29,8.92a7.38,7.38,0,0,0-5.72,2.57,1,1,0,0,0-.32.71.92.92,0,0,0,.95.92,1.08,1.08,0,0,0,.71-.29,5.7,5.7,0,0,1,4.33-2c2.36,0,3.83,1.52,3.83,3.41v.05c0,2.21-1.76,3.44-4.54,3.65a.8.8,0,0,0-.76.92s0,2.32,0,2.75a1,1,0,0,0,1,.9h.11a1,1,0,0,0,.9-1V19.45c3-.42,5.43-2,5.43-5.28v-.05C24.18,11.12,21.84,8.92,18.29,8.92Z"
+        fill={ICON_COLOR}
         stroke={ICON_COLOR}
-        strokeWidth={1.83333}
+        strokeWidth={1}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <Path
-        d="M11 16.0417V16.0521"
+      <Circle
+        cx="17.78"
+        cy="26.2"
+        r="1.25"
+        fill={ICON_COLOR}
         stroke={ICON_COLOR}
-        strokeWidth={1.83333}
+        strokeWidth={1}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
