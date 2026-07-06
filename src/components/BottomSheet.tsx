@@ -14,6 +14,11 @@ import { CARD_BORDER_COLOR, PRIMARY_TEXT_COLOR, SURFACE_COLOR } from "../constan
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const DISMISS_DISTANCE = 80;
 const DISMISS_VELOCITY = 0.5;
+const SHEET_OPEN_MS = 250;
+const SHEET_CLOSE_MS = 200;
+// Minimum vertical drag before treating a touch as a sheet-drag gesture
+// rather than a tap on the content underneath.
+const VERTICAL_MOVE_THRESHOLD = 2;
 // Backdrop is intentionally lighter than the modal scrim (MODAL_OVERLAY_COLOR)
 // so content behind a bottom sheet stays partly legible while it's dragged.
 const BACKDROP_COLOR = "rgba(0,0,0,0.6)";
@@ -46,13 +51,13 @@ export function BottomSheet({
       translateY.setValue(SCREEN_HEIGHT);
       Animated.timing(translateY, {
         toValue: 0,
-        duration: 250,
+        duration: SHEET_OPEN_MS,
         useNativeDriver: true,
       }).start();
     } else if (mounted) {
       Animated.timing(translateY, {
         toValue: SCREEN_HEIGHT,
-        duration: 200,
+        duration: SHEET_CLOSE_MS,
         useNativeDriver: true,
       }).start(() => setMounted(false));
     }
@@ -72,7 +77,7 @@ export function BottomSheet({
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_, gestureState) =>
-        Math.abs(gestureState.dy) > 2 &&
+        Math.abs(gestureState.dy) > VERTICAL_MOVE_THRESHOLD &&
         Math.abs(gestureState.dy) > Math.abs(gestureState.dx),
       onPanResponderTerminationRequest: () => false,
       onPanResponderMove: (_, gestureState) => {

@@ -10,11 +10,21 @@ import {
   StoredButtonState,
 } from "../types";
 import { BUTTONS } from "../data/zones";
+import { APP_NAME } from "../constants";
 
 const STORAGE_KEY = "@t1d_shot_v1";
 const MIRROR_KEY = "@t1d_shot_mirror_v1";
 const INTERFACE_LOCKED_KEY = "@t1d_shot_interface_locked_v1";
 const AUTO_LOCK_KEY = "@t1d_shot_autolock_v1";
+
+// Boolean-as-string encoding used for the mirror/interface-locked flags —
+// AsyncStorage only stores strings.
+const STORED_TRUE = "1";
+const STORED_FALSE = "0";
+
+const JSON_MIME_TYPE = "application/json";
+const EXPORT_FILE_PREFIX = "t1d-shot-";
+const IOS_JSON_UTI = "public.json";
 
 export const DEFAULT_AUTO_LOCK_AFTER_MARK_SECONDS = 30;
 export const DEFAULT_AUTO_LOCK_AFTER_UNLOCK_SECONDS = 5 * 60;
@@ -71,26 +81,26 @@ export async function clearStorage(): Promise<AppStorage> {
 
 export async function loadMirrored(): Promise<boolean> {
   try {
-    return (await AsyncStorage.getItem(MIRROR_KEY)) === "1";
+    return (await AsyncStorage.getItem(MIRROR_KEY)) === STORED_TRUE;
   } catch {
     return false;
   }
 }
 
 export async function saveMirrored(mirrored: boolean): Promise<void> {
-  await AsyncStorage.setItem(MIRROR_KEY, mirrored ? "1" : "0");
+  await AsyncStorage.setItem(MIRROR_KEY, mirrored ? STORED_TRUE : STORED_FALSE);
 }
 
 export async function loadInterfaceLocked(): Promise<boolean> {
   try {
-    return (await AsyncStorage.getItem(INTERFACE_LOCKED_KEY)) === "1";
+    return (await AsyncStorage.getItem(INTERFACE_LOCKED_KEY)) === STORED_TRUE;
   } catch {
     return false;
   }
 }
 
 export async function saveInterfaceLocked(locked: boolean): Promise<void> {
-  await AsyncStorage.setItem(INTERFACE_LOCKED_KEY, locked ? "1" : "0");
+  await AsyncStorage.setItem(INTERFACE_LOCKED_KEY, locked ? STORED_TRUE : STORED_FALSE);
 }
 
 function defaultAutoLock(): StoredAutoLock {
@@ -197,14 +207,14 @@ export async function exportStorageToFile(
   data: ExportedAppData,
 ): Promise<void> {
   const dateStamp = new Date().toISOString().slice(0, 10);
-  const fileUri = `${FileSystem.cacheDirectory}t1d-shot-${dateStamp}.json`;
+  const fileUri = `${FileSystem.cacheDirectory}${EXPORT_FILE_PREFIX}${dateStamp}.json`;
   await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(data, null, 2));
 
   if (await Sharing.isAvailableAsync()) {
     await Sharing.shareAsync(fileUri, {
-      mimeType: "application/json",
-      dialogTitle: "Экспорт данных T1D Shot",
-      UTI: "public.json",
+      mimeType: JSON_MIME_TYPE,
+      dialogTitle: `Экспорт данных ${APP_NAME}`,
+      UTI: IOS_JSON_UTI,
     });
   }
 }
@@ -224,7 +234,7 @@ export type ImportResult =
 // Does not touch AsyncStorage — the caller decides whether/when to apply it.
 export async function pickImportFile(): Promise<ImportResult> {
   const picked = await DocumentPicker.getDocumentAsync({
-    type: "application/json",
+    type: JSON_MIME_TYPE,
     copyToCacheDirectory: true,
   });
   if (picked.canceled || picked.assets.length === 0)

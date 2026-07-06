@@ -9,10 +9,16 @@ import { AutoLockDialogMode, ExportedAppData } from "../types";
 import { ImportResult, ImportResultType } from "../storage/storage";
 import {
   BACKGROUND_COLOR,
+  CANCEL_LABEL,
+  CLEAR_LABEL,
   DISABLED_ICON_COLOR,
   DIVIDER_COLOR,
   ICON_COLOR,
 } from "../constants";
+
+const ICON_SIZE = 22;
+const ICON_STROKE_WIDTH = 1.83333;
+const FILLED_ICON_STROKE_WIDTH = 1;
 
 interface Props {
   canUndo: boolean;
@@ -44,7 +50,12 @@ interface Props {
 function UndoIcon({ disabled }: { disabled: boolean }) {
   const c = disabled ? DISABLED_ICON_COLOR : ICON_COLOR;
   return (
-    <Svg width={22} height={22} viewBox="-0.5 -2 24 24" fill="none">
+    <Svg
+      width={ICON_SIZE}
+      height={ICON_SIZE}
+      viewBox="-0.5 -2 24 24"
+      fill="none"
+    >
       <Path
         d="M5.308 7.612l1.352-.923a.981.981 0 0 1 1.372.27 1.008 1.008 0 0 1-.266 1.388l-3.277 2.237a.981.981 0 0 1-1.372-.27L.907 6.998a1.007 1.007 0 0 1 .266-1.389.981.981 0 0 1 1.372.27l.839 1.259C4.6 3.01 8.38 0 12.855 0c5.458 0 9.882 4.477 9.882 10s-4.424 10-9.882 10a.994.994 0 0 1-.988-1c0-.552.443-1 .988-1 4.366 0 7.906-3.582 7.906-8s-3.54-8-7.906-8C9.311 2 6.312 4.36 5.308 7.612z"
         fill={c}
@@ -55,12 +66,12 @@ function UndoIcon({ disabled }: { disabled: boolean }) {
 
 function HelpIcon() {
   return (
-    <Svg width={22} height={22} viewBox="0 0 36 36" fill="none">
+    <Svg width={ICON_SIZE} height={ICON_SIZE} viewBox="0 0 36 36" fill="none">
       <Path
         d="M18,2A16,16,0,1,0,34,18,16,16,0,0,0,18,2Zm0,30A14,14,0,1,1,32,18,14,14,0,0,1,18,32Z"
         fill={ICON_COLOR}
         stroke={ICON_COLOR}
-        strokeWidth={1}
+        strokeWidth={FILLED_ICON_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -68,7 +79,7 @@ function HelpIcon() {
         d="M18.29,8.92a7.38,7.38,0,0,0-5.72,2.57,1,1,0,0,0-.32.71.92.92,0,0,0,.95.92,1.08,1.08,0,0,0,.71-.29,5.7,5.7,0,0,1,4.33-2c2.36,0,3.83,1.52,3.83,3.41v.05c0,2.21-1.76,3.44-4.54,3.65a.8.8,0,0,0-.76.92s0,2.32,0,2.75a1,1,0,0,0,1,.9h.11a1,1,0,0,0,.9-1V19.45c3-.42,5.43-2,5.43-5.28v-.05C24.18,11.12,21.84,8.92,18.29,8.92Z"
         fill={ICON_COLOR}
         stroke={ICON_COLOR}
-        strokeWidth={1}
+        strokeWidth={FILLED_ICON_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -78,7 +89,7 @@ function HelpIcon() {
         r="1.25"
         fill={ICON_COLOR}
         stroke={ICON_COLOR}
-        strokeWidth={1}
+        strokeWidth={FILLED_ICON_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -88,90 +99,98 @@ function HelpIcon() {
 
 function LockClosedIcon() {
   return (
-    <Svg width={22} height={22} viewBox="0 0 36 36" fill={ICON_COLOR}>
+    <Svg
+      width={ICON_SIZE}
+      height={ICON_SIZE}
+      viewBox="0 0 36 36"
+      fill={ICON_COLOR}
+    >
       <Path
         d="M18.09,20.59A2.41,2.41,0,0,0,17,25.14V28h2V25.23a2.41,2.41,0,0,0-.91-4.64Z"
         stroke={ICON_COLOR}
-        strokeWidth={1}
+        strokeWidth={FILLED_ICON_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
         d="M26,15V10.72a8.2,8.2,0,0,0-8-8.36,8.2,8.2,0,0,0-8,8.36V15H7V32a2,2,0,0,0,2,2H27a2,2,0,0,0,2-2V15ZM12,10.72a6.2,6.2,0,0,1,6-6.36,6.2,6.2,0,0,1,6,6.36V15H12ZM9,32V17H27V32Z"
         stroke={ICON_COLOR}
-        strokeWidth={1}
+        strokeWidth={FILLED_ICON_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <Rect x="0" y="0" width="36" height="36" fillOpacity="0" />
     </Svg>
   );
 }
 
 function LockOpenIcon() {
   return (
-    <Svg width={22} height={22} viewBox="0 0 36 36" fill={ICON_COLOR}>
+    <Svg
+      width={ICON_SIZE}
+      height={ICON_SIZE}
+      viewBox="0 0 36 36"
+      fill={ICON_COLOR}
+    >
       <Path
         d="M12,25.14V28h2V25.23a2.42,2.42,0,1,0-2-.09Z"
         stroke={ICON_COLOR}
-        strokeWidth={1}
+        strokeWidth={FILLED_ICON_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
         d="M26,2a8.2,8.2,0,0,0-8,8.36V15H2V32a2,2,0,0,0,2,2H22a2,2,0,0,0,2-2V15H20V10.36A6.2,6.2,0,0,1,26,4a6.2,6.2,0,0,1,6,6.36v6.83a1,1,0,0,0,2,0V10.36A8.2,8.2,0,0,0,26,2ZM22,17V32H4V17Z"
         stroke={ICON_COLOR}
-        strokeWidth={1}
+        strokeWidth={FILLED_ICON_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <Rect x="0" y="0" width="36" height="36" fillOpacity="0" />
     </Svg>
   );
 }
 
 function MenuIcon() {
   return (
-    <Svg width={22} height={22} viewBox="0 0 22 22" fill="none">
+    <Svg width={ICON_SIZE} height={ICON_SIZE} viewBox="0 0 22 22" fill="none">
       <Path
         d="M8.25 2.75H3.66667C3.16041 2.75 2.75 3.16041 2.75 3.66667V8.25C2.75 8.75626 3.16041 9.16667 3.66667 9.16667H8.25C8.75626 9.16667 9.16667 8.75626 9.16667 8.25V3.66667C9.16667 3.16041 8.75626 2.75 8.25 2.75Z"
         stroke={ICON_COLOR}
-        strokeWidth={1.83333}
+        strokeWidth={ICON_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
         d="M8.25 12.8333H3.66667C3.16041 12.8333 2.75 13.2437 2.75 13.75V18.3333C2.75 18.8396 3.16041 19.25 3.66667 19.25H8.25C8.75626 19.25 9.16667 18.8396 9.16667 18.3333V13.75C9.16667 13.2437 8.75626 12.8333 8.25 12.8333Z"
         stroke={ICON_COLOR}
-        strokeWidth={1.83333}
+        strokeWidth={ICON_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
         d="M12.8333 3.66667H19.25"
         stroke={ICON_COLOR}
-        strokeWidth={1.83333}
+        strokeWidth={ICON_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
         d="M12.8333 8.25H19.25"
         stroke={ICON_COLOR}
-        strokeWidth={1.83333}
+        strokeWidth={ICON_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
         d="M12.8333 13.75H19.25"
         stroke={ICON_COLOR}
-        strokeWidth={1.83333}
+        strokeWidth={ICON_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
         d="M12.8333 18.3333H19.25"
         stroke={ICON_COLOR}
-        strokeWidth={1.83333}
+        strokeWidth={ICON_STROKE_WIDTH}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -343,8 +362,8 @@ export function BottomMenu({
         visible={showClear}
         title="Очистить все данные?"
         message="Вся история инъекций будет удалена. Все точки станут белыми. Это действие нельзя отменить."
-        confirmLabel="Очистить"
-        cancelLabel="Отмена"
+        confirmLabel={CLEAR_LABEL}
+        cancelLabel={CANCEL_LABEL}
         onConfirm={() => {
           setShowClear(false);
           onClear();
@@ -358,7 +377,7 @@ export function BottomMenu({
         title="Импортировать данные?"
         message="Все текущие данные будут стёрты и заменены данными из файла. Это действие нельзя отменить."
         confirmLabel="Импортировать"
-        cancelLabel="Отмена"
+        cancelLabel={CANCEL_LABEL}
         onConfirm={() => {
           if (pendingImport) onApplyImport(pendingImport);
           setPendingImport(null);

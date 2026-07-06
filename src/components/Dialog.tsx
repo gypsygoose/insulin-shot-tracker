@@ -4,6 +4,7 @@ import { Modal } from "./Modal";
 import {
   CANCEL_BUTTON_BORDER_COLOR,
   CANCEL_BUTTON_TEXT_COLOR,
+  CANCEL_LABEL,
   CARD_BORDER_COLOR,
   DESTRUCTIVE_COLOR,
   PRIMARY_ACTION_COLOR,
@@ -33,7 +34,7 @@ export function Dialog({
   message,
   children,
   confirmLabel,
-  cancelLabel = "Отмена",
+  cancelLabel = CANCEL_LABEL,
   onConfirm,
   onCancel,
   destructive = false,

@@ -3,7 +3,14 @@ import { View, Text, StyleSheet, Platform } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { AutoLockDialogMode } from "../types";
 import { Dialog } from "./Dialog";
-import { MUTED_TEXT_COLOR, PRIMARY_TEXT_COLOR } from "../constants";
+import {
+  AFTER_MARK_LABEL,
+  AFTER_UNLOCK_LABEL,
+  AUTO_LOCK_ROW_LABEL,
+  MUTED_TEXT_COLOR,
+  PRIMARY_TEXT_COLOR,
+} from "../constants";
+import { SECONDS_PER_MINUTE, splitSeconds } from "../format";
 
 interface Props {
   visible: boolean;
@@ -23,16 +30,6 @@ const MINUTE_OPTIONS = Array.from({ length: 100 }, (_, i) => i);
 const SECOND_OPTIONS = Array.from({ length: 60 }, (_, i) => i);
 const PICKER_ITEM_COLOR = Platform.OS === "android" ? PRIMARY_TEXT_COLOR : undefined;
 const MIN_AFTER_UNLOCK_SECONDS = 5;
-
-function splitSeconds(totalSeconds: number): {
-  minutes: number;
-  seconds: number;
-} {
-  return {
-    minutes: Math.floor(totalSeconds / 60),
-    seconds: totalSeconds % 60,
-  };
-}
 
 function TimeField({
   label,
@@ -129,15 +126,18 @@ export function AutoLockDialog({
 
   const handleConfirm = () => {
     onConfirm(
-      markMinutes * 60 + markSeconds,
-      Math.max(MIN_AFTER_UNLOCK_SECONDS, unlockMinutes * 60 + unlockSeconds),
+      markMinutes * SECONDS_PER_MINUTE + markSeconds,
+      Math.max(
+        MIN_AFTER_UNLOCK_SECONDS,
+        unlockMinutes * SECONDS_PER_MINUTE + unlockSeconds,
+      ),
     );
   };
 
   return (
     <Dialog
       visible={visible}
-      title="Автоблокировка интерфейса"
+      title={AUTO_LOCK_ROW_LABEL}
       message="Вы можете включить автоматическую блокировку интерфейса, чтобы избежать случайного нажатия на точку укола. Блокировка сработает через заданное время после нажатия на точку или после простоя в разблокированном режиме. Разблокировать интерфейс можно будет нажав на соответствующую кнопку в нижнем меню."
       confirmLabel={confirmLabel}
       onConfirm={handleConfirm}
@@ -145,14 +145,14 @@ export function AutoLockDialog({
       scrollable
     >
       <TimeField
-        label="После отметки"
+        label={AFTER_MARK_LABEL}
         minutes={markMinutes}
         seconds={markSeconds}
         onChangeMinutes={setMarkMinutes}
         onChangeSeconds={setMarkSeconds}
       />
       <TimeField
-        label="После разблокировки"
+        label={AFTER_UNLOCK_LABEL}
         minutes={unlockMinutes}
         seconds={unlockSeconds}
         onChangeMinutes={handleChangeUnlockMinutes}

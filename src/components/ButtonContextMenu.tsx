@@ -1,6 +1,8 @@
 import { ButtonColor, StoredButtonState } from "../types";
 import { getBlackoutEndAt } from "../logic/stateMachine";
 import { ContextMenu, ContextMenuItem } from "./ContextMenu";
+import { CLEAR_LABEL, MARK_LABEL, MINUTES_PER_DAY } from "../constants";
+import { pad2 } from "../format";
 
 interface Props {
   visible: boolean;
@@ -15,20 +17,16 @@ interface Props {
   onCancel: () => void;
 }
 
-function pad(n: number): string {
-  return n.toString().padStart(2, "0");
-}
-
 function formatDateTime(timestamp: number): string {
   const d = new Date(timestamp);
-  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
 
 function formatCountdown(ms: number): string {
   if (ms <= 0) return "0 мин";
   const totalMinutes = Math.ceil(ms / 60_000);
-  const days = Math.floor(totalMinutes / (24 * 60));
-  const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+  const days = Math.floor(totalMinutes / MINUTES_PER_DAY);
+  const hours = Math.floor((totalMinutes % MINUTES_PER_DAY) / 60);
   const minutes = totalMinutes % 60;
   const parts: string[] = [];
   if (days > 0) parts.push(`${days} дн`);
@@ -76,9 +74,9 @@ export function ButtonContextMenu({
   }
   if (!isGray && !isBlack) {
     items.push({ key: "block", label: "Заблокировать", onPress: onBlock });
-    items.push({ key: "mark", label: "Отметить", onPress: onMark });
+    items.push({ key: "mark", label: MARK_LABEL, onPress: onMark });
   }
-  items.push({ key: "clear", label: "Очистить", onPress: onClear, destructive: true });
+  items.push({ key: "clear", label: CLEAR_LABEL, onPress: onClear, destructive: true });
 
   return (
     <ContextMenu

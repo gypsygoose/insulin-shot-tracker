@@ -4,10 +4,11 @@ import {
   toggleManualBlock,
   blackoutDurationFor,
   PressResultType,
+  DAY_MS,
 } from './stateMachine';
 import { ButtonColor, StoredButtonState } from '../types';
 
-const DAY = 24 * 60 * 60 * 1000;
+const DAY = DAY_MS;
 const NOW = 1000000000000; // fixed reference timestamp
 
 const fresh: StoredButtonState = { buttonId: 'x', isManuallyBlocked: false };

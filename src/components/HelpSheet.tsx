@@ -4,12 +4,19 @@ import { COLOR_HEX, COLOR_LABEL } from "../logic/stateMachine";
 import { ZONE_COLORS } from "../data/zones";
 import { BottomSheet } from "./BottomSheet";
 import {
+  AUTO_LOCK_ROW_LABEL,
+  CLEAR_LABEL,
+  DIVIDER_COLOR,
+  EXPORT_ROW_LABEL,
+  HELP_SHEET_TITLE,
+  IMPORT_ROW_LABEL,
+  MENU_SHEET_TITLE,
+  MIRROR_ROW_LABEL,
   MUTED_TEXT_COLOR,
   PRIMARY_TEXT_COLOR,
   SECONDARY_TEXT_COLOR,
   PRIMARY_SECTION_LABEL_COLOR,
   SECONDARY_SECTION_LABEL_COLOR,
-  DIVIDER_COLOR,
 } from "../constants";
 
 // Injection zone descriptions, taken from the Figma "help" frame
@@ -63,7 +70,7 @@ interface Props {
 
 export function HelpSheet({ visible, onClose }: Props) {
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Справка">
+    <BottomSheet visible={visible} onClose={onClose} title={HELP_SHEET_TITLE}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={styles.sectionTitle}>Зоны введения</Text>
         {INJECTION_ZONE_INFO.map((z) => (
@@ -121,11 +128,12 @@ export function HelpSheet({ visible, onClose }: Props) {
           действие (укол, блокировку или разблокировку места).
         </Text>
         <Text style={styles.hint}>
-          <Text style={styles.bold}>Меню</Text> — открыть меню настроек и
-          данных.
+          <Text style={styles.bold}>{MENU_SHEET_TITLE}</Text> — открыть меню
+          настроек и данных.
         </Text>
         <Text style={styles.hint}>
-          <Text style={styles.bold}>Справка</Text> — открыть этот экран.
+          <Text style={styles.bold}>{HELP_SHEET_TITLE}</Text> — открыть этот
+          экран.
         </Text>
         <Text style={styles.hint}>
           <Text style={styles.bold}>Замок</Text> — заблокировать или
@@ -134,25 +142,24 @@ export function HelpSheet({ visible, onClose }: Props) {
 
         <Text style={styles.sectionTitle}>Пункты меню</Text>
         <Text style={styles.hint}>
-          <Text style={styles.bold}>Зеркальное отображение</Text> — отразить
-          силуэт тела по горизонтали.
+          <Text style={styles.bold}>{MIRROR_ROW_LABEL}</Text> — отразить силуэт
+          тела по горизонтали.
         </Text>
         <Text style={styles.hint}>
-          <Text style={styles.bold}>Автоблокировка интерфейса</Text> —
-          автоматически включать блокировку через заданное время после отметки
-          укола и после ручной разблокировки. Нажатие на строку открывает
-          настройку задержек.
+          <Text style={styles.bold}>{AUTO_LOCK_ROW_LABEL}</Text> — автоматически
+          включать блокировку через заданное время после отметки укола и после
+          ручной разблокировки. Нажатие на строку открывает настройку задержек.
         </Text>
         <Text style={styles.hint}>
-          <Text style={styles.bold}>Экспорт...</Text> — сохранить все данные в
-          файл.
+          <Text style={styles.bold}>{EXPORT_ROW_LABEL}</Text> — сохранить все
+          данные в файл.
         </Text>
         <Text style={styles.hint}>
-          <Text style={styles.bold}>Импорт...</Text> — загрузить данные из файла
-          (текущие данные будут заменены).
+          <Text style={styles.bold}>{IMPORT_ROW_LABEL}</Text> — загрузить данные
+          из файла (текущие данные будут заменены).
         </Text>
         <Text style={styles.hint}>
-          <Text style={styles.bold}>Очистить</Text> — удалить всю историю
+          <Text style={styles.bold}>{CLEAR_LABEL}</Text> — удалить всю историю
           инъекций без возможности восстановления.
         </Text>
         <View style={styles.bottomPad} />

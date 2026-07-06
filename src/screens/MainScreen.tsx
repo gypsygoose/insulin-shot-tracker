@@ -19,8 +19,10 @@ import { computeButtonColor } from "../logic/stateMachine";
 import { ZONES, BUTTON_MAP, ZONE_MAP } from "../data/zones";
 import { ButtonColor, ZoneGroup } from "../types";
 import {
+  APP_NAME,
   BACKGROUND_COLOR,
   BLOCKED_TOAST_MESSAGE,
+  CLEAR_LABEL,
   SCREEN_TITLE_COLOR,
   ICON_COLOR,
   IMG_ASPECT,
@@ -106,7 +108,7 @@ export function MainScreen() {
       {/* Header */}
       <SafeAreaView style={styles.headerSafe} edges={["top"]}>
         <View style={styles.header}>
-          <Text style={styles.title}>T1D Shot</Text>
+          <Text style={styles.title}>{APP_NAME}</Text>
         </View>
       </SafeAreaView>
 
@@ -209,7 +211,7 @@ export function MainScreen() {
         visible={clearButtonId !== null}
         title="Очистить точку?"
         message="Данные этой точки будут удалены, и она станет белой (свободной). Это действие нельзя отменить повторно."
-        confirmLabel="Очистить"
+        confirmLabel={CLEAR_LABEL}
         onConfirm={() => {
           if (clearButtonId) actions.clearButton(clearButtonId);
           setClearButtonId(null);

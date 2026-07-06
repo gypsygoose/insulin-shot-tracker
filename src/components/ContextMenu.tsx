@@ -4,6 +4,7 @@ import { Modal } from "./Modal";
 import {
   CANCEL_BUTTON_BACKGROUND_COLOR,
   CANCEL_BUTTON_TEXT_COLOR,
+  CANCEL_LABEL,
   CARD_BORDER_COLOR,
   DESTRUCTIVE_COLOR,
   PRIMARY_TEXT_COLOR,
@@ -34,7 +35,7 @@ export function ContextMenu({
   infoLines,
   items,
   onCancel,
-  cancelLabel = "Отмена",
+  cancelLabel = CANCEL_LABEL,
 }: Props) {
   const hasInfo = !!infoLines && infoLines.length > 0;
 

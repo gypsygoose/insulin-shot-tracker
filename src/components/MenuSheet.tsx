@@ -1,13 +1,22 @@
 import { Text, TouchableOpacity, View, Switch, StyleSheet } from "react-native";
 import { BottomSheet } from "./BottomSheet";
 import {
+  AFTER_MARK_LABEL,
+  AFTER_UNLOCK_LABEL,
+  AUTO_LOCK_ROW_LABEL,
+  CLEAR_LABEL,
   DESTRUCTIVE_COLOR,
+  EXPORT_ROW_LABEL,
+  IMPORT_ROW_LABEL,
+  MENU_SHEET_TITLE,
+  MIRROR_ROW_LABEL,
   MUTED_TEXT_COLOR,
   PRIMARY_TEXT_COLOR,
   SWITCH_THUMB_COLOR,
   SWITCH_TRACK_ON_COLOR,
   SWITCH_TRACK_OFF_COLOR,
 } from "../constants";
+import { pad2, splitSeconds } from "../format";
 
 interface Props {
   visible: boolean;
@@ -25,9 +34,8 @@ interface Props {
 }
 
 function formatDuration(totalSeconds: number): string {
-  const m = Math.floor(totalSeconds / 60);
-  const s = totalSeconds % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
+  const { minutes, seconds } = splitSeconds(totalSeconds);
+  return `${minutes}:${pad2(seconds)}`;
 }
 
 export function MenuSheet({
@@ -45,9 +53,9 @@ export function MenuSheet({
   onClear,
 }: Props) {
   return (
-    <BottomSheet visible={visible} onClose={onClose} title="Меню">
+    <BottomSheet visible={visible} onClose={onClose} title={MENU_SHEET_TITLE}>
       <View style={styles.row}>
-        <Text style={styles.rowLabel}>Зеркальное отображение</Text>
+        <Text style={styles.rowLabel}>{MIRROR_ROW_LABEL}</Text>
         <Switch
           value={mirrored}
           onValueChange={onToggleMirrored}
@@ -62,12 +70,12 @@ export function MenuSheet({
           onPress={onEditAutoLockSettings}
           activeOpacity={0.7}
         >
-          <Text style={styles.rowLabel}>Автоблокировка интерфейса</Text>
+          <Text style={styles.rowLabel}>{AUTO_LOCK_ROW_LABEL}</Text>
           <Text style={styles.rowDescription}>
-            После отметки — {formatDuration(autoLockAfterMarkSeconds)}
+            {AFTER_MARK_LABEL} — {formatDuration(autoLockAfterMarkSeconds)}
           </Text>
           <Text style={styles.rowDescription}>
-            После разблокировки — {formatDuration(autoLockAfterUnlockSeconds)}
+            {AFTER_UNLOCK_LABEL} — {formatDuration(autoLockAfterUnlockSeconds)}
           </Text>
         </TouchableOpacity>
         <Switch
@@ -83,7 +91,7 @@ export function MenuSheet({
         onPress={onExport}
         activeOpacity={0.7}
       >
-        <Text style={styles.rowLabel}>Экспорт...</Text>
+        <Text style={styles.rowLabel}>{EXPORT_ROW_LABEL}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -91,7 +99,7 @@ export function MenuSheet({
         onPress={onImport}
         activeOpacity={0.7}
       >
-        <Text style={styles.rowLabel}>Импорт...</Text>
+        <Text style={styles.rowLabel}>{IMPORT_ROW_LABEL}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -99,7 +107,7 @@ export function MenuSheet({
         onPress={onClear}
         activeOpacity={0.7}
       >
-        <Text style={[styles.rowLabel, styles.destructiveLabel]}>Очистить</Text>
+        <Text style={[styles.rowLabel, styles.destructiveLabel]}>{CLEAR_LABEL}</Text>
       </TouchableOpacity>
     </BottomSheet>
   );

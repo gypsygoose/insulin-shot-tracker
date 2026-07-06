@@ -11,9 +11,11 @@ import { ButtonColor } from "../types";
 import { COLOR_HEX, checkmarkColor } from "../logic/stateMachine";
 
 // Sizes match the Figma "with buttons" frame (node 27:744, file
-// grYg39698ogy0nEBd88Fup): glow halo ~30px diameter, knob ~20px diameter.
+// grYg39698ogy0nEBd88Fup): glow halo ~35px diameter, knob ~25px diameter.
 const GLOW_SIZE = 35;
 const KNOB_SIZE = 25;
+// Context-menu long-press threshold — matches CLAUDE.md's "Manual block" note.
+const LONG_PRESS_DELAY_MS = 800;
 
 interface Props {
   id: string;
@@ -56,7 +58,7 @@ export function InjectionButton({
     <TouchableOpacity
       onPress={handlePress}
       onLongPress={handleLongPress}
-      delayLongPress={800}
+      delayLongPress={LONG_PRESS_DELAY_MS}
       activeOpacity={0.75}
       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       style={styles.outer}

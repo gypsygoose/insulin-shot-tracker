@@ -20,6 +20,14 @@ import {
 } from '../storage/storage';
 import { onPress, PressResultType } from '../logic/stateMachine';
 import { BUTTON_MAP, ZONE_MAP } from '../data/zones';
+import { SECOND_MS } from '../constants';
+
+// Debounce delay before persisting a state change to AsyncStorage.
+const SAVE_DEBOUNCE_MS = 300;
+// How often to refresh `now` so day-based color transitions show up without
+// the user having to interact with the app.
+const NOW_TICK_INTERVAL_MS = 60_000;
+
 function uuid(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 }
@@ -153,7 +161,7 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
   useEffect(() => {
     const id = setInterval(() => {
       setState((prev) => ({ ...prev, now: Date.now() }));
-    }, 60_000);
+    }, NOW_TICK_INTERVAL_MS);
     return () => clearInterval(id);
   }, []);
 
@@ -196,7 +204,7 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
   // Debounced persist to AsyncStorage
   function scheduleSave(nextState: AppStorage) {
     if (saveRef.current) clearTimeout(saveRef.current);
-    saveRef.current = setTimeout(() => saveStorage(nextState), 300);
+    saveRef.current = setTimeout(() => saveStorage(nextState), SAVE_DEBOUNCE_MS);
   }
 
   const pressButton = useCallback((buttonId: string) => {
@@ -232,7 +240,7 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
       // Marking a zone re-arms the auto-lock countdown.
       let autoLockDeadline = prev.autoLockDeadline;
       if (prev.autoLockEnabled) {
-        autoLockDeadline = now + prev.autoLockAfterMarkSeconds * 1000;
+        autoLockDeadline = now + prev.autoLockAfterMarkSeconds * SECOND_MS;
         saveAutoLock({
           enabled: prev.autoLockEnabled,
           afterMarkSeconds: prev.autoLockAfterMarkSeconds,
@@ -404,7 +412,7 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
         ? null
         : prev.autoLockDeadline;
       if (!locked && prev.autoLockEnabled) {
-        autoLockDeadline = Date.now() + prev.autoLockAfterUnlockSeconds * 1000;
+        autoLockDeadline = Date.now() + prev.autoLockAfterUnlockSeconds * SECOND_MS;
       }
       if (autoLockDeadline !== prev.autoLockDeadline) {
         saveAutoLock({
@@ -424,7 +432,7 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
       setState((prev) => {
         const deadline = prev.interfaceLocked
           ? null
-          : Date.now() + afterUnlockSeconds * 1000;
+          : Date.now() + afterUnlockSeconds * SECOND_MS;
         const stored: StoredAutoLock = {
           enabled: true,
           afterMarkSeconds,
@@ -501,7 +509,7 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
     setState((prev) => {
       const deadline =
         data.autoLockEnabled && !prev.interfaceLocked
-          ? Date.now() + data.autoLockAfterUnlockSeconds * 1000
+          ? Date.now() + data.autoLockAfterUnlockSeconds * SECOND_MS
           : null;
       saveAutoLock({
         enabled: data.autoLockEnabled,

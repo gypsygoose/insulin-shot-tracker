@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Dialog } from "./Dialog";
+import { MARK_LABEL } from "../constants";
 
 interface Props {
   visible: boolean;
@@ -32,7 +33,7 @@ export function MarkDialog({ visible, onConfirm, onCancel }: Props) {
       visible={visible}
       title="Отметить укол"
       message="Укажите дату и время, когда была сделана инъекция."
-      confirmLabel="Отметить"
+      confirmLabel={MARK_LABEL}
       onConfirm={handleConfirm}
       onCancel={onCancel}
     >

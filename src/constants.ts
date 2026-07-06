@@ -1,3 +1,4 @@
+export const APP_NAME = "T1D Shot";
 export const BLOCKED_TOAST_MESSAGE =
   "Точка заблокирована и не может быть отмечена";
 export const TOAST_DURATION_MS = 2000;
@@ -9,6 +10,25 @@ export const ICON_COLOR = "#FFFFFF";
 export const DISABLED_ICON_COLOR = "#4A5568";
 export const LEFT_SIDE_LABEL = "левая\nсторона";
 export const RIGHT_SIDE_LABEL = "правая\nсторона";
+
+// Generic time-unit constants, not tied to any one feature.
+export const SECOND_MS = 1000;
+export const MINUTES_PER_DAY = 24 * 60;
+
+// Action labels shared across dialogs/menus/sheets — a single source of
+// truth so e.g. HelpSheet's documentation of a row can't drift from the
+// row's actual label.
+export const CANCEL_LABEL = "Отмена";
+export const CLEAR_LABEL = "Очистить";
+export const MARK_LABEL = "Отметить";
+export const AFTER_MARK_LABEL = "После отметки";
+export const AFTER_UNLOCK_LABEL = "После разблокировки";
+export const MIRROR_ROW_LABEL = "Зеркальное отображение";
+export const AUTO_LOCK_ROW_LABEL = "Автоблокировка интерфейса";
+export const EXPORT_ROW_LABEL = "Экспорт...";
+export const IMPORT_ROW_LABEL = "Импорт...";
+export const MENU_SHEET_TITLE = "Меню";
+export const HELP_SHEET_TITLE = "Справка";
 
 // Shared surface/text/action colors for dialogs, sheets, and menus (dark theme)
 export const SURFACE_COLOR = "#141824"; // card/sheet/toast background

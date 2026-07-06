@@ -24,6 +24,8 @@ npx tsc --noEmit   # TypeScript type check
 ```
 src/
 ├── types/index.ts          — all shared TypeScript types
+├── constants.ts            — shared UI colors, labels, and other app-wide constants
+├── format.ts               — shared formatting helpers (pad2, splitSeconds, SECONDS_PER_MINUTE)
 ├── data/zones.ts           — zone + button definitions with (x,y) positions
 ├── logic/
 │   ├── stateMachine.ts     — pure functions: color computation, press handling
@@ -31,11 +33,11 @@ src/
 ├── storage/storage.ts      — AsyncStorage load/save/clear
 ├── store/useAppStore.ts    — React hook: combines storage + state machine
 ├── components/
-│   ├── BodySilhouette.tsx  — SVG front-view human silhouette (300×580 viewBox)
 │   ├── InjectionButton.tsx — single injection point button
-│   ├── BottomMenu.tsx      — Undo / Legend / Clear bar
-│   ├── ConfirmDialog.tsx   — generic confirmation modal
-│   └── LegendModal.tsx     — colour-key + zone descriptions overlay
+│   ├── BottomMenu.tsx      — Undo / Menu / Help / Lock bar
+│   ├── Modal.tsx           — shared full-screen overlay + backdrop
+│   ├── Dialog.tsx          — shared confirm/cancel modal (built on Modal)
+│   └── ContextMenu.tsx     — shared action-list modal (built on Modal)
 └── screens/MainScreen.tsx  — root screen composing all components
 App.tsx                     — entry point
 ```
@@ -60,6 +62,7 @@ App.tsx                     — entry point
 - Types that enumerate string constants must be TypeScript `enum`s, not string-literal unions (e.g. `ButtonColor`, `ZoneGroup`, `ZoneId`, `AppEventType`, `AutoLockDialogMode` in `src/types/index.ts`). Reference values as `EnumName.Member`, never as raw string literals.
 - Discriminated-union result types (e.g. `PressResult` in `src/logic/stateMachine.ts`, `ImportResult` in `src/storage/storage.ts`) use `type` as the discriminant field name (not `kind`), backed by its own enum (e.g. `PressResultType`, `ImportResultType`).
 - No inline color literals (hex/`rgba`) in component styles. A color literal used in 2+ places with the same semantic role (e.g. dialog title text, modal backdrop, hairline border) is a shared constant in `src/constants.ts`. A literal that's meaningful but used in only one place is still a named constant, declared locally in the file/component where it applies (not inlined). Two literals that happen to share a value by coincidence, but mean different things (e.g. a UI accent color vs. an unrelated injection-cycle color in `stateMachine.ts`), are kept as separate constants — never merged just because the value matches.
+- The same rule applies to non-color literals: no unnamed "magic" numbers (durations, thresholds, sizes) or magic strings (UI labels, storage keys, MIME types, format patterns) in component/logic code. A value reused in 2+ places for the same reason is a shared constant in `src/constants.ts` (or a shared helper in `src/format.ts` for repeated formatting logic, e.g. `pad2`, `splitSeconds`, `SECONDS_PER_MINUTE`); a single-use but deliberate value is still a named local constant in the file where it applies. Ordinary one-off layout numbers (an arbitrary `padding`/`fontSize`/`borderRadius` with no cross-cutting meaning) and one-off prose don't need this — only values that encode an actual decision. Coincidental value matches with unrelated meaning are kept as separate constants, same as colors.
 - **Keep this file current**: whenever a change affects code style, project structure, or any other app-wide convention (not just a single file's internals), add or update the relevant note in this CLAUDE.md in the same change. Treat an out-of-date CLAUDE.md as a bug.
 
 ---
@@ -139,7 +142,7 @@ Long-press (~800 ms) → toggle `isManuallyBlocked`. Gray overrides all colours 
 
 ## Zones and buttons
 
-6 zones, 30 buttons total. All button positions are fractions (0–1) of the body image container (393.46×621.91, matching `body.png`'s aspect ratio), extracted directly from the Figma "with buttons" frame (node `27:744`, file `grYg39698ogy0nEBd88Fup`). Each button renders as a 20 px knob (state colour fill) inside a 30 px radial-gradient glow halo tinted with its zone's `glow` colour (see `ZONE_COLORS` in `src/data/zones.ts`).
+6 zones, 30 buttons total. All button positions are fractions (0–1) of the body image container (393.46×621.91, matching `body.png`'s aspect ratio), extracted directly from the Figma "with buttons" frame (node `27:744`, file `grYg39698ogy0nEBd88Fup`). Each button renders as a 25 px knob (state colour fill) inside a 35 px radial-gradient glow halo tinted with its zone's `glow` colour (see `ZONE_COLORS` in `src/data/zones.ts`).
 
 ### Zone list
 
@@ -163,7 +166,7 @@ Derived by scanning `events[]` from newest to oldest, skipping `manual-block` / 
 
 ## Known limitations / TODO
 
-- [ ] No safe-area handling for devices with home indicator (bottom padding is hardcoded to 20 px)
+- [ ] No safe-area handling for devices with home indicator (bottom padding is hardcoded to 28 px)
 - [ ] Haptics do not fire on Android Expo Go (native module not available in managed workflow without dev build)
 - [ ] Dark mode not yet implemented
 - [ ] English locale not implemented (Russian only)
