@@ -44,13 +44,7 @@ export function MarkDialog({ visible, onConfirm, onCancel }: Props) {
           display={Platform.OS === "ios" ? "compact" : "default"}
           onChange={(_, selected) => {
             if (selected) {
-              const next = new Date(date);
-              next.setFullYear(
-                selected.getFullYear(),
-                selected.getMonth(),
-                selected.getDate(),
-              );
-              setDate(next);
+              setDate(selected);
             }
           }}
           maximumDate={new Date()}
