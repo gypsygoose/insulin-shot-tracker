@@ -2,7 +2,7 @@
 
 ## Overview
 
-Mobile app for Type 1 Diabetes patients to track insulin injection sites and enforce maximum rotation to prevent lipodystrophy. Users tap a button to log an injection; the button changes colour over 8 days to show when the site is safe to reuse.
+Mobile app for people with diabetes who take insulin injections to track insulin injection sites and enforce maximum rotation to prevent lipodystrophy. Users tap a button to log an injection; the button changes colour over 8 days to show when the site is safe to reuse.
 
 **Platform:** iOS / Android — Expo Managed Workflow, TypeScript, React Native.
 
