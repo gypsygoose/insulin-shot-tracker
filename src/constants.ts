@@ -5,6 +5,23 @@ export const TOAST_DURATION_MS = 4000;
 export const INTERFACE_LOCKED_TOAST_MESSAGE =
   "Интерфейс залокирован. Чтобы отметить точку укола, разблокируйте интерфейс в нижнем меню либо отметьте через всплывающее меню точки (долгое нажатие).";
 export const INTERFACE_LOCKED_TOAST_DURATION_MS = 4000;
+export const INTERFACE_LOCK_ENABLED_TOAST_MESSAGE = "Интерфейс заблокирован";
+export const INTERFACE_LOCK_DISABLED_TOAST_MESSAGE = "Интерфейс разблокирован";
+export const AUTO_LOCK_FIRED_TOAST_MESSAGE = "Интерфейс заблокирован автоматически";
+export const MANUAL_BLOCK_TOAST_PREFIX = "Точка заблокирована вручную";
+export const MANUAL_UNBLOCK_TOAST_PREFIX = "Точка разблокирована вручную";
+export const POINT_CLEARED_TOAST_PREFIX = "Точка очищена";
+export const CLEAR_ALL_TOAST_MESSAGE = "Все данные очищены";
+export const UNDO_TOAST_MESSAGE = "Последнее действие отменено";
+export const EXPORT_SUCCESS_TOAST_MESSAGE = "Данные экспортированы";
+export const IMPORT_SUCCESS_TOAST_MESSAGE = "Данные импортированы";
+export const IMPORT_FAILURE_TOAST_MESSAGE =
+  "Не удалось импортировать\nВыбранный файл повреждён или имеет неверный формат.";
+export const MIRROR_ENABLED_TOAST_MESSAGE = "Зеркальное отображение включено";
+export const MIRROR_DISABLED_TOAST_MESSAGE = "Зеркальное отображение выключено";
+export const AUTO_LOCK_ENABLED_TOAST_MESSAGE = "Автоблокировка интерфейса включена";
+export const AUTO_LOCK_DISABLED_TOAST_MESSAGE = "Автоблокировка интерфейса выключена";
+export const AUTO_LOCK_UPDATED_TOAST_MESSAGE = "Настройки автоблокировки обновлены";
 export const BACKGROUND_COLOR = "#080C18";
 export const ICON_COLOR = "#FFFFFF";
 export const DISABLED_ICON_COLOR = "#4A5568";
@@ -63,6 +80,23 @@ export const SWITCH_THUMB_COLOR = "#FFFFFF"; // Switch thumb fill (distinct cont
 export const SWITCH_TRACK_ON_COLOR = "#16A34A"; // Switch "on" track — unrelated to the injection-cycle green in stateMachine.ts's ButtonColor, despite the value match
 export const SWITCH_TRACK_OFF_COLOR = "rgba(255,255,255,0.15)"; // Switch "off" track
 export const SCREEN_TITLE_COLOR = "rgba(255,255,255,0.26)"; // App title text — fainter than PRIMARY_SECTION_LABEL_COLOR since it sits directly on the root background, not a card surface
+
+// Toast status accent colors — each drives both the toast's left-edge/icon
+// tint and its icon shape (src/components/icons/Toast*Icon.tsx). Chosen
+// distinct from ButtonColor's cycle colors despite some value proximity,
+// since they mean "message severity", not "days since injection".
+export const TOAST_INFO_COLOR = "#3B82F6";
+export const TOAST_WARN_COLOR = "#F59E0B";
+export const TOAST_SUCCESS_COLOR = "#22C55E";
+export const TOAST_ERROR_COLOR = "#EF4444";
+export const TOAST_ICON_SIZE = 18;
+// Opaque, darkened tints of the accent colors above, used as the toast's own
+// background so the whole toast (not just the icon) reads as its status
+// without being see-through over whatever content sits behind it.
+export const TOAST_INFO_BACKGROUND_COLOR = "#152238";
+export const TOAST_WARN_BACKGROUND_COLOR = "#2E230D";
+export const TOAST_SUCCESS_BACKGROUND_COLOR = "#122B1D";
+export const TOAST_ERROR_BACKGROUND_COLOR = "#301414";
 
 // Figma body image aspect ratio: 393.46 wide × 621.91 tall
 export const IMG_ASPECT = 393.46 / 621.91;

@@ -21,63 +21,80 @@ import {
   PressResultType,
 } from "../logic/stateMachine";
 import { ZONES, BUTTON_MAP, ZONE_MAP, BUTTON_ADDRESS } from "../data/zones";
-import { ButtonColor, StoredButtonState, ZoneGroup } from "../types";
+import { ButtonColor, StoredButtonState, ToastStatus, ZoneGroup } from "../types";
 import { formatDateTime, pluralDays } from "../format";
 import {
   APP_NAME,
+  AUTO_LOCK_FIRED_TOAST_MESSAGE,
   BACKGROUND_COLOR,
   BLOCKED_TOAST_MESSAGE,
   CLEAR_LABEL,
   SCREEN_TITLE_COLOR,
   ICON_COLOR,
   IMG_ASPECT,
+  INTERFACE_LOCK_DISABLED_TOAST_MESSAGE,
+  INTERFACE_LOCK_ENABLED_TOAST_MESSAGE,
   INTERFACE_LOCKED_TOAST_DURATION_MS,
   INTERFACE_LOCKED_TOAST_MESSAGE,
   LEFT_SIDE_LABEL,
+  MANUAL_BLOCK_TOAST_PREFIX,
+  MANUAL_UNBLOCK_TOAST_PREFIX,
   MARK_BACKDATED_THRESHOLD_MS,
+  POINT_CLEARED_TOAST_PREFIX,
   RIGHT_SIDE_LABEL,
   PRIMARY_SECTION_LABEL_COLOR,
   TOAST_DURATION_MS,
 } from "../constants";
 
+// Shared "<zone label>, ряд <row>, место <column> от центра тела" suffix used
+// by every point-specific toast (mark/block/clear) to name which point it's
+// about via its body-relative address.
+function buildPointAddressSuffix(buttonId: string): string | null {
+  const btn = BUTTON_MAP[buttonId];
+  const zone = btn ? ZONE_MAP[btn.zoneId] : undefined;
+  const address = BUTTON_ADDRESS[buttonId];
+  if (!zone || !address) return null;
+  return `${zone.label}, ряд ${address.row}, место ${address.column} от центра тела`;
+}
+
 // Toast shown after a point is marked (tap or the context menu's "Отметить"
 // dialog), confirming which point it was via its body-relative address, plus
 // the marked time if it's backdated and a note if the mark triggered a
-// system blackout (site reused too early).
+// system blackout (site reused too early) — which also bumps the toast's
+// status from Success to Warn.
 function buildMarkToastMessage(
   buttonId: string,
   buttonState: StoredButtonState,
   timestamp: number,
   daysToWhite: number,
-): string | null {
-  const btn = BUTTON_MAP[buttonId];
-  const zone = btn ? ZONE_MAP[btn.zoneId] : undefined;
-  const address = BUTTON_ADDRESS[buttonId];
-  if (!zone || !address) return null;
+): { message: string; status: ToastStatus } | null {
+  const addressSuffix = buildPointAddressSuffix(buttonId);
+  if (!addressSuffix) return null;
 
-  let message = `Точка отмечена: ${zone.label}, ряд ${address.row}, место ${address.column} от центра тела`;
+  let message = `Точка отмечена: ${addressSuffix}`;
+  let status = ToastStatus.Success;
 
   const result = onPress(buttonState, timestamp, daysToWhite);
   if (result.type === PressResultType.Blackout) {
     const days = result.newState.blackoutDurationDays!;
     message += `\nТочка заблокирована системой на ${days} ${pluralDays(days)}.`;
+    status = ToastStatus.Warn;
   }
 
   if (Date.now() - timestamp > MARK_BACKDATED_THRESHOLD_MS) {
     message += `\nВремя отметки: ${formatDateTime(timestamp)}`;
   }
 
-  return message;
+  return { message, status };
 }
 
 export function MainScreen() {
-  const [state, actions] = useAppStore();
-
   // Long-pressed button awaiting an action from the menu / follow-up dialogs.
   const [menuButtonId, setMenuButtonId] = useState<string | null>(null);
   const [markButtonId, setMarkButtonId] = useState<string | null>(null);
   const [clearButtonId, setClearButtonId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastStatus, setToastStatus] = useState<ToastStatus>(ToastStatus.Info);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -86,13 +103,24 @@ export function MainScreen() {
     };
   }, []);
 
-  const showToast = useCallback((message: string, duration: number) => {
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    setToastMessage(message);
-    toastTimerRef.current = setTimeout(() => {
-      setToastMessage(null);
-    }, duration);
-  }, []);
+  const showToast = useCallback(
+    (message: string, status: ToastStatus, duration: number = TOAST_DURATION_MS) => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      setToastMessage(message);
+      setToastStatus(status);
+      toastTimerRef.current = setTimeout(() => {
+        setToastMessage(null);
+      }, duration);
+    },
+    [],
+  );
+
+  const [state, actions] = useAppStore(
+    useCallback(
+      () => showToast(AUTO_LOCK_FIRED_TOAST_MESSAGE, ToastStatus.Info),
+      [showToast],
+    ),
+  );
 
   const handlePress = useCallback(
     (id: string) => {
@@ -103,13 +131,14 @@ export function MainScreen() {
       );
 
       if (color === ButtonColor.Gray || color === ButtonColor.Black) {
-        showToast(BLOCKED_TOAST_MESSAGE, TOAST_DURATION_MS);
+        showToast(BLOCKED_TOAST_MESSAGE, ToastStatus.Info, TOAST_DURATION_MS);
         return;
       }
 
       if (state.interfaceLocked) {
         showToast(
           INTERFACE_LOCKED_TOAST_MESSAGE,
+          ToastStatus.Info,
           INTERFACE_LOCKED_TOAST_DURATION_MS,
         );
         return;
@@ -117,13 +146,13 @@ export function MainScreen() {
 
       const timestamp = Date.now();
       actions.pressButton(id);
-      const message = buildMarkToastMessage(
+      const toast = buildMarkToastMessage(
         id,
         state.buttonStates[id],
         timestamp,
         state.daysToWhite,
       );
-      if (message) showToast(message, TOAST_DURATION_MS);
+      if (toast) showToast(toast.message, toast.status, TOAST_DURATION_MS);
     },
     [
       actions,
@@ -158,7 +187,7 @@ export function MainScreen() {
     <View style={styles.root}>
       <StatusBar barStyle="light-content" backgroundColor={BACKGROUND_COLOR} />
 
-      <Toast message={toastMessage} />
+      <Toast message={toastMessage} status={toastStatus} />
 
       {/* Header */}
       <SafeAreaView style={styles.headerSafe} edges={["top"]}>
@@ -217,9 +246,16 @@ export function MainScreen() {
         mirrored={state.mirrored}
         onToggleMirrored={actions.setMirrored}
         interfaceLocked={state.interfaceLocked}
-        onToggleInterfaceLocked={() =>
-          actions.setInterfaceLocked(!state.interfaceLocked)
-        }
+        onToggleInterfaceLocked={() => {
+          const nextLocked = !state.interfaceLocked;
+          actions.setInterfaceLocked(nextLocked);
+          showToast(
+            nextLocked
+              ? INTERFACE_LOCK_ENABLED_TOAST_MESSAGE
+              : INTERFACE_LOCK_DISABLED_TOAST_MESSAGE,
+            ToastStatus.Info,
+          );
+        }}
         autoLockEnabled={state.autoLockEnabled}
         autoLockAfterMarkSeconds={state.autoLockAfterMarkSeconds}
         autoLockAfterUnlockSeconds={state.autoLockAfterUnlockSeconds}
@@ -231,6 +267,7 @@ export function MainScreen() {
         onExport={actions.exportData}
         onPickImportFile={actions.pickImportFile}
         onApplyImport={actions.applyImport}
+        onNotify={showToast}
       />
 
       {/* Long-press menu for a single button */}
@@ -242,11 +279,29 @@ export function MainScreen() {
         buttonState={menuButtonState}
         now={state.now}
         onBlock={() => {
-          if (menuButtonId) actions.blockButton(menuButtonId);
+          if (menuButtonId) {
+            actions.blockButton(menuButtonId);
+            const addressSuffix = buildPointAddressSuffix(menuButtonId);
+            if (addressSuffix) {
+              showToast(
+                `${MANUAL_BLOCK_TOAST_PREFIX}: ${addressSuffix}`,
+                ToastStatus.Success,
+              );
+            }
+          }
           setMenuButtonId(null);
         }}
         onUnblock={() => {
-          if (menuButtonId) actions.unblockButton(menuButtonId);
+          if (menuButtonId) {
+            actions.unblockButton(menuButtonId);
+            const addressSuffix = buildPointAddressSuffix(menuButtonId);
+            if (addressSuffix) {
+              showToast(
+                `${MANUAL_UNBLOCK_TOAST_PREFIX}: ${addressSuffix}`,
+                ToastStatus.Success,
+              );
+            }
+          }
           setMenuButtonId(null);
         }}
         onMark={() => {
@@ -264,14 +319,14 @@ export function MainScreen() {
         visible={markButtonId !== null}
         onConfirm={(timestamp) => {
           if (markButtonId) {
-            const message = buildMarkToastMessage(
+            const toast = buildMarkToastMessage(
               markButtonId,
               state.buttonStates[markButtonId],
               timestamp,
               state.daysToWhite,
             );
             actions.markButtonAt(markButtonId, timestamp);
-            if (message) showToast(message, TOAST_DURATION_MS);
+            if (toast) showToast(toast.message, toast.status);
           }
           setMarkButtonId(null);
         }}
@@ -284,7 +339,16 @@ export function MainScreen() {
         message="Данные этой точки будут удалены, и она станет белой (свободной). Это действие нельзя отменить повторно."
         confirmLabel={CLEAR_LABEL}
         onConfirm={() => {
-          if (clearButtonId) actions.clearButton(clearButtonId);
+          if (clearButtonId) {
+            actions.clearButton(clearButtonId);
+            const addressSuffix = buildPointAddressSuffix(clearButtonId);
+            if (addressSuffix) {
+              showToast(
+                `${POINT_CLEARED_TOAST_PREFIX}: ${addressSuffix}`,
+                ToastStatus.Success,
+              );
+            }
+          }
           setClearButtonId(null);
         }}
         onCancel={() => setClearButtonId(null)}

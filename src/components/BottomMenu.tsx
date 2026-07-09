@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { ConfirmDialog } from "./common/ConfirmDialog";
 import { HelpSheet } from "./HelpSheet";
 import { MenuSheet } from "./MenuSheet";
@@ -10,13 +10,24 @@ import { HelpIcon } from "./icons/HelpIcon";
 import { LockClosedIcon } from "./icons/LockClosedIcon";
 import { LockOpenIcon } from "./icons/LockOpenIcon";
 import { MenuIcon } from "./icons/MenuIcon";
-import { AutoLockDialogMode, ExportedAppData } from "../types";
+import { AutoLockDialogMode, ExportedAppData, ToastStatus } from "../types";
 import { ImportResult, ImportResultType } from "../storage/storage";
 import {
+  AUTO_LOCK_DISABLED_TOAST_MESSAGE,
+  AUTO_LOCK_ENABLED_TOAST_MESSAGE,
+  AUTO_LOCK_UPDATED_TOAST_MESSAGE,
   BACKGROUND_COLOR,
   CANCEL_LABEL,
+  CLEAR_ALL_TOAST_MESSAGE,
   CLEAR_LABEL,
+  DAYS_TO_WHITE_ROW_LABEL,
   DIVIDER_COLOR,
+  EXPORT_SUCCESS_TOAST_MESSAGE,
+  IMPORT_FAILURE_TOAST_MESSAGE,
+  IMPORT_SUCCESS_TOAST_MESSAGE,
+  MIRROR_DISABLED_TOAST_MESSAGE,
+  MIRROR_ENABLED_TOAST_MESSAGE,
+  UNDO_TOAST_MESSAGE,
 } from "../constants";
 
 interface Props {
@@ -44,6 +55,7 @@ interface Props {
   onExport: () => Promise<void>;
   onPickImportFile: () => Promise<ImportResult>;
   onApplyImport: (data: ExportedAppData) => void;
+  onNotify: (message: string, status: ToastStatus) => void;
 }
 
 export function BottomMenu({
@@ -65,6 +77,7 @@ export function BottomMenu({
   onExport,
   onPickImportFile,
   onApplyImport,
+  onNotify,
 }: Props) {
   const [showUndo, setShowUndo] = useState(false);
   const [showClear, setShowClear] = useState(false);
@@ -83,6 +96,7 @@ export function BottomMenu({
       setAutoLockDialogIntent(AutoLockDialogMode.Enable);
     } else {
       onDisableAutoLock();
+      onNotify(AUTO_LOCK_DISABLED_TOAST_MESSAGE, ToastStatus.Success);
     }
   };
 
@@ -101,10 +115,7 @@ export function BottomMenu({
     const result = await onPickImportFile();
     if (result.type === ImportResultType.Cancelled) return;
     if (result.type === ImportResultType.Invalid) {
-      Alert.alert(
-        "Не удалось импортировать",
-        "Выбранный файл повреждён или имеет неверный формат.",
-      );
+      onNotify(IMPORT_FAILURE_TOAST_MESSAGE, ToastStatus.Error);
       return;
     }
     setPendingImport(result.data);
@@ -123,7 +134,13 @@ export function BottomMenu({
         visible={showMenu}
         onClose={() => setShowMenu(false)}
         mirrored={mirrored}
-        onToggleMirrored={onToggleMirrored}
+        onToggleMirrored={(value) => {
+          onToggleMirrored(value);
+          onNotify(
+            value ? MIRROR_ENABLED_TOAST_MESSAGE : MIRROR_DISABLED_TOAST_MESSAGE,
+            ToastStatus.Success,
+          );
+        }}
         autoLockEnabled={autoLockEnabled}
         autoLockAfterMarkSeconds={autoLockAfterMarkSeconds}
         autoLockAfterUnlockSeconds={autoLockAfterUnlockSeconds}
@@ -132,9 +149,10 @@ export function BottomMenu({
         daysToWhite={daysToWhite}
         onEditDaysToWhite={handleEditDaysToWhite}
         onImport={handleImport}
-        onExport={() => {
+        onExport={async () => {
           setShowMenu(false);
-          onExport();
+          await onExport();
+          onNotify(EXPORT_SUCCESS_TOAST_MESSAGE, ToastStatus.Success);
         }}
         onClear={() => {
           setShowMenu(false);
@@ -152,8 +170,10 @@ export function BottomMenu({
           setAutoLockDialogIntent(null);
           if (intent === AutoLockDialogMode.Enable) {
             onEnableAutoLock(afterMarkSeconds, afterUnlockSeconds);
+            onNotify(AUTO_LOCK_ENABLED_TOAST_MESSAGE, ToastStatus.Success);
           } else {
             onUpdateAutoLockTimes(afterMarkSeconds, afterUnlockSeconds);
+            onNotify(AUTO_LOCK_UPDATED_TOAST_MESSAGE, ToastStatus.Success);
           }
         }}
         onCancel={() => setAutoLockDialogIntent(null)}
@@ -165,6 +185,7 @@ export function BottomMenu({
         onConfirm={(days) => {
           setShowDaysToWhiteDialog(false);
           onSetDaysToWhite(days);
+          onNotify(`${DAYS_TO_WHITE_ROW_LABEL}: ${days}`, ToastStatus.Success);
         }}
         onCancel={() => setShowDaysToWhiteDialog(false)}
       />
@@ -226,6 +247,7 @@ export function BottomMenu({
         onConfirm={() => {
           setShowUndo(false);
           onUndo();
+          onNotify(UNDO_TOAST_MESSAGE, ToastStatus.Success);
         }}
         onCancel={() => setShowUndo(false)}
       />
@@ -239,6 +261,7 @@ export function BottomMenu({
         onConfirm={() => {
           setShowClear(false);
           onClear();
+          onNotify(CLEAR_ALL_TOAST_MESSAGE, ToastStatus.Success);
         }}
         onCancel={() => setShowClear(false)}
         destructive
@@ -251,7 +274,10 @@ export function BottomMenu({
         confirmLabel="Импортировать"
         cancelLabel={CANCEL_LABEL}
         onConfirm={() => {
-          if (pendingImport) onApplyImport(pendingImport);
+          if (pendingImport) {
+            onApplyImport(pendingImport);
+            onNotify(IMPORT_SUCCESS_TOAST_MESSAGE, ToastStatus.Success);
+          }
           setPendingImport(null);
         }}
         onCancel={() => setPendingImport(null)}

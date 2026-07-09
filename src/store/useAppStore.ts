@@ -107,7 +107,14 @@ function lastPressedByGroup(
   return result;
 }
 
-export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, string | null> }, AppActions] {
+// onAutoLockFired: called when auto-lock engages on its own (countdown
+// elapsed while the app was open) — not when the user locks the interface
+// manually via the bottom-bar button, which the caller already notifies
+// itself. Read through a ref so passing a fresh arrow function each render
+// doesn't retrigger the effect that owns the countdown timer below.
+export function useAppStore(
+  onAutoLockFired?: () => void,
+): [AppState & { lastInGroup: Record<ZoneGroup, string | null> }, AppActions] {
   const [state, setState] = useState<AppState>({
     buttonStates: {},
     events: [],
@@ -122,6 +129,8 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
     daysToWhite: DEFAULT_DAYS_TO_WHITE,
   });
   const saveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onAutoLockFiredRef = useRef(onAutoLockFired);
+  onAutoLockFiredRef.current = onAutoLockFired;
 
   // Load from storage on mount. Loaded together (rather than each in its own
   // .then()) so the just-reopened-the-app auto-lock check below always sees
@@ -195,6 +204,7 @@ export function useAppStore(): [AppState & { lastInGroup: Record<ZoneGroup, stri
         afterUnlockSeconds: state.autoLockAfterUnlockSeconds,
         deadline: null,
       });
+      onAutoLockFiredRef.current?.();
     };
 
     const delay = state.autoLockDeadline - Date.now();

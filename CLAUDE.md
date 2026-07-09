@@ -45,7 +45,7 @@ src/
 │       ├── ContextMenu.tsx — action-list modal (built on Modal)
 │       ├── ConfirmDialog.tsx — title/message confirm wrapper (built on Dialog)
 │       ├── BottomSheet.tsx — swipe-to-dismiss bottom sheet
-│       ├── Toast.tsx       — transient message banner
+│       ├── Toast.tsx       — transient status message banner (info/warn/success/error, own icon + color per status)
 │       ├── TimeField.tsx   — minutes/seconds picker pair (used by AutoLockDialog)
 │       └── NumberPickerField.tsx — single labeled numeric picker (used by DaysToWhiteDialog)
 └── screens/MainScreen.tsx  — root screen composing all components
@@ -70,7 +70,7 @@ App.tsx                     — entry point
 
 - Use named exports for all components, functions, and modules — no `export default`. Import with `import { Foo } from "./Foo"`.
 - Every component (including small presentational helpers like icons or a single form field extracted from a screen) lives in its own file named after the component. Do not define a second component — even an unexported local one only used within the file — alongside another component in the same file. Icon components go in `src/components/icons/`. Generic, domain-agnostic UI primitives with no knowledge of app types (`Modal`, `Dialog`, `ConfirmDialog`, `ContextMenu`, `BottomSheet`, `Toast`, `TimeField`, `NumberPickerField`) go in `src/components/common/`; components that reference app domain types (e.g. `ButtonColor`, `ZoneId`, `AutoLockDialogMode`) or compose the app's screens stay directly under `src/components/`.
-- Types that enumerate string constants must be TypeScript `enum`s, not string-literal unions (e.g. `ButtonColor`, `ZoneGroup`, `ZoneId`, `AppEventType`, `AutoLockDialogMode` in `src/types/index.ts`). Reference values as `EnumName.Member`, never as raw string literals.
+- Types that enumerate string constants must be TypeScript `enum`s, not string-literal unions (e.g. `ButtonColor`, `ZoneGroup`, `ZoneId`, `AppEventType`, `AutoLockDialogMode`, `ToastStatus` in `src/types/index.ts`). Reference values as `EnumName.Member`, never as raw string literals.
 - Discriminated-union result types (e.g. `PressResult` in `src/logic/stateMachine.ts`, `ImportResult` in `src/storage/storage.ts`) use `type` as the discriminant field name (not `kind`), backed by its own enum (e.g. `PressResultType`, `ImportResultType`).
 - No inline color literals (hex/`rgba`) in component styles. A color literal used in 2+ places with the same semantic role (e.g. dialog title text, modal backdrop, hairline border) is a shared constant in `src/constants.ts`. A literal that's meaningful but used in only one place is still a named constant, declared locally in the file/component where it applies (not inlined). Two literals that happen to share a value by coincidence, but mean different things (e.g. a UI accent color vs. an unrelated injection-cycle color in `stateMachine.ts`), are kept as separate constants — never merged just because the value matches.
 - The same rule applies to non-color literals: no unnamed "magic" numbers (durations, thresholds, sizes) or magic strings (UI labels, storage keys, MIME types, format patterns) in component/logic code. A value reused in 2+ places for the same reason is a shared constant in `src/constants.ts` (or a shared helper in `src/format.ts` for repeated formatting logic, e.g. `pad2`, `splitSeconds`, `SECONDS_PER_MINUTE`); a single-use but deliberate value is still a named local constant in the file where it applies. Ordinary one-off layout numbers (an arbitrary `padding`/`fontSize`/`borderRadius` with no cross-cutting meaning) and one-off prose don't need this — only values that encode an actual decision. Coincidental value matches with unrelated meaning are kept as separate constants, same as colors.
@@ -176,6 +176,23 @@ Long-press (~800 ms) → toggle `isManuallyBlocked`. Gray overrides all colours 
 3. Post-blackout cycle (if blackout ended)
 4. Normal injection cycle
 5. White (never used or 8+ days)
+
+---
+
+## Toast statuses
+
+Every toast (`src/components/common/Toast.tsx`) carries a `ToastStatus` (`src/types/index.ts`) that drives its background/border color and leading icon (`src/components/icons/Toast{Info,Warn,Success,Error}Icon.tsx`, colors in `src/constants.ts`):
+
+| Status | Used for |
+|---|---|
+| `Info` | Locking/unlocking the interface (bottom-bar lock button); auto-lock engaging on its own (countdown elapsed); attempting to mark a point while the interface is locked, or a point that's individually blocked (gray/black) |
+| `Warn` | A point mark that triggers a system blackout (site reused too early) |
+| `Success` | A point mark with no blackout; manual block/unblock of a point; clearing a point; clearing all data; undo; successful export/import; any menu setting change (mirror toggle, auto-lock enable/disable/edit, days-to-white) |
+| `Error` | A failed import (corrupt/invalid file) |
+
+`MainScreen`'s `showToast` (message, status, optional duration — defaults to `TOAST_DURATION_MS`) covers point-level actions (mark/block/clear, both driven off the shared `buildPointAddressSuffix` helper) and the interface lock toggle. `BottomMenu` receives it as an `onNotify` prop for actions it owns end-to-end (undo, clear all, export, import success/failure, and every `MenuSheet`/`AutoLockDialog`/`DaysToWhiteDialog` setting change), since those confirm/cancel flows live entirely inside that component. `useAppStore` itself takes an optional `onAutoLockFired` callback (read through a ref so passing a fresh closure each render doesn't retrigger the countdown effect), invoked only when the auto-lock countdown elapses on its own — not when the user locks the interface manually, which the caller already notifies itself.
+
+**Every completed user action must show a toast.** When adding a new one (a new point action, a new menu setting, anything that completes an operation), don't pick its message/status unilaterally — propose the toast text and the suggested `ToastStatus` and let the user confirm that status, pick a different one, or decline the toast entirely before wiring it in.
 
 ---
 
