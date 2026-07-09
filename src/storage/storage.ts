@@ -211,15 +211,21 @@ function isValidEvent(value: unknown): value is AppEvent {
   return true;
 }
 
+// Every field is optional — ExportOptionsDialog lets the user write only a
+// subset of categories to the file (see ExportedAppData's comment) — so each
+// check below only runs when the field is actually present.
 function isValidAppStorage(data: unknown): data is ExportedAppData {
   if (!data || typeof data !== "object") return false;
   const candidate = data as Partial<ExportedAppData>;
-  if (!candidate.buttonStates || typeof candidate.buttonStates !== "object")
-    return false;
-  if (!Object.values(candidate.buttonStates).every(isValidButtonState))
-    return false;
-  if (!Array.isArray(candidate.events)) return false;
-  if (!candidate.events.every(isValidEvent)) return false;
+  if (candidate.buttonStates !== undefined) {
+    if (typeof candidate.buttonStates !== "object") return false;
+    if (!Object.values(candidate.buttonStates).every(isValidButtonState))
+      return false;
+  }
+  if (candidate.events !== undefined) {
+    if (!Array.isArray(candidate.events)) return false;
+    if (!candidate.events.every(isValidEvent)) return false;
+  }
   if (
     candidate.mirrored !== undefined &&
     typeof candidate.mirrored !== "boolean"
@@ -284,6 +290,9 @@ export type ImportResult =
 
 // Lets the user pick a JSON file from the device and parses/validates it.
 // Does not touch AsyncStorage — the caller decides whether/when to apply it.
+// Missing fields are left absent (not defaulted) so the caller can tell a
+// category that was deliberately excluded from the export apart from one
+// that was included with a default value — see ExportedAppData's comment.
 export async function pickImportFile(): Promise<ImportResult> {
   const picked = await DocumentPicker.getDocumentAsync({
     type: JSON_MIME_TYPE,
@@ -296,31 +305,33 @@ export async function pickImportFile(): Promise<ImportResult> {
     const raw = await FileSystem.readAsStringAsync(picked.assets[0].uri);
     const parsed = JSON.parse(raw);
     if (!isValidAppStorage(parsed)) return { type: ImportResultType.Invalid };
-    const normalized = normalizeStorage(parsed);
-    return {
-      type: ImportResultType.Success,
-      data: {
-        ...normalized,
-        mirrored: parsed.mirrored ?? false,
-        autoLockEnabled: parsed.autoLockEnabled ?? false,
-        autoLockAfterMarkSeconds:
-          parsed.autoLockAfterMarkSeconds ??
-          DEFAULT_AUTO_LOCK_AFTER_MARK_SECONDS,
-        autoLockAfterUnlockSeconds:
-          parsed.autoLockAfterUnlockSeconds ??
-          DEFAULT_AUTO_LOCK_AFTER_UNLOCK_SECONDS,
-        daysToWhite: clampDaysToWhite(
-          parsed.daysToWhite ?? DEFAULT_DAYS_TO_WHITE,
-        ),
-        themeMode: parsed.themeMode ?? ThemeMode.System,
-      },
-    };
+
+    const data: ExportedAppData = { ...parsed };
+    if (data.buttonStates !== undefined) {
+      const normalized = normalizeStorage({
+        buttonStates: data.buttonStates,
+        events: data.events ?? [],
+      });
+      data.buttonStates = normalized.buttonStates;
+      data.events = normalized.events;
+    }
+    if (data.daysToWhite !== undefined) {
+      data.daysToWhite = clampDaysToWhite(data.daysToWhite);
+    }
+    return { type: ImportResultType.Success, data };
   } catch {
     return { type: ImportResultType.Invalid };
   }
 }
 
+// Persists only the categories present in `data`, leaving any omitted
+// category's stored value untouched — the merge-import counterpart to
+// ExportOptionsDialog's selective export.
 export async function importStorage(data: ExportedAppData): Promise<void> {
-  await saveStorage({ buttonStates: data.buttonStates, events: data.events });
-  await saveMirrored(data.mirrored);
+  if (data.buttonStates !== undefined && data.events !== undefined) {
+    await saveStorage({ buttonStates: data.buttonStates, events: data.events });
+  }
+  if (data.mirrored !== undefined) {
+    await saveMirrored(data.mirrored);
+  }
 }

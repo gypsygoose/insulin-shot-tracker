@@ -182,12 +182,15 @@ export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
           тёмную или системную тему оформления приложения.
         </Text>
         <Text style={hintStyle}>
-          <Text style={boldStyle}>{EXPORT_ROW_LABEL}</Text> — сохранить все
-          данные в файл.
+          <Text style={boldStyle}>{EXPORT_ROW_LABEL}</Text> — выбрать, что
+          сохранить в файл: отметки точек укола и/или настройки приложения
+          (по отдельности).
         </Text>
         <Text style={hintStyle}>
-          <Text style={boldStyle}>{IMPORT_ROW_LABEL}</Text> — загрузить данные
-          из файла (текущие данные будут заменены).
+          <Text style={boldStyle}>{IMPORT_ROW_LABEL}</Text> — выбрать, что
+          применить из файла: отметки точек укола и/или настройки приложения
+          (по отдельности). Категории, которых нет в файле, недоступны для
+          выбора; остальные текущие данные не затрагиваются.
         </Text>
         <Text style={hintStyle}>
           <Text style={boldStyle}>{CLEAR_LABEL}</Text> — удалить всю историю

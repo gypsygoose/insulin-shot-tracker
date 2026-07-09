@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { AppStorage, AppEvent, AppEventType, ExportedAppData, StoredButtonState, ThemeMode, ZoneGroup } from '../types';
+import { AppStorage, AppEvent, AppEventType, ExportedAppData, ExportSelection, ExportSettingKey, StoredButtonState, ThemeMode, ZoneGroup } from '../types';
 import {
   loadStorage,
   saveStorage,
@@ -67,7 +67,7 @@ export interface AppActions {
   disableAutoLock(): void;
   updateAutoLockTimes(afterMarkSeconds: number, afterUnlockSeconds: number): void;
   setDaysToWhite(days: number): void;
-  exportData(themeMode: ThemeMode): Promise<void>;
+  exportData(themeMode: ThemeMode, selection: ExportSelection): Promise<void>;
   pickImportFile(): Promise<ImportResult>;
   applyImport(data: ExportedAppData): void;
 }
@@ -518,44 +518,84 @@ export function useAppStore(
   // themeMode is passed in rather than read from state — it's owned by
   // ThemeProvider (mounted in App.tsx, above this hook's caller), not by
   // this store. See src/theme/ThemeContext.tsx.
-  const exportData = useCallback(async (themeMode: ThemeMode) => {
-    await exportStorageToFile({
-      buttonStates: state.buttonStates,
-      events: state.events,
-      mirrored: state.mirrored,
-      autoLockEnabled: state.autoLockEnabled,
-      autoLockAfterMarkSeconds: state.autoLockAfterMarkSeconds,
-      autoLockAfterUnlockSeconds: state.autoLockAfterUnlockSeconds,
-      daysToWhite: state.daysToWhite,
-      themeMode,
-    });
-  }, [
-    state.buttonStates,
-    state.events,
-    state.mirrored,
-    state.autoLockEnabled,
-    state.autoLockAfterMarkSeconds,
-    state.autoLockAfterUnlockSeconds,
-    state.daysToWhite,
-  ]);
+  // `selection` (from ExportOptionsDialog) picks which categories actually
+  // make it into the file — omitted categories are left out of the object
+  // entirely, not written with a default, so a partial file round-trips
+  // correctly through the merge-import logic in applyImport below.
+  const exportData = useCallback(
+    async (themeMode: ThemeMode, selection: ExportSelection) => {
+      const data: ExportedAppData = {};
+      if (selection.marks) {
+        data.buttonStates = state.buttonStates;
+        data.events = state.events;
+      }
+      if (selection.settings[ExportSettingKey.Mirrored]) {
+        data.mirrored = state.mirrored;
+      }
+      if (selection.settings[ExportSettingKey.AutoLock]) {
+        data.autoLockEnabled = state.autoLockEnabled;
+        data.autoLockAfterMarkSeconds = state.autoLockAfterMarkSeconds;
+        data.autoLockAfterUnlockSeconds = state.autoLockAfterUnlockSeconds;
+      }
+      if (selection.settings[ExportSettingKey.DaysToWhite]) {
+        data.daysToWhite = state.daysToWhite;
+      }
+      if (selection.settings[ExportSettingKey.Theme]) {
+        data.themeMode = themeMode;
+      }
+      await exportStorageToFile(data);
+    },
+    [
+      state.buttonStates,
+      state.events,
+      state.mirrored,
+      state.autoLockEnabled,
+      state.autoLockAfterMarkSeconds,
+      state.autoLockAfterUnlockSeconds,
+      state.daysToWhite,
+    ],
+  );
 
-  // Doesn't persist data.themeMode — the caller applies it via
-  // ThemeProvider's setMode, which owns that setting's storage key.
+  // Merge-imports whatever categories `data` carries — a field left absent
+  // (because ExportOptionsDialog excluded it) leaves that category's current
+  // state/storage untouched instead of resetting it. Doesn't persist
+  // data.themeMode — the caller applies it via ThemeProvider's setMode,
+  // which owns that setting's storage key.
   const applyImport = useCallback((data: ExportedAppData) => {
     setState((prev) => {
-      const deadline =
-        data.autoLockEnabled && !prev.interfaceLocked
-          ? Date.now() + data.autoLockAfterUnlockSeconds * SECOND_MS
-          : null;
-      saveAutoLock({
-        enabled: data.autoLockEnabled,
-        afterMarkSeconds: data.autoLockAfterMarkSeconds,
-        afterUnlockSeconds: data.autoLockAfterUnlockSeconds,
-        deadline,
-      });
-      saveDaysToWhite(data.daysToWhite);
-      const { themeMode: _themeMode, ...storageData } = data;
-      return { ...prev, ...storageData, autoLockDeadline: deadline };
+      const next: AppState = { ...prev };
+
+      if (data.buttonStates !== undefined) next.buttonStates = data.buttonStates;
+      if (data.events !== undefined) next.events = data.events;
+      if (data.mirrored !== undefined) next.mirrored = data.mirrored;
+
+      if (data.autoLockEnabled !== undefined) {
+        const afterMarkSeconds =
+          data.autoLockAfterMarkSeconds ?? prev.autoLockAfterMarkSeconds;
+        const afterUnlockSeconds =
+          data.autoLockAfterUnlockSeconds ?? prev.autoLockAfterUnlockSeconds;
+        const deadline =
+          data.autoLockEnabled && !prev.interfaceLocked
+            ? Date.now() + afterUnlockSeconds * SECOND_MS
+            : null;
+        saveAutoLock({
+          enabled: data.autoLockEnabled,
+          afterMarkSeconds,
+          afterUnlockSeconds,
+          deadline,
+        });
+        next.autoLockEnabled = data.autoLockEnabled;
+        next.autoLockAfterMarkSeconds = afterMarkSeconds;
+        next.autoLockAfterUnlockSeconds = afterUnlockSeconds;
+        next.autoLockDeadline = deadline;
+      }
+
+      if (data.daysToWhite !== undefined) {
+        saveDaysToWhite(data.daysToWhite);
+        next.daysToWhite = data.daysToWhite;
+      }
+
+      return next;
     });
     importStorage(data);
   }, []);

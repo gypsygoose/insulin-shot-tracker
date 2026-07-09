@@ -293,11 +293,11 @@ export function MainScreen() {
         onSetDaysToWhite={actions.setDaysToWhite}
         themeMode={themeMode}
         onSetThemeMode={onSetThemeMode}
-        onExport={() => actions.exportData(themeMode)}
+        onExport={(selection) => actions.exportData(themeMode, selection)}
         onPickImportFile={actions.pickImportFile}
         onApplyImport={(data) => {
           actions.applyImport(data);
-          onSetThemeMode(data.themeMode);
+          if (data.themeMode !== undefined) onSetThemeMode(data.themeMode);
         }}
         onNotify={showToast}
       />

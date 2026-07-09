@@ -14,6 +14,7 @@ interface Props {
   onConfirm: () => void;
   onCancel: () => void;
   destructive?: boolean;
+  confirmDisabled?: boolean;
   // Wraps message/children in a scrollable, height-capped box — for dialogs
   // whose content (e.g. AutoLockDialog's two time pickers) can overflow.
   scrollable?: boolean;
@@ -30,6 +31,7 @@ export function Dialog({
   onCancel,
   destructive = false,
   scrollable = false,
+  confirmDisabled = false,
 }: Props) {
   const { colors } = useTheme();
 
@@ -82,9 +84,11 @@ export function Dialog({
               styles.confirmBtn,
               { backgroundColor: colors.primaryAction },
               destructive && { backgroundColor: colors.destructive },
+              confirmDisabled && styles.confirmBtnDisabled,
             ]}
             onPress={onConfirm}
             activeOpacity={0.8}
+            disabled={confirmDisabled}
           >
             <Text style={[styles.confirmLabel, { color: colors.actionLabel }]}>
               {confirmLabel}
@@ -144,6 +148,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: "center",
+  },
+  confirmBtnDisabled: {
+    opacity: 0.4,
   },
   confirmLabel: {
     fontSize: 15,

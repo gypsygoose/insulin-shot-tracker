@@ -42,16 +42,22 @@ src/
 │   ├── AutoLockDialog.tsx  — edit auto-lock delays (opened from MenuSheet)
 │   ├── DaysToWhiteDialog.tsx — edit the "days to white" setting (opened from MenuSheet)
 │   ├── ThemeDialog.tsx     — edit the theme setting (Light/Dark/System, opened from MenuSheet)
+│   ├── ImportExportOptions.tsx — shared "marks" checkbox + "settings" accordion (one checkbox per `ExportSettingKey`), used by both ExportOptionsDialog and ImportOptionsDialog; takes an `ExportSelection` + `onSelectionChange`, plus optional `marksDisabled`/`disabledSettingKeys` (an `ExportSettingKey[]`) so the import side can grey out categories absent from the file — also exports `isSelectionEmpty`/`SETTING_KEYS` helpers
+│   ├── ExportOptionsDialog.tsx — pick which categories (marks / app settings) go into the export file, via ImportExportOptions
+│   ├── ImportOptionsDialog.tsx — pick which categories to actually apply from a parsed import file, via ImportExportOptions; a category absent from the file is passed in as disabled (nothing to import for it), and the settings accordion checkbox is disabled once all four of its sub-rows are
 │   ├── icons/              — one file per icon component (e.g. UndoIcon.tsx, MenuIcon.tsx)
 │   └── common/             — generic, domain-agnostic UI primitives, reusable outside this app
 │       ├── Modal.tsx       — full-screen overlay + backdrop
-│       ├── Dialog.tsx      — confirm/cancel modal (built on Modal)
+│       ├── Dialog.tsx      — confirm/cancel modal (built on Modal), optional `confirmDisabled`
 │       ├── ContextMenu.tsx — action-list modal (built on Modal)
 │       ├── ConfirmDialog.tsx — title/message confirm wrapper (built on Dialog)
 │       ├── BottomSheet.tsx — swipe-to-dismiss bottom sheet
 │       ├── Toast.tsx       — transient status message banner (info/warn/success/error, own icon + color per status)
 │       ├── TimeField.tsx   — minutes/seconds picker pair (used by AutoLockDialog)
-│       └── NumberPickerField.tsx — single labeled numeric picker (used by DaysToWhiteDialog)
+│       ├── NumberPickerField.tsx — single labeled numeric picker (used by DaysToWhiteDialog)
+│       ├── Checkbox.tsx    — labeled checkbox row, supports `indeterminate` and `disabled` (used by ImportExportOptions)
+│       ├── Chevron.tsx     — small directional (`down`/`right`) arrow built from a rotated bordered box (no SVG); animates between the two rotations via `Animated.Value`
+│       └── Accordion.tsx   — generic expand/collapse group, smooth via `LayoutAnimation`; `label` is a `ReactNode` so a caller-supplied control (e.g. a checkbox) keeps its own tap target since RN gives touch priority to the innermost responder — Accordion itself holds no checkbox logic (used by ImportExportOptions); optional `disabled` prop blocks the header tap (no expand/collapse) and dims the chevron — used by ImportExportOptions when the whole group's checkbox is disabled (ImportOptionsDialog, when the file carries no settings at all)
 └── screens/MainScreen.tsx  — root screen composing all components
 App.tsx                     — entry point (mounts ThemeProvider above MainScreen)
 ```
@@ -80,7 +86,7 @@ App.tsx                     — entry point (mounts ThemeProvider above MainScre
 - The same rule applies to non-color literals: no unnamed "magic" numbers (durations, thresholds, sizes) or magic strings (UI labels, storage keys, MIME types, format patterns) in component/logic code. A value reused in 2+ places for the same reason is a shared constant in `src/constants.ts` (or a shared helper in `src/format.ts` for repeated formatting logic, e.g. `pad2`, `splitSeconds`, `SECONDS_PER_MINUTE`); a single-use but deliberate value is still a named local constant in the file where it applies. Ordinary one-off layout numbers (an arbitrary `padding`/`fontSize`/`borderRadius` with no cross-cutting meaning) and one-off prose don't need this — only values that encode an actual decision. Coincidental value matches with unrelated meaning are kept as separate constants, same as colors.
 - **Keep this file current**: whenever a change affects code style, project structure, or any other app-wide convention (not just a single file's internals), add or update the relevant note in this CLAUDE.md in the same change. Treat an out-of-date CLAUDE.md as a bug.
 - **Keep README.md current too**: whenever a change affects the project description, features, setup/scripts, or structure, update README.md in the same change, not just CLAUDE.md.
-- **Every new menu setting must round-trip through storage and export/import**, following the pattern set by `mirrored`/`autoLock*`/`daysToWhite`: its own AsyncStorage key + `load.../save...` pair in `src/storage/storage.ts`, a field on `ExportedAppData` in `src/types/index.ts` with a matching optional-type check in `isValidAppStorage`, a default fallback in `pickImportFile`, inclusion in `useAppStore`'s `exportData`/`applyImport`, and a row label constant in `src/constants.ts` documented in HelpSheet's "Пункты меню" section. `themeMode` follows the same storage/export/import contract but, uniquely, isn't held in `useAppStore`'s state — see "Theme" below for why.
+- **Every new menu setting must round-trip through storage and export/import**, following the pattern set by `mirrored`/`autoLock*`/`daysToWhite`: its own AsyncStorage key + `load.../save...` pair in `src/storage/storage.ts`, a field on `ExportedAppData` in `src/types/index.ts`, a matching optional-type check in `isValidAppStorage`, inclusion in `useAppStore`'s `exportData`/`applyImport`, `BottomMenu`'s `buildImportData` filter, and a row label constant in `src/constants.ts` documented in HelpSheet's "Пункты меню" section. If the setting is a standalone toggle/value shown in `MenuSheet` (not bundled into an existing row like auto-lock's three fields), also add it to `ExportSettingKey`, `ImportExportOptions`'s `SETTING_LABEL` map, and `ImportOptionsDialog`'s `SETTING_AVAILABLE` map so it gets its own checkbox on both sides — see "Selective export / merge import" below. `themeMode` follows the same storage/export/import contract but, uniquely, isn't held in `useAppStore`'s state — see "Theme" below for why.
 
 ---
 
@@ -112,19 +118,35 @@ interface AppStorage {
   events: AppEvent[];
 }
 
-// ExportedAppData — AppStorage plus settings that live in their own
-// AsyncStorage keys, written out as one JSON file by export/import.
-interface ExportedAppData extends AppStorage {
-  mirrored: boolean;
-  autoLockEnabled: boolean;
-  autoLockAfterMarkSeconds: number;
-  autoLockAfterUnlockSeconds: number;
-  daysToWhite: number;  // 1–8, default 8 — see "Button colour state machine" below
-  themeMode: ThemeMode; // Light/Dark/System, default System — see "Theme" below
+// ExportedAppData — AppStorage fields plus settings that live in their own
+// AsyncStorage keys, written out as one JSON file by export/import. Every
+// field is optional: ExportOptionsDialog lets the user write only a subset
+// of categories, and a missing field on import means "leave this category
+// untouched", not "reset to default" — see "Selective export / merge
+// import" below.
+interface ExportedAppData {
+  buttonStates?: Record<string, StoredButtonState>;
+  events?: AppEvent[];
+  mirrored?: boolean;
+  autoLockEnabled?: boolean;
+  autoLockAfterMarkSeconds?: number;
+  autoLockAfterUnlockSeconds?: number;
+  daysToWhite?: number;  // 1–8, default 8 — see "Button colour state machine" below
+  themeMode?: ThemeMode; // Light/Dark/System, default System — see "Theme" below
 }
 ```
 
 Storage keys: `@insulin_shot_tracker_v1` (buttonStates/events), plus one key per setting (mirror, interface-locked, auto-lock, `daysToWhite`, `themeMode`) — see `src/storage/storage.ts`.
+
+---
+
+## Selective export / merge import
+
+The **"Экспорт..."** row (`MenuSheet`) opens `ExportOptionsDialog.tsx` instead of exporting immediately; the **"Импорт..."** row similarly opens `ImportOptionsDialog.tsx` over the parsed file instead of applying it outright. Both render the same `ImportExportOptions.tsx` (`src/components/ImportExportOptions.tsx`): a top-level **"Отметки точек укола"** checkbox (`buttonStates`/`events`) plus a **"Настройки приложения"** accordion of four sub-checkboxes, one per `ExportSettingKey` (`Mirrored`/`AutoLock`/`DaysToWhite`/`Theme`, `src/types/index.ts`), built on the generic `Accordion` common component (`src/components/common/Accordion.tsx`), which knows nothing about checkboxes — `ImportExportOptions` passes a `Checkbox` (with its own `label` prop) directly as `Accordion`'s `label` node. In `Checkbox.tsx`, only the 22×22 box is a `TouchableOpacity`; the label text next to it is plain `Text`, not touchable. So tapping that checkbox's box bulk-toggles (and shows indeterminate for a partial selection of) the four sub-checkboxes, labeled with the same row-label constants as `MenuSheet` — while tapping its label text (or the chevron) falls through to `Accordion`'s own header `TouchableOpacity` and toggles `expanded` instead, since React Native gives touch priority to the innermost responder and the text itself isn't one. Expanding/collapsing animates via `LayoutAnimation` (`Accordion`) and the chevron's rotation animates via `Animated.Value` (`Chevron`). The group starts collapsed, and the selection is untouched by expand/collapse.
+
+`ImportExportOptions` is a controlled component: it takes the current `ExportSelection` (`{ marks: boolean; settings: Record<ExportSettingKey, boolean> }`) and an `onSelectionChange`, and two optional props — `marksDisabled` and `disabledSettingKeys` (an `ExportSettingKey[]`) — that grey out and disable individual rows; both default to "nothing disabled" (`[]`), which is exactly `ExportOptionsDialog`'s case, since every category is always available to export. It also exports `isSelectionEmpty(selection)`, used by both dialogs to disable their Confirm button while nothing is selected, and `SETTING_KEYS` (`Object.values(ExportSettingKey)`). `ExportOptionsDialog` owns the `ExportSelection` state (defaulting to everything checked) and passes it straight through; its resulting selection is passed to `useAppStore`'s `exportData(themeMode, selection)`, which builds the `ExportedAppData` object with only the selected keys set — unselected categories are omitted entirely, not written with a default/empty value (see `ExportedAppData`'s comment above).
+
+Import mirrors this on the way back in: `storage.ts`'s `isValidAppStorage` only validates fields that are present, and `pickImportFile` returns the parsed data as-is (normalizing `buttonStates` to include every current `BUTTONS` entry only when that category is present, rather than defaulting missing categories). `ImportOptionsDialog` derives `marksDisabled`/`disabledSettingKeys` from whether each field is actually present on the parsed `ExportedAppData` (its `SETTING_AVAILABLE` map, e.g. `data.daysToWhite !== undefined`) and passes them into `ImportExportOptions`, so a category absent from the file is forced unchecked and can't be selected; the "Настройки приложения" accordion checkbox is itself disabled by `ImportExportOptions` once every one of its four sub-rows is (i.e. the file carries no settings at all) — and `Accordion`'s own `disabled` prop then also blocks expanding/collapsing that group. Confirming calls `BottomMenu`'s local `buildImportData(data, selection)`, which narrows the parsed file down to just the checked categories (mirroring `exportData`'s filter on the way out), before handing that filtered object to `useAppStore`'s `applyImport`/`importStorage`, which persist and merge only the fields present — an omitted category's current state and AsyncStorage value are left untouched rather than reset. This lets e.g. a settings-only export be imported without wiping injection history, or only auto-lock (not theme) be applied from a file that has both. `MainScreen`'s `onApplyImport` only calls `onSetThemeMode` when `data.themeMode !== undefined`, for the same reason — which now also covers the user deliberately unchecking the theme row in `ImportOptionsDialog`.
 
 ---
 

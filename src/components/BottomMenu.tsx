@@ -6,12 +6,21 @@ import { MenuSheet, THEME_MODE_LABEL } from "./MenuSheet";
 import { AutoLockDialog } from "./AutoLockDialog";
 import { DaysToWhiteDialog } from "./DaysToWhiteDialog";
 import { ThemeDialog } from "./ThemeDialog";
+import { ExportOptionsDialog } from "./ExportOptionsDialog";
+import { ImportOptionsDialog } from "./ImportOptionsDialog";
 import { UndoIcon } from "./icons/UndoIcon";
 import { HelpIcon } from "./icons/HelpIcon";
 import { LockClosedIcon } from "./icons/LockClosedIcon";
 import { LockOpenIcon } from "./icons/LockOpenIcon";
 import { MenuIcon } from "./icons/MenuIcon";
-import { AutoLockDialogMode, ExportedAppData, ThemeMode, ToastStatus } from "../types";
+import {
+  AutoLockDialogMode,
+  ExportedAppData,
+  ExportSelection,
+  ExportSettingKey,
+  ThemeMode,
+  ToastStatus,
+} from "../types";
 import { ImportResult, ImportResultType } from "../storage/storage";
 import { useTheme } from "../theme/ThemeContext";
 import {
@@ -30,6 +39,35 @@ import {
   THEME_UPDATED_TOAST_MESSAGE_PREFIX,
   UNDO_TOAST_MESSAGE,
 } from "../constants";
+
+// Narrows a parsed import file down to just the categories the user kept
+// checked in ImportOptionsDialog, mirroring useAppStore's exportData filter
+// on the way out.
+function buildImportData(
+  data: ExportedAppData,
+  selection: ExportSelection,
+): ExportedAppData {
+  const filtered: ExportedAppData = {};
+  if (selection.marks) {
+    filtered.buttonStates = data.buttonStates;
+    filtered.events = data.events;
+  }
+  if (selection.settings[ExportSettingKey.Mirrored]) {
+    filtered.mirrored = data.mirrored;
+  }
+  if (selection.settings[ExportSettingKey.AutoLock]) {
+    filtered.autoLockEnabled = data.autoLockEnabled;
+    filtered.autoLockAfterMarkSeconds = data.autoLockAfterMarkSeconds;
+    filtered.autoLockAfterUnlockSeconds = data.autoLockAfterUnlockSeconds;
+  }
+  if (selection.settings[ExportSettingKey.DaysToWhite]) {
+    filtered.daysToWhite = data.daysToWhite;
+  }
+  if (selection.settings[ExportSettingKey.Theme]) {
+    filtered.themeMode = data.themeMode;
+  }
+  return filtered;
+}
 
 interface Props {
   canUndo: boolean;
@@ -55,7 +93,7 @@ interface Props {
   onSetDaysToWhite: (days: number) => void;
   themeMode: ThemeMode;
   onSetThemeMode: (mode: ThemeMode) => void;
-  onExport: () => Promise<void>;
+  onExport: (selection: ExportSelection) => Promise<void>;
   onPickImportFile: () => Promise<ImportResult>;
   onApplyImport: (data: ExportedAppData) => void;
   onNotify: (message: string, status: ToastStatus) => void;
@@ -93,6 +131,7 @@ export function BottomMenu({
     useState<AutoLockDialogMode | null>(null);
   const [showDaysToWhiteDialog, setShowDaysToWhiteDialog] = useState(false);
   const [showThemeDialog, setShowThemeDialog] = useState(false);
+  const [showExportOptions, setShowExportOptions] = useState(false);
   const [pendingImport, setPendingImport] = useState<ExportedAppData | null>(
     null,
   );
@@ -163,10 +202,9 @@ export function BottomMenu({
         themeMode={themeMode}
         onEditTheme={handleEditTheme}
         onImport={handleImport}
-        onExport={async () => {
+        onExport={() => {
           setShowMenu(false);
-          await onExport();
-          onNotify(EXPORT_SUCCESS_TOAST_MESSAGE, ToastStatus.Success);
+          setShowExportOptions(true);
         }}
         onClear={() => {
           setShowMenu(false);
@@ -216,6 +254,16 @@ export function BottomMenu({
           );
         }}
         onCancel={() => setShowThemeDialog(false)}
+      />
+
+      <ExportOptionsDialog
+        visible={showExportOptions}
+        onConfirm={async (selection) => {
+          setShowExportOptions(false);
+          await onExport(selection);
+          onNotify(EXPORT_SUCCESS_TOAST_MESSAGE, ToastStatus.Success);
+        }}
+        onCancel={() => setShowExportOptions(false)}
       />
 
       <View
@@ -297,21 +345,17 @@ export function BottomMenu({
         destructive
       />
 
-      <ConfirmDialog
+      <ImportOptionsDialog
         visible={pendingImport !== null}
-        title="Импортировать данные?"
-        message="Все текущие данные будут стёрты и заменены данными из файла. Это действие нельзя отменить."
-        confirmLabel="Импортировать"
-        cancelLabel={CANCEL_LABEL}
-        onConfirm={() => {
+        data={pendingImport ?? {}}
+        onConfirm={(selection) => {
           if (pendingImport) {
-            onApplyImport(pendingImport);
+            onApplyImport(buildImportData(pendingImport, selection));
             onNotify(IMPORT_SUCCESS_TOAST_MESSAGE, ToastStatus.Success);
           }
           setPendingImport(null);
         }}
         onCancel={() => setPendingImport(null)}
-        destructive
       />
     </>
   );

@@ -10,7 +10,8 @@ export const INTERFACE_LOCKED_TOAST_MESSAGE =
 export const INTERFACE_LOCKED_TOAST_DURATION_MS = 4000;
 export const INTERFACE_LOCK_ENABLED_TOAST_MESSAGE = "Интерфейс заблокирован";
 export const INTERFACE_LOCK_DISABLED_TOAST_MESSAGE = "Интерфейс разблокирован";
-export const AUTO_LOCK_FIRED_TOAST_MESSAGE = "Интерфейс заблокирован автоматически";
+export const AUTO_LOCK_FIRED_TOAST_MESSAGE =
+  "Интерфейс заблокирован автоматически";
 export const MANUAL_BLOCK_TOAST_PREFIX = "Точка заблокирована вручную";
 export const MANUAL_UNBLOCK_TOAST_PREFIX = "Точка разблокирована вручную";
 export const POINT_CLEARED_TOAST_PREFIX = "Точка очищена";
@@ -22,9 +23,12 @@ export const IMPORT_FAILURE_TOAST_MESSAGE =
   "Не удалось импортировать\nВыбранный файл повреждён или имеет неверный формат.";
 export const MIRROR_ENABLED_TOAST_MESSAGE = "Зеркальное отображение включено";
 export const MIRROR_DISABLED_TOAST_MESSAGE = "Зеркальное отображение выключено";
-export const AUTO_LOCK_ENABLED_TOAST_MESSAGE = "Автоблокировка интерфейса включена";
-export const AUTO_LOCK_DISABLED_TOAST_MESSAGE = "Автоблокировка интерфейса выключена";
-export const AUTO_LOCK_UPDATED_TOAST_MESSAGE = "Настройки автоблокировки обновлены";
+export const AUTO_LOCK_ENABLED_TOAST_MESSAGE =
+  "Автоблокировка интерфейса включена";
+export const AUTO_LOCK_DISABLED_TOAST_MESSAGE =
+  "Автоблокировка интерфейса выключена";
+export const AUTO_LOCK_UPDATED_TOAST_MESSAGE =
+  "Настройки автоблокировки обновлены";
 export const ICON_SIZE = 22; // bottom-menu icon width/height (src/components/icons)
 export const LEFT_SIDE_LABEL = "левая\nсторона";
 export const RIGHT_SIDE_LABEL = "правая\nсторона";
@@ -61,8 +65,21 @@ export const THEME_LIGHT_LABEL = "Светлая";
 export const THEME_DARK_LABEL = "Тёмная";
 export const THEME_SYSTEM_LABEL = "Системная";
 export const THEME_UPDATED_TOAST_MESSAGE_PREFIX = "Тема изменена";
-export const EXPORT_ROW_LABEL = "Экспорт...";
-export const IMPORT_ROW_LABEL = "Импорт...";
+export const EXPORT_ROW_LABEL = "Экспорт данных";
+export const IMPORT_ROW_LABEL = "Импорт данных";
+export const EXPORT_OPTIONS_DIALOG_TITLE = "Экспорт данных";
+export const EXPORT_OPTIONS_DIALOG_MESSAGE =
+  "Выберите, что экспортировать в файл.";
+export const EXPORT_MARKS_LABEL = "Отметки точек укола";
+export const EXPORT_SETTINGS_LABEL = "Настройки приложения";
+export const EXPORT_CONFIRM_LABEL = "Экспортировать";
+export const IMPORT_OPTIONS_DIALOG_TITLE = "Импорт данных";
+export const IMPORT_OPTIONS_DIALOG_MESSAGE =
+  "Выберите, что импортировать из файла. Пункты, которых нет в файле, недоступны. Выбранные категории заменят текущие данные — это действие нельзя отменить.";
+export const IMPORT_CONFIRM_LABEL = "Импортировать";
+// Shared between Accordion (LayoutAnimation, content expand/collapse) and
+// Chevron (Animated.timing, rotation) so the two animate in lockstep.
+export const ACCORDION_ANIMATION_DURATION_MS = 150;
 export const MENU_SHEET_TITLE = "Меню";
 export const HELP_SHEET_TITLE = "Справка";
 
