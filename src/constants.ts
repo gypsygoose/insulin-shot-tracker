@@ -1,37 +1,13 @@
+// Brand name — deliberately not localized (see src/i18n/), unlike every
+// other user-facing string in the app.
 export const APP_NAME = "Insulin Shot Tracker";
-export const BLOCKED_TOAST_MESSAGE =
-  "Точка заблокирована и не может быть отмечена";
+
 export const TOAST_DURATION_MS = 4000;
 // Newest toasts push older ones down; once the stack holds this many, the
 // oldest is dropped to make room instead of growing further.
 export const MAX_STACKED_TOASTS = 3;
-export const INTERFACE_LOCKED_TOAST_MESSAGE =
-  "Интерфейс залокирован. Чтобы отметить точку укола, разблокируйте интерфейс в нижнем меню либо отметьте через всплывающее меню точки (долгое нажатие).";
 export const INTERFACE_LOCKED_TOAST_DURATION_MS = 4000;
-export const INTERFACE_LOCK_ENABLED_TOAST_MESSAGE = "Интерфейс заблокирован";
-export const INTERFACE_LOCK_DISABLED_TOAST_MESSAGE = "Интерфейс разблокирован";
-export const AUTO_LOCK_FIRED_TOAST_MESSAGE =
-  "Интерфейс заблокирован автоматически";
-export const MANUAL_BLOCK_TOAST_PREFIX = "Точка заблокирована вручную";
-export const MANUAL_UNBLOCK_TOAST_PREFIX = "Точка разблокирована вручную";
-export const POINT_CLEARED_TOAST_PREFIX = "Точка очищена";
-export const CLEAR_ALL_TOAST_MESSAGE = "Все данные очищены";
-export const UNDO_TOAST_MESSAGE = "Последнее действие отменено";
-export const EXPORT_SUCCESS_TOAST_MESSAGE = "Данные экспортированы";
-export const IMPORT_SUCCESS_TOAST_MESSAGE = "Данные импортированы";
-export const IMPORT_FAILURE_TOAST_MESSAGE =
-  "Не удалось импортировать\nВыбранный файл повреждён или имеет неверный формат.";
-export const MIRROR_ENABLED_TOAST_MESSAGE = "Зеркальное отображение включено";
-export const MIRROR_DISABLED_TOAST_MESSAGE = "Зеркальное отображение выключено";
-export const AUTO_LOCK_ENABLED_TOAST_MESSAGE =
-  "Автоблокировка интерфейса включена";
-export const AUTO_LOCK_DISABLED_TOAST_MESSAGE =
-  "Автоблокировка интерфейса выключена";
-export const AUTO_LOCK_UPDATED_TOAST_MESSAGE =
-  "Настройки автоблокировки обновлены";
 export const ICON_SIZE = 22; // bottom-menu icon width/height (src/components/icons)
-export const LEFT_SIDE_LABEL = "левая\nсторона";
-export const RIGHT_SIDE_LABEL = "правая\nсторона";
 
 // Generic time-unit constants, not tied to any one feature.
 export const SECOND_MS = 1000;
@@ -48,45 +24,16 @@ export const MIN_DAYS_TO_WHITE = 1;
 export const MAX_DAYS_TO_WHITE = 8;
 export const DEFAULT_DAYS_TO_WHITE = MAX_DAYS_TO_WHITE;
 
-// Action labels shared across dialogs/menus/sheets — a single source of
-// truth so e.g. HelpSheet's documentation of a row can't drift from the
-// row's actual label.
-export const CANCEL_LABEL = "Отмена";
-export const SAVE_LABEL = "Сохранить";
-export const CLEAR_LABEL = "Очистить";
-export const MARK_LABEL = "Отметить";
-export const AFTER_MARK_LABEL = "После отметки";
-export const AFTER_UNLOCK_LABEL = "После разблокировки";
-export const MIRROR_ROW_LABEL = "Зеркальное отображение";
-export const AUTO_LOCK_ROW_LABEL = "Автоблокировка интерфейса";
-export const DAYS_TO_WHITE_ROW_LABEL = "Дней до восстановления точки";
-export const THEME_ROW_LABEL = "Тема";
-export const THEME_LIGHT_LABEL = "Светлая";
-export const THEME_DARK_LABEL = "Тёмная";
-export const THEME_SYSTEM_LABEL = "Системная";
-export const THEME_UPDATED_TOAST_MESSAGE_PREFIX = "Тема изменена";
-export const EXPORT_ROW_LABEL = "Экспорт данных";
-export const IMPORT_ROW_LABEL = "Импорт данных";
-export const EXPORT_OPTIONS_DIALOG_TITLE = "Экспорт данных";
-export const EXPORT_OPTIONS_DIALOG_MESSAGE =
-  "Выберите, что экспортировать в файл.";
-export const EXPORT_MARKS_LABEL = "Отметки точек укола";
-export const EXPORT_SETTINGS_LABEL = "Настройки приложения";
-export const EXPORT_CONFIRM_LABEL = "Экспортировать";
-export const IMPORT_OPTIONS_DIALOG_TITLE = "Импорт данных";
-export const IMPORT_OPTIONS_DIALOG_MESSAGE =
-  "Выберите, что импортировать из файла. Пункты, которых нет в файле, недоступны. Выбранные категории заменят текущие данные — это действие нельзя отменить.";
-export const IMPORT_CONFIRM_LABEL = "Импортировать";
 // Shared between Accordion (LayoutAnimation, content expand/collapse) and
 // Chevron (Animated.timing, rotation) so the two animate in lockstep.
 export const ACCORDION_ANIMATION_DURATION_MS = 150;
-export const MENU_SHEET_TITLE = "Меню";
-export const HELP_SHEET_TITLE = "Справка";
 
 // Note: shared surface/text/action/icon colors used to live here as flat
 // constants (one dark palette). They're now theme-dependent — see
 // src/theme/palette.ts (ThemeColors/DARK_COLORS/LIGHT_COLORS) and
-// src/theme/ThemeContext.tsx's useTheme() hook.
+// src/theme/ThemeContext.tsx's useTheme() hook. All user-facing text
+// (row labels, toast messages, dialog copy) has similarly moved out of this
+// file — see src/i18n/locales/ru.ts and en.ts.
 
 // Toast status accent colors — each drives both the toast's left-edge/icon
 // tint and its icon shape (src/components/icons/Toast*Icon.tsx). Chosen

@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog } from "./common/Dialog";
 import { ImportExportOptions, isSelectionEmpty } from "./ImportExportOptions";
 import { ExportSelection, ExportSettingKey } from "../types";
-import {
-  EXPORT_CONFIRM_LABEL,
-  EXPORT_OPTIONS_DIALOG_MESSAGE,
-  EXPORT_OPTIONS_DIALOG_TITLE,
-} from "../constants";
 
 function allSettings(value: boolean): Record<ExportSettingKey, boolean> {
   return {
@@ -14,6 +10,7 @@ function allSettings(value: boolean): Record<ExportSettingKey, boolean> {
     [ExportSettingKey.AutoLock]: value,
     [ExportSettingKey.DaysToWhite]: value,
     [ExportSettingKey.Theme]: value,
+    [ExportSettingKey.Language]: value,
   };
 }
 
@@ -30,6 +27,7 @@ interface Props {
 }
 
 export function ExportOptionsDialog({ visible, onConfirm, onCancel }: Props) {
+  const { t } = useTranslation();
   const [selection, setSelection] =
     useState<ExportSelection>(DEFAULT_SELECTION);
   const [settingsExpanded, setSettingsExpanded] = useState(
@@ -45,9 +43,9 @@ export function ExportOptionsDialog({ visible, onConfirm, onCancel }: Props) {
   return (
     <Dialog
       visible={visible}
-      title={EXPORT_OPTIONS_DIALOG_TITLE}
-      message={EXPORT_OPTIONS_DIALOG_MESSAGE}
-      confirmLabel={EXPORT_CONFIRM_LABEL}
+      title={t("menu.exportOptionsDialog.title")}
+      message={t("menu.exportOptionsDialog.message")}
+      confirmLabel={t("menu.exportOptionsDialog.confirmLabel")}
       confirmDisabled={isSelectionEmpty(selection)}
       onConfirm={() => onConfirm(selection)}
       onCancel={onCancel}

@@ -7,34 +7,31 @@ import {
   ZoneType,
   ButtonAddress,
 } from "../types";
+import type { TranslationKey } from "../i18n";
 
 // Zones from Figma design (grYg39698ogy0nEBd88Fup, node 26:3)
 // Group label follows patient perspective: "правое" = patient's right = screen LEFT
 
 export const ZONES: Zone[] = [
-  {
-    id: ZoneId.ShoulderRight,
-    label: "Правое плечо",
-    group: ZoneGroup.ShouldersAndBelly,
-  },
-  {
-    id: ZoneId.ShoulderLeft,
-    label: "Левое плечо",
-    group: ZoneGroup.ShouldersAndBelly,
-  },
-  {
-    id: ZoneId.BellyRight,
-    label: "Живот справа",
-    group: ZoneGroup.ShouldersAndBelly,
-  },
-  {
-    id: ZoneId.BellyLeft,
-    label: "Живот слева",
-    group: ZoneGroup.ShouldersAndBelly,
-  },
-  { id: ZoneId.ThighRight, label: "Правое бедро", group: ZoneGroup.Thighs },
-  { id: ZoneId.ThighLeft, label: "Левое бедро", group: ZoneGroup.Thighs },
+  { id: ZoneId.ShoulderRight, group: ZoneGroup.ShouldersAndBelly },
+  { id: ZoneId.ShoulderLeft, group: ZoneGroup.ShouldersAndBelly },
+  { id: ZoneId.BellyRight, group: ZoneGroup.ShouldersAndBelly },
+  { id: ZoneId.BellyLeft, group: ZoneGroup.ShouldersAndBelly },
+  { id: ZoneId.ThighRight, group: ZoneGroup.Thighs },
+  { id: ZoneId.ThighLeft, group: ZoneGroup.Thighs },
 ];
+
+// Translation key for each zone's display label (see src/i18n/locales/ru.ts
+// `zones.*`) — zone data is a module-level array, not a component, so it
+// can't call t() itself; readers look up this key and call t() themselves.
+export const ZONE_LABEL_KEY: Record<ZoneId, TranslationKey> = {
+  [ZoneId.ShoulderRight]: "zones.shoulderRight",
+  [ZoneId.ShoulderLeft]: "zones.shoulderLeft",
+  [ZoneId.BellyRight]: "zones.bellyRight",
+  [ZoneId.BellyLeft]: "zones.bellyLeft",
+  [ZoneId.ThighRight]: "zones.thighRight",
+  [ZoneId.ThighLeft]: "zones.thighLeft",
+};
 
 export const ZONE_MAP: Record<ZoneId, Zone> = Object.fromEntries(
   ZONES.map((z) => [z.id, z]),

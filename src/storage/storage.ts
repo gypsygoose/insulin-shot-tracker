@@ -7,12 +7,12 @@ import {
   AppEventType,
   AppStorage,
   ExportedAppData,
+  LanguageMode,
   StoredButtonState,
   ThemeMode,
 } from "../types";
 import { BUTTONS } from "../data/zones";
 import {
-  APP_NAME,
   DEFAULT_DAYS_TO_WHITE,
   MAX_DAYS_TO_WHITE,
   MIN_DAYS_TO_WHITE,
@@ -24,6 +24,7 @@ const INTERFACE_LOCKED_KEY = "@insulin_shot_tracker_interface_locked_v1";
 const AUTO_LOCK_KEY = "@insulin_shot_tracker_autolock_v1";
 const DAYS_TO_WHITE_KEY = "@insulin_shot_tracker_days_to_white_v1";
 const THEME_MODE_KEY = "@insulin_shot_tracker_theme_mode_v1";
+const LANGUAGE_MODE_KEY = "@insulin_shot_tracker_language_mode_v1";
 
 // Boolean-as-string encoding used for the mirror/interface-locked flags —
 // AsyncStorage only stores strings.
@@ -169,6 +170,23 @@ export async function saveThemeMode(mode: ThemeMode): Promise<void> {
   await AsyncStorage.setItem(THEME_MODE_KEY, mode);
 }
 
+const LANGUAGE_MODES: LanguageMode[] = Object.values(LanguageMode);
+
+export async function loadLanguageMode(): Promise<LanguageMode> {
+  try {
+    const raw = await AsyncStorage.getItem(LANGUAGE_MODE_KEY);
+    if (raw && LANGUAGE_MODES.includes(raw as LanguageMode))
+      return raw as LanguageMode;
+    return LanguageMode.System;
+  } catch {
+    return LanguageMode.System;
+  }
+}
+
+export async function saveLanguageMode(mode: LanguageMode): Promise<void> {
+  await AsyncStorage.setItem(LANGUAGE_MODE_KEY, mode);
+}
+
 // ---------------------------------------------------------------------------
 // Export / import full app state to/from a JSON file
 // ---------------------------------------------------------------------------
@@ -256,13 +274,21 @@ function isValidAppStorage(data: unknown): data is ExportedAppData {
     !THEME_MODES.includes(candidate.themeMode)
   )
     return false;
+  if (
+    candidate.languageMode !== undefined &&
+    !LANGUAGE_MODES.includes(candidate.languageMode)
+  )
+    return false;
   return true;
 }
 
 // Writes the full app state to a JSON file in cache and opens the system
 // share sheet so the user can pick where on the device to save it.
+// `dialogTitle` is pre-formatted by the caller (via t('menu.exportOptionsDialog.shareDialogTitle'))
+// since this module stays free of an i18next dependency, like stateMachine.ts.
 export async function exportStorageToFile(
   data: ExportedAppData,
+  dialogTitle: string,
 ): Promise<void> {
   const dateStamp = new Date().toISOString().slice(0, 10);
   const fileUri = `${FileSystem.cacheDirectory}${EXPORT_FILE_PREFIX}${dateStamp}.json`;
@@ -271,7 +297,7 @@ export async function exportStorageToFile(
   if (await Sharing.isAvailableAsync()) {
     await Sharing.shareAsync(fileUri, {
       mimeType: JSON_MIME_TYPE,
-      dialogTitle: `Экспорт данных ${APP_NAME}`,
+      dialogTitle,
       UTI: IOS_JSON_UTI,
     });
   }

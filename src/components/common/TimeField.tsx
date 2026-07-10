@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, Platform } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "../../theme/ThemeContext";
 
 const MINUTE_OPTIONS = Array.from({ length: 100 }, (_, i) => i);
@@ -20,6 +21,7 @@ export function TimeField({
   onChangeMinutes,
   onChangeSeconds,
 }: Props) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const pickerItemColor = Platform.OS === "android" ? colors.primaryText : undefined;
 
@@ -37,7 +39,7 @@ export function TimeField({
           {MINUTE_OPTIONS.map((m) => (
             <Picker.Item
               key={m}
-              label={`${m} мин`}
+              label={t("common.minutesAbbrev", { count: m })}
               value={m}
               color={pickerItemColor}
             />
@@ -53,7 +55,7 @@ export function TimeField({
           {SECOND_OPTIONS.map((s) => (
             <Picker.Item
               key={s}
-              label={`${s} сек`}
+              label={t("common.secondsAbbrev", { count: s })}
               value={s}
               color={pickerItemColor}
             />

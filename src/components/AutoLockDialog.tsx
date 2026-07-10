@@ -1,13 +1,8 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AutoLockDialogMode } from "../types";
 import { Dialog } from "./common/Dialog";
 import { TimeField } from "./common/TimeField";
-import {
-  AFTER_MARK_LABEL,
-  AFTER_UNLOCK_LABEL,
-  AUTO_LOCK_ROW_LABEL,
-  SAVE_LABEL,
-} from "../constants";
 import { SECONDS_PER_MINUTE, splitSeconds } from "../format";
 
 interface Props {
@@ -19,11 +14,6 @@ interface Props {
   onCancel: () => void;
 }
 
-const CONFIRM_LABELS: Record<AutoLockDialogMode, string> = {
-  [AutoLockDialogMode.Enable]: "Включить",
-  [AutoLockDialogMode.Edit]: SAVE_LABEL,
-};
-
 const MIN_AFTER_UNLOCK_SECONDS = 5;
 
 export function AutoLockDialog({
@@ -34,7 +24,11 @@ export function AutoLockDialog({
   onConfirm,
   onCancel,
 }: Props) {
-  const confirmLabel = CONFIRM_LABELS[mode];
+  const { t } = useTranslation();
+  const confirmLabel =
+    mode === AutoLockDialogMode.Enable
+      ? t("menu.autoLockEnableConfirm")
+      : t("common.save");
   const [markMinutes, setMarkMinutes] = useState(0);
   const [markSeconds, setMarkSeconds] = useState(0);
   const [unlockMinutes, setUnlockMinutes] = useState(0);
@@ -78,22 +72,22 @@ export function AutoLockDialog({
   return (
     <Dialog
       visible={visible}
-      title={AUTO_LOCK_ROW_LABEL}
-      message="Вы можете включить автоматическую блокировку интерфейса, чтобы избежать случайного нажатия на точку укола. Блокировка сработает через заданное время после нажатия на точку или после простоя в разблокированном режиме. Разблокировать интерфейс можно будет нажав на соответствующую кнопку в нижнем меню."
+      title={t("menu.autoLockRow")}
+      message={t("menu.autoLockDialog.message")}
       confirmLabel={confirmLabel}
       onConfirm={handleConfirm}
       onCancel={onCancel}
       scrollable
     >
       <TimeField
-        label={AFTER_MARK_LABEL}
+        label={t("menu.autoLockDialog.afterMark")}
         minutes={markMinutes}
         seconds={markSeconds}
         onChangeMinutes={setMarkMinutes}
         onChangeSeconds={setMarkSeconds}
       />
       <TimeField
-        label={AFTER_UNLOCK_LABEL}
+        label={t("menu.autoLockDialog.afterUnlock")}
         minutes={unlockMinutes}
         seconds={unlockSeconds}
         onChangeMinutes={handleChangeUnlockMinutes}

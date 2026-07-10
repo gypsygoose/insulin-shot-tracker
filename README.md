@@ -16,6 +16,7 @@ Tap a button on the body diagram to log an injection at that spot. The button's 
 - Automatic "blackout" cooldown when a site is reused too early, with duration based on how recently it was used
 - Manual site lock (long-press) to mark a spot as temporarily unavailable
 - Light, dark, or system-matched theme, switchable from the menu (defaults to following the OS appearance)
+- Russian and English UI, switchable from the menu (defaults to following the device language)
 - Undo, injection history, and selective import/export of your data (choose which of injection marks / individual app settings to include on export; on import, pick which of the categories actually present in the file to apply) — all stored locally on-device, no account or backend required
 
 ## Getting started
@@ -39,11 +40,12 @@ npm run android    # run on Android emulator/device
 ```
 src/
 ├── types/index.ts          — all shared TypeScript types
-├── constants.ts            — shared UI colors, labels, and other app-wide constants
+├── constants.ts            — shared non-text UI constants (durations, sizes, status colors)
 ├── format.ts               — shared formatting helpers
 ├── data/zones.ts           — zone + button definitions with (x,y) positions
 ├── logic/stateMachine.ts   — pure functions: color computation, press handling
 ├── theme/                  — light/dark theme palettes + ThemeProvider/useTheme
+├── i18n/                   — i18next setup, ru/en translations, LanguageProvider/useLanguage
 ├── storage/storage.ts      — AsyncStorage load/save/clear
 ├── store/useAppStore.ts    — React hook combining storage + state machine
 ├── components/             — app screens and components
@@ -56,7 +58,7 @@ See [CLAUDE.md](CLAUDE.md) for full architecture notes, the button color/rotatio
 ## Notes
 
 - All data is stored locally on-device (AsyncStorage) — there is no backend or cloud sync.
-- UI is currently Russian-only; English localization is planned.
+- UI is available in Russian and English (see the "Язык"/"Language" menu row); more languages may be added later.
 - This app supports injection-site rotation tracking and is not a substitute for medical advice.
 
 ## License

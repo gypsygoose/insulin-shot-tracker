@@ -5,11 +5,11 @@ import {
   blackoutDurationFor,
   activeCycleColors,
   colorLabel,
+  ColorLabelType,
   PressResultType,
   DAY_MS,
 } from './stateMachine';
 import { ButtonColor, StoredButtonState } from '../types';
-import { pluralDays } from '../format';
 
 const DAY = DAY_MS;
 const NOW = 1000000000000; // fixed reference timestamp
@@ -406,47 +406,49 @@ describe('onPress — respects daysToWhite', () => {
 });
 
 describe('colorLabel', () => {
-  test('matches the original static text at daysToWhite 8', () => {
-    expect(colorLabel(ButtonColor.Maroon, 8)).toBe('Только что (день 0)');
-    expect(colorLabel(ButtonColor.Red, 8)).toBe('1 день');
-    expect(colorLabel(ButtonColor.DarkOrange, 8)).toBe('2 дня');
-    expect(colorLabel(ButtonColor.Green, 8)).toBe('7 дней');
-    expect(colorLabel(ButtonColor.White, 8)).toBe(
-      'Свободно (не использовалось 8+ дней)',
-    );
+  test('returns a descriptor at daysToWhite 8', () => {
+    expect(colorLabel(ButtonColor.Maroon, 8)).toEqual({
+      type: ColorLabelType.Maroon,
+    });
+    expect(colorLabel(ButtonColor.Red, 8)).toEqual({
+      type: ColorLabelType.Days,
+      count: 1,
+    });
+    expect(colorLabel(ButtonColor.DarkOrange, 8)).toEqual({
+      type: ColorLabelType.Days,
+      count: 2,
+    });
+    expect(colorLabel(ButtonColor.Green, 8)).toEqual({
+      type: ColorLabelType.Days,
+      count: 7,
+    });
+    expect(colorLabel(ButtonColor.White, 8)).toEqual({
+      type: ColorLabelType.White,
+      count: 8,
+    });
   });
 
   test('reflects a reduced daysToWhite', () => {
-    expect(colorLabel(ButtonColor.Orange, 7)).toBe('3 дня');
-    expect(colorLabel(ButtonColor.Green, 7)).toBe('6 дней');
-    expect(colorLabel(ButtonColor.White, 7)).toBe(
-      'Свободно (не использовалось 7+ дней)',
-    );
+    expect(colorLabel(ButtonColor.Orange, 7)).toEqual({
+      type: ColorLabelType.Days,
+      count: 3,
+    });
+    expect(colorLabel(ButtonColor.Green, 7)).toEqual({
+      type: ColorLabelType.Days,
+      count: 6,
+    });
+    expect(colorLabel(ButtonColor.White, 7)).toEqual({
+      type: ColorLabelType.White,
+      count: 7,
+    });
   });
 
-  test('block-state labels are unaffected by daysToWhite', () => {
-    expect(colorLabel(ButtonColor.Black, 5)).toBe(
-      'Заблокировано системой из-за частого использования',
-    );
-    expect(colorLabel(ButtonColor.Gray, 5)).toBe(
-      'Заблокировано вручную (травма/синяк)',
-    );
-  });
-});
-
-describe('pluralDays', () => {
-  test.each([
-    [1, 'день'],
-    [2, 'дня'],
-    [3, 'дня'],
-    [4, 'дня'],
-    [5, 'дней'],
-    [6, 'дней'],
-    [7, 'дней'],
-    [8, 'дней'],
-    [11, 'дней'],
-    [21, 'день'],
-  ])('%i → %s', (n, expected) => {
-    expect(pluralDays(n)).toBe(expected);
+  test('block-state descriptors are unaffected by daysToWhite', () => {
+    expect(colorLabel(ButtonColor.Black, 5)).toEqual({
+      type: ColorLabelType.Black,
+    });
+    expect(colorLabel(ButtonColor.Gray, 5)).toEqual({
+      type: ColorLabelType.Gray,
+    });
   });
 });

@@ -3,48 +3,48 @@ import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "./common/Dialog";
 import { useTheme } from "../theme/ThemeContext";
-import { ThemeMode } from "../types";
-import { THEME_MODE_KEY } from "./MenuSheet";
+import { LanguageMode } from "../types";
+import { LANGUAGE_MODE_KEY } from "./MenuSheet";
 
-const THEME_MODE_OPTIONS: ThemeMode[] = [
-  ThemeMode.System,
-  ThemeMode.Light,
-  ThemeMode.Dark,
+const LANGUAGE_MODE_OPTIONS: LanguageMode[] = [
+  LanguageMode.System,
+  LanguageMode.English,
+  LanguageMode.Russian,
 ];
 
 interface Props {
   visible: boolean;
-  initialThemeMode: ThemeMode;
-  onConfirm: (mode: ThemeMode) => void;
+  initialLanguageMode: LanguageMode;
+  onConfirm: (mode: LanguageMode) => void;
   onCancel: () => void;
 }
 
-export function ThemeDialog({
+export function LanguageDialog({
   visible,
-  initialThemeMode,
+  initialLanguageMode,
   onConfirm,
   onCancel,
 }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const [mode, setMode] = useState(initialThemeMode);
+  const [mode, setMode] = useState(initialLanguageMode);
 
   useEffect(() => {
     if (!visible) return;
-    setMode(initialThemeMode);
-  }, [visible, initialThemeMode]);
+    setMode(initialLanguageMode);
+  }, [visible, initialLanguageMode]);
 
   return (
     <Dialog
       visible={visible}
-      title={t("menu.themeRow")}
-      message={t("menu.themeDialog.message")}
+      title={t("menu.languageRow")}
+      message={t("menu.languageDialog.message")}
       confirmLabel={t("common.save")}
       onConfirm={() => onConfirm(mode)}
       onCancel={onCancel}
     >
       <View style={styles.options}>
-        {THEME_MODE_OPTIONS.map((option) => {
+        {LANGUAGE_MODE_OPTIONS.map((option) => {
           const selected = option === mode;
           return (
             <TouchableOpacity
@@ -61,7 +61,7 @@ export function ThemeDialog({
               activeOpacity={0.7}
             >
               <Text style={[styles.optionLabel, { color: colors.primaryText }]}>
-                {t(THEME_MODE_KEY[option])}
+                {t(LANGUAGE_MODE_KEY[option])}
               </Text>
               {selected ? (
                 <Text

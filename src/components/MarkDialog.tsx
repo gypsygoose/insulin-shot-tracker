@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useTranslation } from "react-i18next";
 import { Dialog } from "./common/Dialog";
-import { MARK_LABEL } from "../constants";
 
 interface Props {
   visible: boolean;
@@ -12,6 +12,7 @@ interface Props {
 }
 
 export function MarkDialog({ visible, minDate, onConfirm, onCancel }: Props) {
+  const { t } = useTranslation();
   const [date, setDate] = useState(() => new Date());
   // Bumped every time the dialog opens so the native pickers remount with
   // the fresh value — some platforms don't re-sync their internal display
@@ -32,9 +33,9 @@ export function MarkDialog({ visible, minDate, onConfirm, onCancel }: Props) {
   return (
     <Dialog
       visible={visible}
-      title="Отметить укол"
-      message="Укажите дату и время, когда была сделана инъекция."
-      confirmLabel={MARK_LABEL}
+      title={t("markDialog.title")}
+      message={t("markDialog.message")}
+      confirmLabel={t("common.mark")}
       onConfirm={handleConfirm}
       onCancel={onCancel}
     >

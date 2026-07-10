@@ -8,6 +8,8 @@ import {
   StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 import { ZoneContainer } from "../components/ZoneContainer";
 import { BottomMenu } from "../components/BottomMenu";
 import { ButtonContextMenu } from "../components/ButtonContextMenu";
@@ -16,12 +18,19 @@ import { ConfirmDialog } from "../components/common/ConfirmDialog";
 import { ToastEntry, ToastStack } from "../components/common/ToastStack";
 import { useAppStore } from "../store/useAppStore";
 import { useTheme } from "../theme/ThemeContext";
+import { useLanguage } from "../i18n/LanguageContext";
 import {
   computeButtonColor,
   onPress,
   PressResultType,
 } from "../logic/stateMachine";
-import { ZONES, BUTTON_MAP, ZONE_MAP, BUTTON_ADDRESS } from "../data/zones";
+import {
+  ZONES,
+  BUTTON_MAP,
+  ZONE_MAP,
+  BUTTON_ADDRESS,
+  ZONE_LABEL_KEY,
+} from "../data/zones";
 import {
   ButtonColor,
   StoredButtonState,
@@ -29,36 +38,32 @@ import {
   ToastStatus,
   ZoneGroup,
 } from "../types";
-import { formatDateTime, pluralDays } from "../format";
+import { formatDateTime } from "../format";
 import {
   APP_NAME,
-  AUTO_LOCK_FIRED_TOAST_MESSAGE,
-  BLOCKED_TOAST_MESSAGE,
-  CLEAR_LABEL,
   IMG_ASPECT,
-  INTERFACE_LOCK_DISABLED_TOAST_MESSAGE,
-  INTERFACE_LOCK_ENABLED_TOAST_MESSAGE,
   INTERFACE_LOCKED_TOAST_DURATION_MS,
-  INTERFACE_LOCKED_TOAST_MESSAGE,
-  LEFT_SIDE_LABEL,
-  MANUAL_BLOCK_TOAST_PREFIX,
-  MANUAL_UNBLOCK_TOAST_PREFIX,
   MARK_BACKDATED_THRESHOLD_MS,
   MAX_STACKED_TOASTS,
-  POINT_CLEARED_TOAST_PREFIX,
-  RIGHT_SIDE_LABEL,
   TOAST_DURATION_MS,
 } from "../constants";
 
 // Shared "<zone label>, ряд <row>, место <column> от центра тела" suffix used
 // by every point-specific toast (mark/block/clear) to name which point it's
 // about via its body-relative address.
-function buildPointAddressSuffix(buttonId: string): string | null {
+function buildPointAddressSuffix(
+  t: TFunction,
+  buttonId: string,
+): string | null {
   const btn = BUTTON_MAP[buttonId];
   const zone = btn ? ZONE_MAP[btn.zoneId] : undefined;
   const address = BUTTON_ADDRESS[buttonId];
   if (!zone || !address) return null;
-  return `${zone.label}, ряд ${address.row}, место ${address.column} от центра тела`;
+  return t("toast.pointAddressSuffix", {
+    zoneLabel: t(ZONE_LABEL_KEY[zone.id]),
+    row: address.row,
+    column: address.column,
+  });
 }
 
 interface MarkToastMessage {
@@ -72,26 +77,30 @@ interface MarkToastMessage {
 // system blackout (site reused too early) — which also bumps the toast's
 // status from Success to Warn.
 function buildMarkToastMessage(
+  t: TFunction,
+  locale: string,
   buttonId: string,
   buttonState: StoredButtonState,
   timestamp: number,
   daysToWhite: number,
 ): MarkToastMessage | null {
-  const addressSuffix = buildPointAddressSuffix(buttonId);
+  const addressSuffix = buildPointAddressSuffix(t, buttonId);
   if (!addressSuffix) return null;
 
-  let message = `Точка отмечена: ${addressSuffix}`;
+  let message = t("toast.pointMarked", { address: addressSuffix });
   let status = ToastStatus.Success;
 
   const result = onPress(buttonState, timestamp, daysToWhite);
   if (result.type === PressResultType.Blackout) {
     const days = result.newState.blackoutDurationDays!;
-    message += `\nТочка заблокирована системой на ${days} ${pluralDays(days)}`;
+    message += t("toast.markBlackoutSuffix", { count: days });
     status = ToastStatus.Warn;
   }
 
   if (Date.now() - timestamp > MARK_BACKDATED_THRESHOLD_MS) {
-    message += `\nВремя отметки: ${formatDateTime(timestamp)}`;
+    message += t("toast.markBackdatedSuffix", {
+      dateTime: formatDateTime(timestamp, locale),
+    });
   }
 
   return { message, status };
@@ -126,17 +135,20 @@ export function MainScreen() {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
+  const { t, i18n } = useTranslation();
+
   const [state, actions] = useAppStore(
     useCallback(
-      () => showToast(AUTO_LOCK_FIRED_TOAST_MESSAGE, ToastStatus.Info),
-      [showToast],
+      () => showToast(t("toast.autoLockFired"), ToastStatus.Info),
+      [showToast, t],
     ),
   );
 
-  // ThemeProvider is mounted in App.tsx, above MainScreen, so it's read
-  // through context here like any other descendant.
+  // ThemeProvider/LanguageProvider are mounted in App.tsx, above MainScreen,
+  // so they're read through context here like any other descendant.
   const { resolvedScheme, colors, mode: themeMode, setMode: onSetThemeMode } =
     useTheme();
+  const { mode: languageMode, setMode: onSetLanguageMode } = useLanguage();
 
   const handlePress = useCallback(
     (id: string) => {
@@ -147,13 +159,13 @@ export function MainScreen() {
       );
 
       if (color === ButtonColor.Gray || color === ButtonColor.Black) {
-        showToast(BLOCKED_TOAST_MESSAGE, ToastStatus.Info, TOAST_DURATION_MS);
+        showToast(t("toast.blocked"), ToastStatus.Info, TOAST_DURATION_MS);
         return;
       }
 
       if (state.interfaceLocked) {
         showToast(
-          INTERFACE_LOCKED_TOAST_MESSAGE,
+          t("toast.interfaceLocked"),
           ToastStatus.Info,
           INTERFACE_LOCKED_TOAST_DURATION_MS,
         );
@@ -163,6 +175,8 @@ export function MainScreen() {
       const timestamp = Date.now();
       actions.pressButton(id);
       const toast = buildMarkToastMessage(
+        t,
+        i18n.language,
         id,
         state.buttonStates[id],
         timestamp,
@@ -177,13 +191,16 @@ export function MainScreen() {
       state.daysToWhite,
       state.interfaceLocked,
       showToast,
+      t,
+      i18n.language,
     ],
   );
   const handleLongPress = useCallback((id: string) => setMenuButtonId(id), []);
 
-  const menuZoneLabel = menuButtonId
-    ? ZONE_MAP[BUTTON_MAP[menuButtonId]?.zoneId]?.label
+  const menuZone = menuButtonId
+    ? ZONE_MAP[BUTTON_MAP[menuButtonId]?.zoneId]
     : undefined;
+  const menuZoneLabel = menuZone ? t(ZONE_LABEL_KEY[menuZone.id]) : undefined;
   const menuButtonState = menuButtonId
     ? state.buttonStates[menuButtonId]
     : undefined;
@@ -240,10 +257,10 @@ export function MainScreen() {
             ]}
           >
             <Text style={[styles.sideLabel, { color: colors.sectionLabel }]}>
-              {RIGHT_SIDE_LABEL}
+              {t("mainScreen.rightSideLabel")}
             </Text>
             <Text style={[styles.sideLabel, { color: colors.sectionLabel }]}>
-              {LEFT_SIDE_LABEL}
+              {t("mainScreen.leftSideLabel")}
             </Text>
           </View>
 
@@ -283,8 +300,8 @@ export function MainScreen() {
           actions.setInterfaceLocked(nextLocked);
           showToast(
             nextLocked
-              ? INTERFACE_LOCK_ENABLED_TOAST_MESSAGE
-              : INTERFACE_LOCK_DISABLED_TOAST_MESSAGE,
+              ? t("toast.interfaceLockEnabled")
+              : t("toast.interfaceLockDisabled"),
             ToastStatus.Info,
           );
         }}
@@ -298,11 +315,24 @@ export function MainScreen() {
         onSetDaysToWhite={actions.setDaysToWhite}
         themeMode={themeMode}
         onSetThemeMode={onSetThemeMode}
-        onExport={(selection) => actions.exportData(themeMode, selection)}
+        languageMode={languageMode}
+        onSetLanguageMode={onSetLanguageMode}
+        onExport={(selection) =>
+          actions.exportData(
+            themeMode,
+            languageMode,
+            t("menu.exportOptionsDialog.shareDialogTitle", {
+              appName: APP_NAME,
+            }),
+            selection,
+          )
+        }
         onPickImportFile={actions.pickImportFile}
         onApplyImport={(data) => {
           actions.applyImport(data);
           if (data.themeMode !== undefined) onSetThemeMode(data.themeMode);
+          if (data.languageMode !== undefined)
+            onSetLanguageMode(data.languageMode);
         }}
         onNotify={showToast}
       />
@@ -318,10 +348,13 @@ export function MainScreen() {
         onBlock={() => {
           if (menuButtonId) {
             actions.blockButton(menuButtonId);
-            const addressSuffix = buildPointAddressSuffix(menuButtonId);
+            const addressSuffix = buildPointAddressSuffix(t, menuButtonId);
             if (addressSuffix) {
               showToast(
-                `${MANUAL_BLOCK_TOAST_PREFIX}: ${addressSuffix}`,
+                t("toast.labeledValue", {
+                  label: t("toast.manualBlockPrefix"),
+                  value: addressSuffix,
+                }),
                 ToastStatus.Success,
               );
             }
@@ -331,10 +364,13 @@ export function MainScreen() {
         onUnblock={() => {
           if (menuButtonId) {
             actions.unblockButton(menuButtonId);
-            const addressSuffix = buildPointAddressSuffix(menuButtonId);
+            const addressSuffix = buildPointAddressSuffix(t, menuButtonId);
             if (addressSuffix) {
               showToast(
-                `${MANUAL_UNBLOCK_TOAST_PREFIX}: ${addressSuffix}`,
+                t("toast.labeledValue", {
+                  label: t("toast.manualUnblockPrefix"),
+                  value: addressSuffix,
+                }),
                 ToastStatus.Success,
               );
             }
@@ -362,6 +398,8 @@ export function MainScreen() {
         onConfirm={(timestamp) => {
           if (markButtonId) {
             const toast = buildMarkToastMessage(
+              t,
+              i18n.language,
               markButtonId,
               state.buttonStates[markButtonId],
               timestamp,
@@ -377,16 +415,19 @@ export function MainScreen() {
 
       <ConfirmDialog
         visible={clearButtonId !== null}
-        title="Очистить точку?"
-        message="Данные этой точки будут удалены, и она станет белой (свободной). Это действие нельзя отменить повторно."
-        confirmLabel={CLEAR_LABEL}
+        title={t("mainScreen.clearPointConfirm.title")}
+        message={t("mainScreen.clearPointConfirm.message")}
+        confirmLabel={t("common.clear")}
         onConfirm={() => {
           if (clearButtonId) {
             actions.clearButton(clearButtonId);
-            const addressSuffix = buildPointAddressSuffix(clearButtonId);
+            const addressSuffix = buildPointAddressSuffix(t, clearButtonId);
             if (addressSuffix) {
               showToast(
-                `${POINT_CLEARED_TOAST_PREFIX}: ${addressSuffix}`,
+                t("toast.labeledValue", {
+                  label: t("toast.pointClearedPrefix"),
+                  value: addressSuffix,
+                }),
                 ToastStatus.Success,
               );
             }

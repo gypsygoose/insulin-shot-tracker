@@ -1,23 +1,17 @@
 import { ScrollView, Text, View, StyleSheet } from "react-native";
+import { TFunction } from "i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { ButtonColor, ZoneType } from "../types";
 import {
   activeCycleColors,
   COLOR_HEX,
   colorLabel,
+  ColorLabelDescriptor,
+  ColorLabelType,
 } from "../logic/stateMachine";
 import { BottomSheet } from "./common/BottomSheet";
 import { useTheme } from "../theme/ThemeContext";
-import {
-  AUTO_LOCK_ROW_LABEL,
-  CLEAR_LABEL,
-  DAYS_TO_WHITE_ROW_LABEL,
-  EXPORT_ROW_LABEL,
-  HELP_SHEET_TITLE,
-  IMPORT_ROW_LABEL,
-  MENU_SHEET_TITLE,
-  MIRROR_ROW_LABEL,
-  THEME_ROW_LABEL,
-} from "../constants";
+import type { TranslationKey } from "../i18n";
 
 // Injection zone descriptions, taken from the Figma "help" frame (node
 // 26:239, file grYg39698ogy0nEBd88Fup). `type` looks up the accent directly
@@ -25,36 +19,35 @@ import {
 // shade in light mode — the plain dark-theme accent reads too faint as
 // text/a badge border on the light theme's white sheet surface (same issue
 // as ZoneContainer's block — see CLAUDE.md's "Zones and buttons").
-interface InjectionZoneInfo {
-  type: ZoneType;
-  label: string;
-  location: string;
-  description: string;
+const HELP_ZONE_TYPES: ZoneType[] = [
+  ZoneType.Shoulder,
+  ZoneType.Belly,
+  ZoneType.Thigh,
+];
+
+interface HelpZoneKeys {
+  label: TranslationKey;
+  location: TranslationKey;
+  description: TranslationKey;
 }
 
-const INJECTION_ZONE_INFO: InjectionZoneInfo[] = [
-  {
-    label: "Плечи",
-    location: "средняя треть сзади и сбоку",
-    description:
-      "Умеренное всасывание. Начало действия через 10 минут. Пик действия через 60–90 минут.",
-    type: ZoneType.Shoulder,
+const HELP_ZONE_KEY: Record<ZoneType, HelpZoneKeys> = {
+  [ZoneType.Shoulder]: {
+    label: "help.zones.shoulder.label",
+    location: "help.zones.shoulder.location",
+    description: "help.zones.shoulder.description",
   },
-  {
-    label: "Живот",
-    location: "4 см отступ от рёбер и пупка",
-    description:
-      "Быстрое всасывание. Начало действия через 5 минут. Пик действия через 30–60 минут.",
-    type: ZoneType.Belly,
+  [ZoneType.Belly]: {
+    label: "help.zones.belly.label",
+    location: "help.zones.belly.location",
+    description: "help.zones.belly.description",
   },
-  {
-    label: "Бёдра",
-    location: "внешняя боковая поверхность",
-    description:
-      "Медленное всасывание. Для пролонгированного инсулина. Пик действия через 90–120 минут.",
-    type: ZoneType.Thigh,
+  [ZoneType.Thigh]: {
+    label: "help.zones.thigh.label",
+    location: "help.zones.thigh.location",
+    description: "help.zones.thigh.description",
   },
-];
+};
 
 // Color scheme rows shown in order: white (free), the active injection
 // cycle (fewer entries when daysToWhite is reduced), then the two block
@@ -68,6 +61,27 @@ function colorOrder(daysToWhite: number): ButtonColor[] {
   ];
 }
 
+// Formats the descriptor colorLabel() returns (see stateMachine.ts, which
+// stays free of an i18next dependency by returning a descriptor rather than
+// a string) — the only consumer, so this stays local rather than exported.
+function formatColorLabel(
+  t: TFunction,
+  descriptor: ColorLabelDescriptor,
+): string {
+  switch (descriptor.type) {
+    case ColorLabelType.White:
+      return t("stateMachine.colorLabel.white", { count: descriptor.count });
+    case ColorLabelType.Maroon:
+      return t("stateMachine.colorLabel.maroon");
+    case ColorLabelType.Black:
+      return t("stateMachine.colorLabel.black");
+    case ColorLabelType.Gray:
+      return t("stateMachine.colorLabel.gray");
+    case ColorLabelType.Days:
+      return t("common.daysCount", { count: descriptor.count });
+  }
+}
+
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -75,6 +89,7 @@ interface Props {
 }
 
 export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const sectionTitleStyle = [
     styles.sectionTitle,
@@ -82,16 +97,18 @@ export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
   ];
   const hintStyle = [styles.hint, { color: colors.secondaryText }];
   const boldStyle = [styles.bold, { color: colors.primaryText }];
+  const boldComponents = { bold: <Text style={boldStyle} /> };
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title={HELP_SHEET_TITLE}>
+    <BottomSheet visible={visible} onClose={onClose} title={t("help.title")}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={sectionTitleStyle}>Зоны введения</Text>
-        {INJECTION_ZONE_INFO.map((zone) => {
-          const color = colors.zoneColors[zone.type].accent;
+        <Text style={sectionTitleStyle}>{t("help.sectionZones")}</Text>
+        {HELP_ZONE_TYPES.map((type) => {
+          const color = colors.zoneColors[type].accent;
+          const zoneKey = HELP_ZONE_KEY[type];
           return (
             <View
-              key={zone.type}
+              key={type}
               style={[styles.zoneCard, { borderBottomColor: colors.divider }]}
             >
               <View style={styles.zoneHeader}>
@@ -103,13 +120,13 @@ export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
                 />
                 <Text style={styles.zoneRowText}>
                   <Text style={[styles.zoneLabel, { color }]}>
-                    {zone.label}
+                    {t(zoneKey.label)}
                   </Text>
                   <Text
                     style={[styles.zoneLocation, { color: colors.mutedText }]}
                   >
                     {" "}
-                    {zone.location}
+                    {t(zoneKey.location)}
                   </Text>
                 </Text>
               </View>
@@ -119,13 +136,13 @@ export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
                   { color: colors.secondaryText },
                 ]}
               >
-                {zone.description}
+                {t(zoneKey.description)}
               </Text>
             </View>
           );
         })}
 
-        <Text style={sectionTitleStyle}>Цветовая схема</Text>
+        <Text style={sectionTitleStyle}>{t("help.sectionColorScheme")}</Text>
         {colorOrder(daysToWhite).map((color) => (
           <View key={color} style={styles.colorRow}>
             <View
@@ -138,75 +155,106 @@ export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
               ]}
             />
             <Text style={[styles.colorLabel, { color: colors.secondaryText }]}>
-              {colorLabel(color, daysToWhite)}
+              {formatColorLabel(t, colorLabel(color, daysToWhite))}
             </Text>
           </View>
         ))}
 
-        <Text style={sectionTitleStyle}>Управление</Text>
+        <Text style={sectionTitleStyle}>{t("help.sectionControls")}</Text>
         <Text style={hintStyle}>
-          <Text style={boldStyle}>Нажатие</Text> — зафиксировать укол.
+          <Trans i18nKey="help.controls.press" components={boldComponents} />
         </Text>
         <Text style={hintStyle}>
-          <Text style={boldStyle}>Долгое нажатие</Text> (~1 с) — вызвать меню
-          для места укола.
+          <Trans
+            i18nKey="help.controls.longPress"
+            components={boldComponents}
+          />
         </Text>
         <Text style={hintStyle}>
-          <Text style={boldStyle}>✓ Галочка</Text> — последнее использованное
-          место в группе.
-        </Text>
-
-        <Text style={sectionTitleStyle}>Нижняя панель</Text>
-        <Text style={hintStyle}>
-          <Text style={boldStyle}>Отменить</Text> — отменить последнее действие
-          (укол, блокировку или разблокировку места).
-        </Text>
-        <Text style={hintStyle}>
-          <Text style={boldStyle}>{MENU_SHEET_TITLE}</Text> — открыть меню
-          настроек и данных.
-        </Text>
-        <Text style={hintStyle}>
-          <Text style={boldStyle}>{HELP_SHEET_TITLE}</Text> — открыть этот
-          экран.
-        </Text>
-        <Text style={hintStyle}>
-          <Text style={boldStyle}>Замок</Text> — заблокировать или
-          разблокировать интерфейс, чтобы избежать случайных нажатий.
+          <Trans
+            i18nKey="help.controls.checkmark"
+            components={boldComponents}
+          />
         </Text>
 
-        <Text style={sectionTitleStyle}>Пункты меню</Text>
+        <Text style={sectionTitleStyle}>{t("help.sectionBottomBar")}</Text>
         <Text style={hintStyle}>
-          <Text style={boldStyle}>{MIRROR_ROW_LABEL}</Text> — отразить силуэт
-          тела по горизонтали.
+          <Trans i18nKey="help.bottomBar.undo" components={boldComponents} />
         </Text>
         <Text style={hintStyle}>
-          <Text style={boldStyle}>{AUTO_LOCK_ROW_LABEL}</Text> — автоматически
-          включать блокировку через заданное время после отметки укола и после
-          ручной разблокировки. Нажатие на строку открывает настройку задержек.
+          <Trans
+            i18nKey="help.bottomBar.menu"
+            values={{ label: t("menu.title") }}
+            components={boldComponents}
+          />
         </Text>
         <Text style={hintStyle}>
-          <Text style={boldStyle}>{DAYS_TO_WHITE_ROW_LABEL}</Text> — через
-          сколько дней место укола снова считается полностью свободным (белым).
-          Уменьшение значения сжимает цветовую схему в этот срок.
+          <Trans
+            i18nKey="help.bottomBar.help"
+            values={{ label: t("help.title") }}
+            components={boldComponents}
+          />
         </Text>
         <Text style={hintStyle}>
-          <Text style={boldStyle}>{THEME_ROW_LABEL}</Text> — выбрать светлую,
-          тёмную или системную тему оформления приложения.
+          <Trans i18nKey="help.bottomBar.lock" components={boldComponents} />
+        </Text>
+
+        <Text style={sectionTitleStyle}>{t("help.sectionMenuItems")}</Text>
+        <Text style={hintStyle}>
+          <Trans
+            i18nKey="help.menuItems.mirror"
+            values={{ label: t("menu.mirrorRow") }}
+            components={boldComponents}
+          />
         </Text>
         <Text style={hintStyle}>
-          <Text style={boldStyle}>{EXPORT_ROW_LABEL}</Text> — выбрать, что
-          сохранить в файл: отметки точек укола и/или настройки приложения (по
-          отдельности).
+          <Trans
+            i18nKey="help.menuItems.autoLock"
+            values={{ label: t("menu.autoLockRow") }}
+            components={boldComponents}
+          />
         </Text>
         <Text style={hintStyle}>
-          <Text style={boldStyle}>{IMPORT_ROW_LABEL}</Text> — выбрать, что
-          применить из файла: отметки точек укола и/или настройки приложения (по
-          отдельности). Категории, которых нет в файле, недоступны для выбора;
-          остальные текущие данные не затрагиваются.
+          <Trans
+            i18nKey="help.menuItems.daysToWhite"
+            values={{ label: t("menu.daysToWhiteRow") }}
+            components={boldComponents}
+          />
         </Text>
         <Text style={hintStyle}>
-          <Text style={boldStyle}>{CLEAR_LABEL}</Text> — удалить всю историю
-          инъекций без возможности восстановления.
+          <Trans
+            i18nKey="help.menuItems.theme"
+            values={{ label: t("menu.themeRow") }}
+            components={boldComponents}
+          />
+        </Text>
+        <Text style={hintStyle}>
+          <Trans
+            i18nKey="help.menuItems.language"
+            values={{ label: t("menu.languageRow") }}
+            components={boldComponents}
+          />
+        </Text>
+        <Text style={hintStyle}>
+          <Trans
+            i18nKey="help.menuItems.export"
+            values={{ label: t("menu.exportRow") }}
+            components={boldComponents}
+          />
+        </Text>
+        <Text style={hintStyle}>
+          <Trans
+            i18nKey="help.menuItems.import"
+            values={{ label: t("menu.importRow") }}
+            components={boldComponents}
+          />
+        </Text>
+        <Text style={hintStyle}>
+          <Trans
+            i18nKey="help.menuItems.clear"
+            values={{ label: t("common.clear") }}
+            components={boldComponents}
+          />
         </Text>
         <View style={styles.bottomPad} />
       </ScrollView>

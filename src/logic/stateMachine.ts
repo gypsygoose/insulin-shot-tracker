@@ -1,5 +1,4 @@
 import { ButtonColor, StoredButtonState } from "../types";
-import { pluralDays } from "../format";
 import { DEFAULT_DAYS_TO_WHITE } from "../constants";
 
 export const DAY_MS = 24 * 60 * 60 * 1000;
@@ -223,24 +222,41 @@ export const COLOR_HEX: Record<ButtonColor, string> = {
   [ButtonColor.Gray]: "#6B7280",
 };
 
-// Human-readable description of when a color is reached, dependent on the
-// daysToWhite setting for colors that are part of the injection cycle.
+// Which sentence colorLabel() below describes — kept as a descriptor rather
+// than a formatted string so this file (tested without an RN renderer) stays
+// free of an i18next dependency; the UI layer (HelpSheet.tsx) formats it via
+// t('stateMachine.colorLabel.*', { count }).
+export enum ColorLabelType {
+  White = "white",
+  Maroon = "maroon",
+  Black = "black",
+  Gray = "gray",
+  Days = "days",
+}
+
+export interface ColorLabelDescriptor {
+  type: ColorLabelType;
+  count?: number;
+}
+
+// Descriptor for when a color is reached, dependent on the daysToWhite
+// setting for colors that are part of the injection cycle.
 export function colorLabel(
   color: ButtonColor,
   daysToWhite: number = DEFAULT_DAYS_TO_WHITE,
-): string {
+): ColorLabelDescriptor {
   switch (color) {
     case ButtonColor.White:
-      return `Свободно (не использовалось ${daysToWhite}+ ${pluralDays(daysToWhite)})`;
+      return { type: ColorLabelType.White, count: daysToWhite };
     case ButtonColor.Maroon:
-      return "Только что (день 0)";
+      return { type: ColorLabelType.Maroon };
     case ButtonColor.Black:
-      return "Заблокировано системой из-за частого использования";
+      return { type: ColorLabelType.Black };
     case ButtonColor.Gray:
-      return "Заблокировано вручную (травма/синяк)";
+      return { type: ColorLabelType.Gray };
     default: {
       const days = activeCycleColors(daysToWhite).indexOf(color);
-      return `${days} ${pluralDays(days)}`;
+      return { type: ColorLabelType.Days, count: days };
     }
   }
 }

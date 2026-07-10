@@ -1,22 +1,17 @@
+import { useTranslation } from "react-i18next";
 import { Checkbox } from "./common/Checkbox";
 import { Accordion } from "./common/Accordion";
 import { ExportSelection, ExportSettingKey } from "../types";
-import {
-  AUTO_LOCK_ROW_LABEL,
-  DAYS_TO_WHITE_ROW_LABEL,
-  EXPORT_MARKS_LABEL,
-  EXPORT_SETTINGS_LABEL,
-  MIRROR_ROW_LABEL,
-  THEME_ROW_LABEL,
-} from "../constants";
+import type { TranslationKey } from "../i18n";
 
 export const SETTING_KEYS: ExportSettingKey[] = Object.values(ExportSettingKey);
 
-const SETTING_LABEL: Record<ExportSettingKey, string> = {
-  [ExportSettingKey.Mirrored]: MIRROR_ROW_LABEL,
-  [ExportSettingKey.AutoLock]: AUTO_LOCK_ROW_LABEL,
-  [ExportSettingKey.DaysToWhite]: DAYS_TO_WHITE_ROW_LABEL,
-  [ExportSettingKey.Theme]: THEME_ROW_LABEL,
+const SETTING_LABEL_KEY: Record<ExportSettingKey, TranslationKey> = {
+  [ExportSettingKey.Mirrored]: "menu.mirrorRow",
+  [ExportSettingKey.AutoLock]: "menu.autoLockRow",
+  [ExportSettingKey.DaysToWhite]: "menu.daysToWhiteRow",
+  [ExportSettingKey.Theme]: "menu.themeRow",
+  [ExportSettingKey.Language]: "menu.languageRow",
 };
 
 export function isSelectionEmpty(selection: ExportSelection): boolean {
@@ -48,6 +43,7 @@ export function ImportExportOptions({
   marksDisabled = false,
   disabledSettingKeys = [],
 }: Props) {
+  const { t } = useTranslation();
   const checkableSettingKeys = SETTING_KEYS.filter(
     (key) => !disabledSettingKeys.includes(key),
   );
@@ -80,7 +76,7 @@ export function ImportExportOptions({
   return (
     <>
       <Checkbox
-        label={EXPORT_MARKS_LABEL}
+        label={t("menu.exportOptionsDialog.marksLabel")}
         checked={selection.marks}
         onToggle={toggleMarks}
         disabled={marksDisabled}
@@ -89,7 +85,7 @@ export function ImportExportOptions({
       <Accordion
         label={
           <Checkbox
-            label={EXPORT_SETTINGS_LABEL}
+            label={t("menu.exportOptionsDialog.settingsLabel")}
             checked={allSettingsChecked}
             indeterminate={!allSettingsChecked && !noSettingsChecked}
             onToggle={toggleAllSettings}
@@ -103,7 +99,7 @@ export function ImportExportOptions({
         {SETTING_KEYS.map((key) => (
           <Checkbox
             key={key}
-            label={SETTING_LABEL[key]}
+            label={t(SETTING_LABEL_KEY[key])}
             checked={selection.settings[key]}
             onToggle={() => toggleSetting(key)}
             disabled={disabledSettingKeys.includes(key)}

@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Modal } from "./Modal";
 import { useTheme } from "../../theme/ThemeContext";
-import { CANCEL_LABEL } from "../../constants";
 
 interface Props {
   visible: boolean;
@@ -26,13 +26,14 @@ export function Dialog({
   message,
   children,
   confirmLabel,
-  cancelLabel = CANCEL_LABEL,
+  cancelLabel,
   onConfirm,
   onCancel,
   destructive = false,
   scrollable = false,
   confirmDisabled = false,
 }: Props) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
 
   const body = (
@@ -76,7 +77,7 @@ export function Dialog({
             activeOpacity={0.8}
           >
             <Text style={[styles.cancelLabel, { color: colors.cancelButtonText }]}>
-              {cancelLabel}
+              {cancelLabel ?? t("common.cancel")}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity

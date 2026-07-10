@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog } from "./common/Dialog";
 import { ImportExportOptions, isSelectionEmpty, SETTING_KEYS } from "./ImportExportOptions";
 import { ExportedAppData, ExportSelection, ExportSettingKey } from "../types";
-import {
-  IMPORT_CONFIRM_LABEL,
-  IMPORT_OPTIONS_DIALOG_MESSAGE,
-  IMPORT_OPTIONS_DIALOG_TITLE,
-} from "../constants";
 
 const SETTING_AVAILABLE: Record<
   ExportSettingKey,
@@ -16,6 +12,7 @@ const SETTING_AVAILABLE: Record<
   [ExportSettingKey.AutoLock]: (data) => data.autoLockEnabled !== undefined,
   [ExportSettingKey.DaysToWhite]: (data) => data.daysToWhite !== undefined,
   [ExportSettingKey.Theme]: (data) => data.themeMode !== undefined,
+  [ExportSettingKey.Language]: (data) => data.languageMode !== undefined,
 };
 
 function availableSettings(data: ExportedAppData): Record<ExportSettingKey, boolean> {
@@ -40,6 +37,7 @@ interface Props {
 // checkbox follows the same rule: it's disabled once every one of its
 // sub-rows is disabled, i.e. the file carries no settings at all.
 export function ImportOptionsDialog({ visible, data, onConfirm, onCancel }: Props) {
+  const { t } = useTranslation();
   const marksAvailable = data.buttonStates !== undefined;
   const settingsAvailable = availableSettings(data);
   const disabledSettingKeys = SETTING_KEYS.filter(
@@ -66,9 +64,9 @@ export function ImportOptionsDialog({ visible, data, onConfirm, onCancel }: Prop
   return (
     <Dialog
       visible={visible}
-      title={IMPORT_OPTIONS_DIALOG_TITLE}
-      message={IMPORT_OPTIONS_DIALOG_MESSAGE}
-      confirmLabel={IMPORT_CONFIRM_LABEL}
+      title={t("menu.importOptionsDialog.title")}
+      message={t("menu.importOptionsDialog.message")}
+      confirmLabel={t("menu.importOptionsDialog.confirmLabel")}
       confirmDisabled={isSelectionEmpty(selection)}
       onConfirm={() => onConfirm(selection)}
       onCancel={onCancel}

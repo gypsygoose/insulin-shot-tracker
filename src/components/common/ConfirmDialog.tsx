@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Dialog } from './Dialog';
 
 interface Props {
@@ -15,18 +16,19 @@ export function ConfirmDialog({
   visible,
   title,
   message,
-  confirmLabel = 'Подтвердить',
+  confirmLabel,
   cancelLabel,
   onConfirm,
   onCancel,
   destructive = false,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <Dialog
       visible={visible}
       title={title}
       message={message}
-      confirmLabel={confirmLabel}
+      confirmLabel={confirmLabel ?? t('common.confirm')}
       cancelLabel={cancelLabel}
       onConfirm={onConfirm}
       onCancel={onCancel}

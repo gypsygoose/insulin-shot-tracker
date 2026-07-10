@@ -1,21 +1,13 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog } from "./common/Dialog";
 import { NumberPickerField } from "./common/NumberPickerField";
-import {
-  DAYS_TO_WHITE_ROW_LABEL,
-  MAX_DAYS_TO_WHITE,
-  MIN_DAYS_TO_WHITE,
-  SAVE_LABEL,
-} from "../constants";
-import { pluralDays } from "../format";
+import { MAX_DAYS_TO_WHITE, MIN_DAYS_TO_WHITE } from "../constants";
 
 const DAYS_OPTIONS = Array.from(
   { length: MAX_DAYS_TO_WHITE - MIN_DAYS_TO_WHITE + 1 },
   (_, i) => i + MIN_DAYS_TO_WHITE,
 );
-
-const DIALOG_MESSAGE =
-  "Через сколько дней место укола снова считается полностью свободным (белым). При меньшем значении цвета цикла сжимаются в этот срок.";
 
 interface Props {
   visible: boolean;
@@ -30,6 +22,7 @@ export function DaysToWhiteDialog({
   onConfirm,
   onCancel,
 }: Props) {
+  const { t } = useTranslation();
   const [days, setDays] = useState(initialDays);
 
   useEffect(() => {
@@ -40,14 +33,14 @@ export function DaysToWhiteDialog({
   return (
     <Dialog
       visible={visible}
-      title={DAYS_TO_WHITE_ROW_LABEL}
-      message={DIALOG_MESSAGE}
-      confirmLabel={SAVE_LABEL}
+      title={t("menu.daysToWhiteRow")}
+      message={t("menu.daysToWhiteDialog.message")}
+      confirmLabel={t("common.save")}
       onConfirm={() => onConfirm(days)}
       onCancel={onCancel}
     >
       <NumberPickerField
-        label={DAYS_TO_WHITE_ROW_LABEL}
+        label={t("menu.daysToWhiteRow")}
         value={days}
         options={DAYS_OPTIONS}
         onChange={setDays}

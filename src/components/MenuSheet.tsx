@@ -1,23 +1,10 @@
 import { Text, TouchableOpacity, View, Switch, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { BottomSheet } from "./common/BottomSheet";
 import { useTheme } from "../theme/ThemeContext";
-import { ThemeMode } from "../types";
-import {
-  AFTER_MARK_LABEL,
-  AFTER_UNLOCK_LABEL,
-  AUTO_LOCK_ROW_LABEL,
-  CLEAR_LABEL,
-  DAYS_TO_WHITE_ROW_LABEL,
-  EXPORT_ROW_LABEL,
-  IMPORT_ROW_LABEL,
-  MENU_SHEET_TITLE,
-  MIRROR_ROW_LABEL,
-  THEME_DARK_LABEL,
-  THEME_LIGHT_LABEL,
-  THEME_ROW_LABEL,
-  THEME_SYSTEM_LABEL,
-} from "../constants";
-import { pad2, pluralDays, splitSeconds } from "../format";
+import { LanguageMode, ThemeMode } from "../types";
+import { pad2, splitSeconds } from "../format";
+import type { TranslationKey } from "../i18n";
 
 interface Props {
   visible: boolean;
@@ -33,16 +20,26 @@ interface Props {
   onEditDaysToWhite: () => void;
   themeMode: ThemeMode;
   onEditTheme: () => void;
+  languageMode: LanguageMode;
+  onEditLanguage: () => void;
   onImport: () => void;
   onExport: () => void;
   onClear: () => void;
 }
 
-// Shared with ThemeDialog.tsx, which offers the same three options.
-export const THEME_MODE_LABEL: Record<ThemeMode, string> = {
-  [ThemeMode.Light]: THEME_LIGHT_LABEL,
-  [ThemeMode.Dark]: THEME_DARK_LABEL,
-  [ThemeMode.System]: THEME_SYSTEM_LABEL,
+// Shared with ThemeDialog.tsx, which offers the same three options — values
+// are translation keys, not literal labels.
+export const THEME_MODE_KEY: Record<ThemeMode, TranslationKey> = {
+  [ThemeMode.Light]: "menu.themeDialog.light",
+  [ThemeMode.Dark]: "menu.themeDialog.dark",
+  [ThemeMode.System]: "menu.themeDialog.system",
+};
+
+// Shared with LanguageDialog.tsx, which offers the same three options.
+export const LANGUAGE_MODE_KEY: Record<LanguageMode, TranslationKey> = {
+  [LanguageMode.Russian]: "menu.languageDialog.russian",
+  [LanguageMode.English]: "menu.languageDialog.english",
+  [LanguageMode.System]: "menu.languageDialog.system",
 };
 
 function formatDuration(totalSeconds: number): string {
@@ -64,17 +61,20 @@ export function MenuSheet({
   onEditDaysToWhite,
   themeMode,
   onEditTheme,
+  languageMode,
+  onEditLanguage,
   onImport,
   onExport,
   onClear,
 }: Props) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title={MENU_SHEET_TITLE}>
+    <BottomSheet visible={visible} onClose={onClose} title={t("menu.title")}>
       <View style={styles.row}>
         <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
-          {MIRROR_ROW_LABEL}
+          {t("menu.mirrorRow")}
         </Text>
         <Switch
           value={mirrored}
@@ -91,13 +91,15 @@ export function MenuSheet({
           activeOpacity={0.7}
         >
           <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
-            {AUTO_LOCK_ROW_LABEL}
+            {t("menu.autoLockRow")}
           </Text>
           <Text style={[styles.rowDescription, { color: colors.mutedText }]}>
-            {AFTER_MARK_LABEL} — {formatDuration(autoLockAfterMarkSeconds)}
+            {t("menu.autoLockDialog.afterMark")} —{" "}
+            {formatDuration(autoLockAfterMarkSeconds)}
           </Text>
           <Text style={[styles.rowDescription, { color: colors.mutedText }]}>
-            {AFTER_UNLOCK_LABEL} — {formatDuration(autoLockAfterUnlockSeconds)}
+            {t("menu.autoLockDialog.afterUnlock")} —{" "}
+            {formatDuration(autoLockAfterUnlockSeconds)}
           </Text>
         </TouchableOpacity>
         <Switch
@@ -114,19 +116,32 @@ export function MenuSheet({
         activeOpacity={0.7}
       >
         <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
-          {DAYS_TO_WHITE_ROW_LABEL}
+          {t("menu.daysToWhiteRow")}
         </Text>
         <Text style={[styles.rowValue, { color: colors.mutedText }]}>
-          {daysToWhite} {pluralDays(daysToWhite)}
+          {t("common.daysCount", { count: daysToWhite })}
         </Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.row} onPress={onEditTheme} activeOpacity={0.7}>
         <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
-          {THEME_ROW_LABEL}
+          {t("menu.themeRow")}
         </Text>
         <Text style={[styles.rowValue, { color: colors.mutedText }]}>
-          {THEME_MODE_LABEL[themeMode]}
+          {t(THEME_MODE_KEY[themeMode])}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.row}
+        onPress={onEditLanguage}
+        activeOpacity={0.7}
+      >
+        <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
+          {t("menu.languageRow")}
+        </Text>
+        <Text style={[styles.rowValue, { color: colors.mutedText }]}>
+          {t(LANGUAGE_MODE_KEY[languageMode])}
         </Text>
       </TouchableOpacity>
 
@@ -136,7 +151,7 @@ export function MenuSheet({
         activeOpacity={0.7}
       >
         <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
-          {EXPORT_ROW_LABEL}
+          {t("menu.exportRow")}
         </Text>
       </TouchableOpacity>
 
@@ -146,7 +161,7 @@ export function MenuSheet({
         activeOpacity={0.7}
       >
         <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
-          {IMPORT_ROW_LABEL}
+          {t("menu.importRow")}
         </Text>
       </TouchableOpacity>
 
@@ -156,7 +171,7 @@ export function MenuSheet({
         activeOpacity={0.7}
       >
         <Text style={[styles.rowLabel, { color: colors.destructive }]}>
-          {CLEAR_LABEL}
+          {t("common.clear")}
         </Text>
       </TouchableOpacity>
     </BottomSheet>

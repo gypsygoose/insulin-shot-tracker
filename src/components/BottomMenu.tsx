@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
+import { i18next } from "../i18n";
 import { ConfirmDialog } from "./common/ConfirmDialog";
 import { HelpSheet } from "./HelpSheet";
-import { MenuSheet, THEME_MODE_LABEL } from "./MenuSheet";
+import { MenuSheet, LANGUAGE_MODE_KEY, THEME_MODE_KEY } from "./MenuSheet";
 import { AutoLockDialog } from "./AutoLockDialog";
 import { DaysToWhiteDialog } from "./DaysToWhiteDialog";
 import { ThemeDialog } from "./ThemeDialog";
+import { LanguageDialog } from "./LanguageDialog";
 import { ExportOptionsDialog } from "./ExportOptionsDialog";
 import { ImportOptionsDialog } from "./ImportOptionsDialog";
 import { UndoIcon } from "./icons/UndoIcon";
@@ -18,27 +21,12 @@ import {
   ExportedAppData,
   ExportSelection,
   ExportSettingKey,
+  LanguageMode,
   ThemeMode,
   ToastStatus,
 } from "../types";
 import { ImportResult, ImportResultType } from "../storage/storage";
 import { useTheme } from "../theme/ThemeContext";
-import {
-  AUTO_LOCK_DISABLED_TOAST_MESSAGE,
-  AUTO_LOCK_ENABLED_TOAST_MESSAGE,
-  AUTO_LOCK_UPDATED_TOAST_MESSAGE,
-  CANCEL_LABEL,
-  CLEAR_ALL_TOAST_MESSAGE,
-  CLEAR_LABEL,
-  DAYS_TO_WHITE_ROW_LABEL,
-  EXPORT_SUCCESS_TOAST_MESSAGE,
-  IMPORT_FAILURE_TOAST_MESSAGE,
-  IMPORT_SUCCESS_TOAST_MESSAGE,
-  MIRROR_DISABLED_TOAST_MESSAGE,
-  MIRROR_ENABLED_TOAST_MESSAGE,
-  THEME_UPDATED_TOAST_MESSAGE_PREFIX,
-  UNDO_TOAST_MESSAGE,
-} from "../constants";
 
 // Narrows a parsed import file down to just the categories the user kept
 // checked in ImportOptionsDialog, mirroring useAppStore's exportData filter
@@ -65,6 +53,9 @@ function buildImportData(
   }
   if (selection.settings[ExportSettingKey.Theme]) {
     filtered.themeMode = data.themeMode;
+  }
+  if (selection.settings[ExportSettingKey.Language]) {
+    filtered.languageMode = data.languageMode;
   }
   return filtered;
 }
@@ -93,6 +84,8 @@ interface Props {
   onSetDaysToWhite: (days: number) => void;
   themeMode: ThemeMode;
   onSetThemeMode: (mode: ThemeMode) => void;
+  languageMode: LanguageMode;
+  onSetLanguageMode: (mode: LanguageMode) => Promise<void>;
   onExport: (selection: ExportSelection) => Promise<void>;
   onPickImportFile: () => Promise<ImportResult>;
   onApplyImport: (data: ExportedAppData) => void;
@@ -117,11 +110,14 @@ export function BottomMenu({
   onSetDaysToWhite,
   themeMode,
   onSetThemeMode,
+  languageMode,
+  onSetLanguageMode,
   onExport,
   onPickImportFile,
   onApplyImport,
   onNotify,
 }: Props) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const [showUndo, setShowUndo] = useState(false);
   const [showClear, setShowClear] = useState(false);
@@ -131,6 +127,7 @@ export function BottomMenu({
     useState<AutoLockDialogMode | null>(null);
   const [showDaysToWhiteDialog, setShowDaysToWhiteDialog] = useState(false);
   const [showThemeDialog, setShowThemeDialog] = useState(false);
+  const [showLanguageDialog, setShowLanguageDialog] = useState(false);
   const [showExportOptions, setShowExportOptions] = useState(false);
   const [pendingImport, setPendingImport] = useState<ExportedAppData | null>(
     null,
@@ -142,7 +139,7 @@ export function BottomMenu({
       setAutoLockDialogIntent(AutoLockDialogMode.Enable);
     } else {
       onDisableAutoLock();
-      onNotify(AUTO_LOCK_DISABLED_TOAST_MESSAGE, ToastStatus.Success);
+      onNotify(t("toast.autoLockDisabled"), ToastStatus.Success);
     }
   };
 
@@ -161,12 +158,17 @@ export function BottomMenu({
     setShowThemeDialog(true);
   };
 
+  const handleEditLanguage = () => {
+    setShowMenu(false);
+    setShowLanguageDialog(true);
+  };
+
   const handleImport = async () => {
     setShowMenu(false);
     const result = await onPickImportFile();
     if (result.type === ImportResultType.Cancelled) return;
     if (result.type === ImportResultType.Invalid) {
-      onNotify(IMPORT_FAILURE_TOAST_MESSAGE, ToastStatus.Error);
+      onNotify(t("toast.importFailure"), ToastStatus.Error);
       return;
     }
     setPendingImport(result.data);
@@ -188,7 +190,7 @@ export function BottomMenu({
         onToggleMirrored={(value) => {
           onToggleMirrored(value);
           onNotify(
-            value ? MIRROR_ENABLED_TOAST_MESSAGE : MIRROR_DISABLED_TOAST_MESSAGE,
+            value ? t("toast.mirrorEnabled") : t("toast.mirrorDisabled"),
             ToastStatus.Success,
           );
         }}
@@ -201,6 +203,8 @@ export function BottomMenu({
         onEditDaysToWhite={handleEditDaysToWhite}
         themeMode={themeMode}
         onEditTheme={handleEditTheme}
+        languageMode={languageMode}
+        onEditLanguage={handleEditLanguage}
         onImport={handleImport}
         onExport={() => {
           setShowMenu(false);
@@ -222,10 +226,10 @@ export function BottomMenu({
           setAutoLockDialogIntent(null);
           if (intent === AutoLockDialogMode.Enable) {
             onEnableAutoLock(afterMarkSeconds, afterUnlockSeconds);
-            onNotify(AUTO_LOCK_ENABLED_TOAST_MESSAGE, ToastStatus.Success);
+            onNotify(t("toast.autoLockEnabled"), ToastStatus.Success);
           } else {
             onUpdateAutoLockTimes(afterMarkSeconds, afterUnlockSeconds);
-            onNotify(AUTO_LOCK_UPDATED_TOAST_MESSAGE, ToastStatus.Success);
+            onNotify(t("toast.autoLockUpdated"), ToastStatus.Success);
           }
         }}
         onCancel={() => setAutoLockDialogIntent(null)}
@@ -237,7 +241,13 @@ export function BottomMenu({
         onConfirm={(days) => {
           setShowDaysToWhiteDialog(false);
           onSetDaysToWhite(days);
-          onNotify(`${DAYS_TO_WHITE_ROW_LABEL}: ${days}`, ToastStatus.Success);
+          onNotify(
+            t("toast.labeledValue", {
+              label: t("menu.daysToWhiteRow"),
+              value: days,
+            }),
+            ToastStatus.Success,
+          );
         }}
         onCancel={() => setShowDaysToWhiteDialog(false)}
       />
@@ -249,11 +259,36 @@ export function BottomMenu({
           setShowThemeDialog(false);
           onSetThemeMode(mode);
           onNotify(
-            `${THEME_UPDATED_TOAST_MESSAGE_PREFIX}: ${THEME_MODE_LABEL[mode]}`,
+            t("toast.labeledValue", {
+              label: t("toast.themeUpdatedPrefix"),
+              value: t(THEME_MODE_KEY[mode]),
+            }),
             ToastStatus.Success,
           );
         }}
         onCancel={() => setShowThemeDialog(false)}
+      />
+
+      <LanguageDialog
+        visible={showLanguageDialog}
+        initialLanguageMode={languageMode}
+        onConfirm={async (mode) => {
+          setShowLanguageDialog(false);
+          await onSetLanguageMode(mode);
+          // react-i18next's t() is fixed to the language of the last render
+          // (see useTranslation's getFixedT snapshot) — it won't reflect the
+          // language switch above until BottomMenu re-renders. i18next.t()
+          // itself reads the instance's current language dynamically, so it
+          // reflects the switch immediately.
+          onNotify(
+            i18next.t("toast.labeledValue", {
+              label: i18next.t("toast.languageUpdatedPrefix"),
+              value: i18next.t(LANGUAGE_MODE_KEY[mode]),
+            }),
+            ToastStatus.Success,
+          );
+        }}
+        onCancel={() => setShowLanguageDialog(false)}
       />
 
       <ExportOptionsDialog
@@ -261,7 +296,7 @@ export function BottomMenu({
         onConfirm={async (selection) => {
           setShowExportOptions(false);
           await onExport(selection);
-          onNotify(EXPORT_SUCCESS_TOAST_MESSAGE, ToastStatus.Success);
+          onNotify(t("toast.exportSuccess"), ToastStatus.Success);
         }}
         onCancel={() => setShowExportOptions(false)}
       />
@@ -319,27 +354,27 @@ export function BottomMenu({
 
       <ConfirmDialog
         visible={showUndo}
-        title="Отменить последний укол?"
-        message="Последняя зафиксированная инъекция будет удалена. Это действие нельзя отменить повторно."
-        confirmLabel="Отменить укол"
+        title={t("menu.undoConfirm.title")}
+        message={t("menu.undoConfirm.message")}
+        confirmLabel={t("menu.undoConfirm.confirmLabel")}
         onConfirm={() => {
           setShowUndo(false);
           onUndo();
-          onNotify(UNDO_TOAST_MESSAGE, ToastStatus.Success);
+          onNotify(t("toast.undo"), ToastStatus.Success);
         }}
         onCancel={() => setShowUndo(false)}
       />
 
       <ConfirmDialog
         visible={showClear}
-        title="Очистить все данные?"
-        message="Вся история инъекций будет удалена. Все точки станут белыми. Это действие нельзя отменить."
-        confirmLabel={CLEAR_LABEL}
-        cancelLabel={CANCEL_LABEL}
+        title={t("menu.clearAllConfirm.title")}
+        message={t("menu.clearAllConfirm.message")}
+        confirmLabel={t("common.clear")}
+        cancelLabel={t("common.cancel")}
         onConfirm={() => {
           setShowClear(false);
           onClear();
-          onNotify(CLEAR_ALL_TOAST_MESSAGE, ToastStatus.Success);
+          onNotify(t("toast.clearAll"), ToastStatus.Success);
         }}
         onCancel={() => setShowClear(false)}
         destructive
@@ -351,7 +386,7 @@ export function BottomMenu({
         onConfirm={(selection) => {
           if (pendingImport) {
             onApplyImport(buildImportData(pendingImport, selection));
-            onNotify(IMPORT_SUCCESS_TOAST_MESSAGE, ToastStatus.Success);
+            onNotify(t("toast.importSuccess"), ToastStatus.Success);
           }
           setPendingImport(null);
         }}

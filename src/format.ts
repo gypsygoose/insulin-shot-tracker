@@ -4,19 +4,18 @@ export function pad2(n: number): string {
   return n.toString().padStart(2, "0");
 }
 
-export function formatDateTime(timestamp: number): string {
-  const d = new Date(timestamp);
-  return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
-}
-
-// Russian pluralization for "день/дня/дней" (day/days), e.g. 1 → "день",
-// 2 → "дня", 5 → "дней".
-export function pluralDays(n: number): string {
-  const mod100 = n % 100;
-  const mod10 = n % 10;
-  if (mod10 === 1 && mod100 !== 11) return "день";
-  if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return "дня";
-  return "дней";
+// Locale-aware date/time formatting (e.g. DD.MM.YYYY for ru, MM/DD/YYYY for
+// en) — callers pass the active i18next language (`i18n.language` from
+// useTranslation()) rather than this file depending on i18next itself.
+export function formatDateTime(timestamp: number, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(timestamp));
 }
 
 export function splitSeconds(totalSeconds: number): {

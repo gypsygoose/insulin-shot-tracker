@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { AppStorage, AppEvent, AppEventType, ExportedAppData, ExportSelection, ExportSettingKey, StoredButtonState, ThemeMode, ZoneGroup } from '../types';
+import { AppStorage, AppEvent, AppEventType, ExportedAppData, ExportSelection, ExportSettingKey, LanguageMode, StoredButtonState, ThemeMode, ZoneGroup } from '../types';
 import {
   loadStorage,
   saveStorage,
@@ -67,7 +67,12 @@ export interface AppActions {
   disableAutoLock(): void;
   updateAutoLockTimes(afterMarkSeconds: number, afterUnlockSeconds: number): void;
   setDaysToWhite(days: number): void;
-  exportData(themeMode: ThemeMode, selection: ExportSelection): Promise<void>;
+  exportData(
+    themeMode: ThemeMode,
+    languageMode: LanguageMode,
+    dialogTitle: string,
+    selection: ExportSelection,
+  ): Promise<void>;
   pickImportFile(): Promise<ImportResult>;
   applyImport(data: ExportedAppData): void;
 }
@@ -515,15 +520,24 @@ export function useAppStore(
     saveDaysToWhite(clamped);
   }, []);
 
-  // themeMode is passed in rather than read from state — it's owned by
-  // ThemeProvider (mounted in App.tsx, above this hook's caller), not by
-  // this store. See src/theme/ThemeContext.tsx.
+  // themeMode/languageMode are passed in rather than read from state —
+  // they're owned by ThemeProvider/LanguageProvider (mounted in App.tsx,
+  // above this hook's caller), not by this store. See
+  // src/theme/ThemeContext.tsx and src/i18n/LanguageContext.tsx.
+  // `dialogTitle` is pre-formatted by the caller (via
+  // t('menu.exportOptionsDialog.shareDialogTitle')) so this hook stays free
+  // of an i18next dependency, like storage.ts's exportStorageToFile.
   // `selection` (from ExportOptionsDialog) picks which categories actually
   // make it into the file — omitted categories are left out of the object
   // entirely, not written with a default, so a partial file round-trips
   // correctly through the merge-import logic in applyImport below.
   const exportData = useCallback(
-    async (themeMode: ThemeMode, selection: ExportSelection) => {
+    async (
+      themeMode: ThemeMode,
+      languageMode: LanguageMode,
+      dialogTitle: string,
+      selection: ExportSelection,
+    ) => {
       const data: ExportedAppData = {};
       if (selection.marks) {
         data.buttonStates = state.buttonStates;
@@ -543,7 +557,10 @@ export function useAppStore(
       if (selection.settings[ExportSettingKey.Theme]) {
         data.themeMode = themeMode;
       }
-      await exportStorageToFile(data);
+      if (selection.settings[ExportSettingKey.Language]) {
+        data.languageMode = languageMode;
+      }
+      await exportStorageToFile(data, dialogTitle);
     },
     [
       state.buttonStates,

@@ -1,0 +1,215 @@
+import type { AppLocale } from "./en";
+
+// en.ts is the source of truth for every translation key's shape (its
+// `AppLocale` type, imported above); typing ru against it means a key
+// missing from ru.ts is a compile error (see CLAUDE.md's "Localization"
+// section).
+export const ru: AppLocale = {
+  common: {
+    cancel: "Отмена",
+    save: "Сохранить",
+    clear: "Очистить",
+    mark: "Отметить",
+    confirm: "Подтвердить",
+    daysCount_one: "{{count}} день",
+    daysCount_few: "{{count}} дня",
+    daysCount_many: "{{count}} дней",
+    daysCount_other: "{{count}} дней",
+    minutesAbbrev: "{{count}} мин",
+    secondsAbbrev: "{{count}} сек",
+    daysAbbrev: "{{count}} дн",
+    hoursAbbrev: "{{count}} ч",
+  },
+  zones: {
+    shoulderRight: "Правое плечо",
+    shoulderLeft: "Левое плечо",
+    bellyRight: "Живот справа",
+    bellyLeft: "Живот слева",
+    thighRight: "Правое бедро",
+    thighLeft: "Левое бедро",
+  },
+  toast: {
+    blocked: "Точка заблокирована и не может быть отмечена",
+    interfaceLocked:
+      "Интерфейс залокирован. Чтобы отметить точку укола, разблокируйте интерфейс в нижнем меню либо отметьте через всплывающее меню точки (долгое нажатие).",
+    interfaceLockEnabled: "Интерфейс заблокирован",
+    interfaceLockDisabled: "Интерфейс разблокирован",
+    autoLockFired: "Интерфейс заблокирован автоматически",
+    clearAll: "Все данные очищены",
+    undo: "Последнее действие отменено",
+    exportSuccess: "Данные экспортированы",
+    importSuccess: "Данные импортированы",
+    importFailure:
+      "Не удалось импортировать\nВыбранный файл повреждён или имеет неверный формат.",
+    mirrorEnabled: "Зеркальное отображение включено",
+    mirrorDisabled: "Зеркальное отображение выключено",
+    autoLockEnabled: "Автоблокировка интерфейса включена",
+    autoLockDisabled: "Автоблокировка интерфейса выключена",
+    autoLockUpdated: "Настройки автоблокировки обновлены",
+    labeledValue: "{{label}}: {{value}}",
+    manualBlockPrefix: "Точка заблокирована вручную",
+    manualUnblockPrefix: "Точка разблокирована вручную",
+    pointClearedPrefix: "Точка очищена",
+    themeUpdatedPrefix: "Тема изменена",
+    languageUpdatedPrefix: "Язык изменён",
+    pointMarked: "Точка отмечена: {{address}}",
+    markBlackoutSuffix_one: "\nТочка заблокирована системой на {{count}} день",
+    markBlackoutSuffix_few: "\nТочка заблокирована системой на {{count}} дня",
+    markBlackoutSuffix_many: "\nТочка заблокирована системой на {{count}} дней",
+    markBlackoutSuffix_other:
+      "\nТочка заблокирована системой на {{count}} дней",
+    markBackdatedSuffix: "\nВремя отметки: {{dateTime}}",
+    pointAddressSuffix:
+      "{{zoneLabel}}, ряд {{row}}, место {{column}} от центра тела",
+  },
+  menu: {
+    title: "Меню",
+    mirrorRow: "Зеркальное отображение",
+    autoLockRow: "Автоблокировка интерфейса",
+    daysToWhiteRow: "Дней до восстановления точки",
+    themeRow: "Тема",
+    languageRow: "Язык",
+    exportRow: "Экспорт данных",
+    importRow: "Импорт данных",
+    autoLockEnableConfirm: "Включить",
+    autoLockDialog: {
+      message:
+        "Вы можете включить автоматическую блокировку интерфейса, чтобы избежать случайного нажатия на точку укола. Блокировка сработает через заданное время после нажатия на точку или после простоя в разблокированном режиме. Разблокировать интерфейс можно будет нажав на соответствующую кнопку в нижнем меню.",
+      afterMark: "После отметки",
+      afterUnlock: "После разблокировки",
+    },
+    daysToWhiteDialog: {
+      message:
+        "Через сколько дней место укола снова считается полностью свободным (белым). При меньшем значении цвета цикла сжимаются в этот срок.",
+    },
+    themeDialog: {
+      message: "Системная тема следует за настройкой оформления устройства.",
+      light: "Светлая",
+      dark: "Тёмная",
+      system: "Системная",
+    },
+    languageDialog: {
+      message: "Системный язык следует за языком устройства.",
+      system: "Системный",
+      russian: "Русский",
+      english: "English",
+    },
+    exportOptionsDialog: {
+      title: "Экспорт данных",
+      message: "Выберите, что экспортировать в файл.",
+      marksLabel: "Отметки точек укола",
+      settingsLabel: "Настройки приложения",
+      confirmLabel: "Экспортировать",
+      shareDialogTitle: "Экспорт данных {{appName}}",
+    },
+    importOptionsDialog: {
+      title: "Импорт данных",
+      message:
+        "Выберите, что импортировать из файла. Пункты, которых нет в файле, недоступны. Выбранные категории заменят текущие данные — это действие нельзя отменить.",
+      confirmLabel: "Импортировать",
+    },
+    undoConfirm: {
+      title: "Отменить последний укол?",
+      message:
+        "Последняя зафиксированная инъекция будет удалена. Это действие нельзя отменить повторно.",
+      confirmLabel: "Отменить укол",
+    },
+    clearAllConfirm: {
+      title: "Очистить все данные?",
+      message:
+        "Вся история инъекций будет удалена. Все точки станут белыми. Это действие нельзя отменить.",
+    },
+  },
+  pointMenu: {
+    unblock: "Разблокировать",
+    block: "Заблокировать",
+    titlePrefix: "Точка · {{zoneLabel}}",
+    titleFallback: "Действия с точкой",
+    addressSubtitle: "РЯД {{row}}, МЕСТО {{column}} (от центра тела)",
+    lastMark: "Последняя отметка: {{dateTime}}",
+    manuallyBlockedAt: "Заблокировано вручную: {{dateTime}}",
+    systemBlockedCountdown:
+      "Заблокировано системой.\nДо разблокировки: {{countdown}}",
+  },
+  markDialog: {
+    title: "Отметить укол",
+    message: "Укажите дату и время, когда была сделана инъекция.",
+  },
+  mainScreen: {
+    leftSideLabel: "левая\nсторона",
+    rightSideLabel: "правая\nсторона",
+    clearPointConfirm: {
+      title: "Очистить точку?",
+      message:
+        "Данные этой точки будут удалены, и она станет белой (свободной). Это действие нельзя отменить повторно.",
+    },
+  },
+  help: {
+    title: "Справка",
+    sectionZones: "Зоны введения",
+    sectionColorScheme: "Цветовая схема",
+    sectionControls: "Управление",
+    sectionBottomBar: "Нижняя панель",
+    sectionMenuItems: "Пункты меню",
+    zones: {
+      shoulder: {
+        label: "Плечи",
+        location: "средняя треть сзади и сбоку",
+        description:
+          "Умеренное всасывание. Начало действия через 10 минут. Пик действия через 60–90 минут.",
+      },
+      belly: {
+        label: "Живот",
+        location: "4 см отступ от рёбер и пупка",
+        description:
+          "Быстрое всасывание. Начало действия через 5 минут. Пик действия через 30–60 минут.",
+      },
+      thigh: {
+        label: "Бёдра",
+        location: "внешняя боковая поверхность",
+        description:
+          "Медленное всасывание. Для пролонгированного инсулина. Пик действия через 90–120 минут.",
+      },
+    },
+    controls: {
+      press: "<bold>Нажатие</bold> — зафиксировать укол.",
+      longPress:
+        "<bold>Долгое нажатие</bold> (~1 с) — вызвать меню для места укола.",
+      checkmark:
+        "<bold>✓ Галочка</bold> — последнее использованное место в группе.",
+    },
+    bottomBar: {
+      undo: "<bold>Отменить</bold> — отменить последнее действие (укол, блокировку или разблокировку места).",
+      menu: "<bold>{{label}}</bold> — открыть меню настроек и данных.",
+      help: "<bold>{{label}}</bold> — открыть этот экран.",
+      lock: "<bold>Замок</bold> — заблокировать или разблокировать интерфейс, чтобы избежать случайных нажатий.",
+    },
+    menuItems: {
+      mirror: "<bold>{{label}}</bold> — отразить силуэт тела по горизонтали.",
+      autoLock:
+        "<bold>{{label}}</bold> — автоматически включать блокировку через заданное время после отметки укола и после ручной разблокировки. Нажатие на строку открывает настройку задержек.",
+      daysToWhite:
+        "<bold>{{label}}</bold> — через сколько дней место укола снова считается полностью свободным (белым). Уменьшение значения сжимает цветовую схему в этот срок.",
+      theme:
+        "<bold>{{label}}</bold> — выбрать светлую, тёмную или системную тему оформления приложения.",
+      language: "<bold>{{label}}</bold> — выбрать язык интерфейса приложения.",
+      export:
+        "<bold>{{label}}</bold> — выбрать, что сохранить в файл: отметки точек укола и/или настройки приложения (по отдельности).",
+      import:
+        "<bold>{{label}}</bold> — выбрать, что применить из файла: отметки точек укола и/или настройки приложения (по отдельности). Категории, которых нет в файле, недоступны для выбора; остальные текущие данные не затрагиваются.",
+      clear:
+        "<bold>{{label}}</bold> — удалить всю историю инъекций без возможности восстановления.",
+    },
+  },
+  stateMachine: {
+    colorLabel: {
+      white_one: "Свободно (не использовалось {{count}}+ день)",
+      white_few: "Свободно (не использовалось {{count}}+ дня)",
+      white_many: "Свободно (не использовалось {{count}}+ дней)",
+      white_other: "Свободно (не использовалось {{count}}+ дней)",
+      maroon: "Только что (день 0)",
+      black: "Заблокировано системой из-за частого использования",
+      gray: "Заблокировано вручную (травма/синяк)",
+    },
+  },
+};

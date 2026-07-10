@@ -1,8 +1,8 @@
 import { Fragment } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Modal } from "./Modal";
 import { useTheme } from "../../theme/ThemeContext";
-import { CANCEL_LABEL } from "../../constants";
 
 export interface ContextMenuItem {
   key: string;
@@ -28,8 +28,9 @@ export function ContextMenu({
   infoLines,
   items,
   onCancel,
-  cancelLabel = CANCEL_LABEL,
+  cancelLabel,
 }: Props) {
+  const { t } = useTranslation();
   const hasInfo = !!infoLines && infoLines.length > 0;
   const { colors } = useTheme();
 
@@ -109,7 +110,7 @@ export function ContextMenu({
           <Text
             style={[styles.cancelLabel, { color: colors.cancelButtonText }]}
           >
-            {cancelLabel}
+            {cancelLabel ?? t("common.cancel")}
           </Text>
         </TouchableOpacity>
       </View>

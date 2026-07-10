@@ -38,7 +38,6 @@ export enum ZoneType {
 
 export interface Zone {
   id: ZoneId;
-  label: string;
   group: ZoneGroup;
 }
 
@@ -96,6 +95,15 @@ export enum ThemeMode {
   System = 'system',
 }
 
+// App interface language — System resolves to the device locale at render
+// time (see src/i18n/LanguageContext.tsx); Russian/English pin a specific
+// language. Values double as the corresponding i18next language codes.
+export enum LanguageMode {
+  System = 'system',
+  Russian = 'ru',
+  English = 'en',
+}
+
 // Toast severity — drives the toast's accent color and leading icon (see
 // Toast.tsx / src/components/icons/Toast*Icon.tsx).
 export enum ToastStatus {
@@ -136,6 +144,7 @@ export interface ExportedAppData {
   autoLockAfterUnlockSeconds?: number;
   daysToWhite?: number;
   themeMode?: ThemeMode;
+  languageMode?: LanguageMode;
 }
 
 // Which categories ExportOptionsDialog writes to the export file. The
@@ -150,6 +159,7 @@ export enum ExportSettingKey {
   AutoLock = 'auto-lock',
   DaysToWhite = 'days-to-white',
   Theme = 'theme',
+  Language = 'language',
 }
 
 export interface ExportSelection {
