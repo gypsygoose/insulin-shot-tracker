@@ -2,34 +2,18 @@ import {
   createContext,
   ReactNode,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
 } from "react";
-import { ColorSchemeName, useColorScheme } from "react-native";
+import { useColorScheme } from "react-native";
 import { ThemeMode } from "../types";
-import { loadThemeMode, saveThemeMode } from "../storage/storage";
-import { DARK_COLORS, LIGHT_COLORS, ThemeColors } from "./palette";
+import { StorageService } from "../storage";
+import { DARK_COLORS, LIGHT_COLORS } from "./palette";
+import { ThemeContextValue } from "./types";
+import { resolveScheme } from "./utils";
 
-export type ResolvedScheme = ThemeMode.Light | ThemeMode.Dark;
-
-interface ThemeContextValue {
-  mode: ThemeMode;
-  resolvedScheme: ResolvedScheme;
-  colors: ThemeColors;
-  setMode: (mode: ThemeMode) => void;
-}
-
-const ThemeContext = createContext<ThemeContextValue | null>(null);
-
-function resolveScheme(
-  mode: ThemeMode,
-  systemScheme: ColorSchemeName,
-): ResolvedScheme {
-  if (mode !== ThemeMode.System) return mode;
-  return systemScheme === "light" ? ThemeMode.Light : ThemeMode.Dark;
-}
+export const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 // Owns the persisted ThemeMode setting end to end (its own AsyncStorage key,
 // same pattern as mirrored/autoLock*/daysToWhite) and resolves it against
@@ -41,12 +25,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>(ThemeMode.System);
 
   useEffect(() => {
-    loadThemeMode().then(setModeState);
+    StorageService.loadThemeMode().then(setModeState);
   }, []);
 
   const setMode = useCallback((next: ThemeMode) => {
     setModeState(next);
-    saveThemeMode(next);
+    StorageService.saveThemeMode(next);
   }, []);
 
   const value = useMemo<ThemeContextValue>(() => {
@@ -62,10 +46,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
-}
-
-export function useTheme(): ThemeContextValue {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error("useTheme() must be used within a ThemeProvider");
-  return ctx;
 }

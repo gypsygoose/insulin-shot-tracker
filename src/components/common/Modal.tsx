@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Modal as RNModal, View, Pressable, StyleSheet } from "react-native";
-import { useTheme } from "../../theme/ThemeContext";
+import { useTheme } from "../../theme";
 
 interface Props {
   visible: boolean;

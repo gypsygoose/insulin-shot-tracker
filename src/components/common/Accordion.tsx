@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { Chevron } from "./Chevron";
-import { useTheme } from "../../theme/ThemeContext";
+import { useTheme } from "../../theme";
 import { ACCORDION_ANIMATION_DURATION_MS } from "../../constants";
 
 // Old (pre-Fabric) Android needs this opt-in for LayoutAnimation to work at

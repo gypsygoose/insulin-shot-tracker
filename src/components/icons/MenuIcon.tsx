@@ -1,6 +1,6 @@
 import Svg, { Path } from "react-native-svg";
 import { ICON_SIZE } from "../../constants";
-import { useTheme } from "../../theme/ThemeContext";
+import { useTheme } from "../../theme";
 
 const ICON_STROKE_WIDTH = 1.83333;
 

@@ -50,7 +50,7 @@ export const ZONE_MIRROR_MAP: Record<ZoneId, ZoneId> = {
 };
 
 // Left/right zones of the same body part share one accent/glow colour pair
-// (theme/palette.ts's ThemeColors.zoneColors, keyed by ZoneType) — this maps
+// (theme/types.ts's ThemeColors.zoneColors, keyed by ZoneType) — this maps
 // each ZoneId to that shared type instead of duplicating the pair per zone.
 export const ZONE_TYPE: Record<ZoneId, ZoneType> = {
   [ZoneId.ShoulderRight]: ZoneType.Shoulder,

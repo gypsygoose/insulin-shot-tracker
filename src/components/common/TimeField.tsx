@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Platform } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "../../theme/ThemeContext";
+import { useTheme } from "../../theme";
 
 const MINUTE_OPTIONS = Array.from({ length: 100 }, (_, i) => i);
 const SECOND_OPTIONS = Array.from({ length: 60 }, (_, i) => i);

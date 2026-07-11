@@ -2,28 +2,19 @@ import {
   createContext,
   ReactNode,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useState,
 } from "react";
 import { LanguageMode } from "../types";
-import { loadLanguageMode, saveLanguageMode } from "../storage/storage";
+import { StorageService } from "../storage";
 import { i18next } from "./index";
-import { getDeviceLanguage, ResolvedLanguage } from "./deviceLanguage";
+import { LanguageContextValue } from "./types";
+import { resolveLanguage } from "./utils";
 
-interface LanguageContextValue {
-  mode: LanguageMode;
-  resolvedLanguage: ResolvedLanguage;
-  setMode: (mode: LanguageMode) => Promise<void>;
-}
-
-const LanguageContext = createContext<LanguageContextValue | null>(null);
-
-function resolveLanguage(mode: LanguageMode): ResolvedLanguage {
-  if (mode !== LanguageMode.System) return mode;
-  return getDeviceLanguage();
-}
+export const LanguageContext = createContext<LanguageContextValue | null>(
+  null,
+);
 
 // Owns the persisted LanguageMode setting end to end (its own AsyncStorage
 // key, same pattern as ThemeMode — see src/theme/ThemeContext.tsx) and
@@ -37,7 +28,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<LanguageMode>(LanguageMode.System);
 
   useEffect(() => {
-    loadLanguageMode().then((loadedMode) => {
+    StorageService.loadLanguageMode().then((loadedMode) => {
       setModeState(loadedMode);
       i18next.changeLanguage(resolveLanguage(loadedMode));
     });
@@ -45,7 +36,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const setMode = useCallback(async (next: LanguageMode) => {
     setModeState(next);
-    saveLanguageMode(next);
+    StorageService.saveLanguageMode(next);
     await i18next.changeLanguage(resolveLanguage(next));
   }, []);
 
@@ -59,11 +50,4 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       {children}
     </LanguageContext.Provider>
   );
-}
-
-export function useLanguage(): LanguageContextValue {
-  const ctx = useContext(LanguageContext);
-  if (!ctx)
-    throw new Error("useLanguage() must be used within a LanguageProvider");
-  return ctx;
 }

@@ -41,15 +41,15 @@ npm run android    # run on Android emulator/device
 src/
 ├── types/                  — shared TypeScript types, split by entity (zone.ts, point.ts, event.ts, storage.ts, theme.ts, language.ts, toast.ts, autoLock.ts), re-exported via index.ts
 ├── constants.ts            — shared non-text UI constants (durations, sizes, status colors)
-├── format.ts               — shared formatting helpers
-├── data/zones.ts           — zone + point definitions with (x,y) positions
-├── logic/stateMachine.ts   — pure functions: color computation, press handling
-├── theme/                  — light/dark theme palettes + ThemeProvider/useTheme
+├── utils/                  — shared helper functions, one per file (pad2, formatDateTime, splitSeconds, uuid, lastPressedByGroup, ...), re-exported via index.ts
+├── hooks/useAppStore.ts    — React hook combining storage + state machine, re-exported via index.ts
+├── data/zones.ts           — zone + point definitions with (x,y) positions, re-exported via index.ts
+├── logic/                  — pure functions: color computation, press handling (stateMachine.ts), re-exported via index.ts
+├── theme/                  — light/dark theme palettes + ThemeProvider/useTheme, re-exported via index.ts
 ├── i18n/                   — i18next setup, ru/en translations, LanguageProvider/useLanguage
-├── storage/storage.ts      — AsyncStorage load/save/clear
-├── store/useAppStore.ts    — React hook combining storage + state machine
-├── components/             — app screens and components
-└── screens/MainScreen.tsx  — root screen
+├── storage/storage.ts      — AsyncStorage load/save/clear, re-exported via index.ts
+├── components/             — app screens and components (helper-heavy ones live in their own ComponentName/ folder alongside their utils/constants/types — see CLAUDE.md); every folder, down to each ComponentName/utils/, has an index.ts barrel, so imports always go through a folder, never a concrete file inside it
+└── screens/MainScreen/     — root screen
 App.tsx                     — entry point
 ```
 

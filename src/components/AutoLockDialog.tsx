@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AutoLockDialogMode } from "../types";
-import { Dialog } from "./common/Dialog";
-import { TimeField } from "./common/TimeField";
-import { SECONDS_PER_MINUTE, splitSeconds } from "../format";
+import { Dialog, TimeField } from "./common";
+import { SECONDS_PER_MINUTE, splitSeconds } from "../utils";
 
 interface Props {
   visible: boolean;

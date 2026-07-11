@@ -1,5 +1,5 @@
 import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
-import { useTheme } from "../../theme/ThemeContext";
+import { useTheme } from "../../theme";
 
 interface Props {
   label: string;

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useTranslation } from "react-i18next";
-import { Dialog } from "./common/Dialog";
+import { Dialog } from "./common";
 
 interface Props {
   visible: boolean;

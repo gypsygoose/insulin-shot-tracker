@@ -14,7 +14,7 @@ export interface AppStorage {
 // All fields are optional: ExportOptionsDialog lets the user pick which
 // categories to write, so a file may carry only a subset. On import, a
 // missing field means "leave this category untouched" (see
-// storage.ts#importStorage / useAppStore#applyImport), not "reset to
+// StorageService.importStorage / useAppStore#applyImport), not "reset to
 // default" — so fields must never be defaulted away during export/import.
 export interface ExportedAppData {
   pointStates?: Record<string, StoredPointState>;

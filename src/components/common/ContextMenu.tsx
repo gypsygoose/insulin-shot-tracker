@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Modal } from "./Modal";
-import { useTheme } from "../../theme/ThemeContext";
+import { useTheme } from "../../theme";
 
 export interface ContextMenuItem {
   key: string;

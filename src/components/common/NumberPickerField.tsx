@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Platform } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { useTheme } from "../../theme/ThemeContext";
+import { useTheme } from "../../theme";
 
 interface Props {
   label: string;

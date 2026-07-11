@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Dialog } from "./common/Dialog";
-import { useTheme } from "../theme/ThemeContext";
+import { Dialog } from "./common";
+import { useTheme } from "../theme";
 import { LanguageMode } from "../types";
 import { LANGUAGE_MODE_KEY } from "./MenuSheet";
 

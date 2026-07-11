@@ -1,9 +1,8 @@
 import i18next from "i18next";
 import { initReactI18next } from "react-i18next";
-import { ru } from "./locales/ru";
-import { en } from "./locales/en";
-import type { AppLocale } from "./locales/en";
-import { getDeviceLanguage } from "./deviceLanguage";
+import { ru, en } from "./locales";
+import type { AppLocale } from "./locales";
+import { getDeviceLanguage } from "./utils";
 
 export const resources = {
   ru: { translation: ru },
@@ -34,3 +33,4 @@ i18next.use(initReactI18next).init({
 });
 
 export { i18next };
+export * from "./hooks";

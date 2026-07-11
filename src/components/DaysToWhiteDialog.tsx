@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Dialog } from "./common/Dialog";
-import { NumberPickerField } from "./common/NumberPickerField";
+import { Dialog, NumberPickerField } from "./common";
 import { MAX_DAYS_TO_WHITE, MIN_DAYS_TO_WHITE } from "../constants";
 
 const DAYS_OPTIONS = Array.from(

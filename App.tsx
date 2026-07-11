@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import { I18nextProvider } from 'react-i18next';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { MainScreen } from './src/screens/MainScreen';
-import { ThemeProvider } from './src/theme/ThemeContext';
+import { MainScreen } from './src/screens';
+import { ThemeProvider } from './src/theme';
 import { i18next } from './src/i18n';
 import { LanguageProvider } from './src/i18n/LanguageContext';
 

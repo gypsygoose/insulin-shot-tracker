@@ -1,6 +1,6 @@
 import Svg, { Path } from "react-native-svg";
 import { ICON_SIZE } from "../../constants";
-import { useTheme } from "../../theme/ThemeContext";
+import { useTheme } from "../../theme";
 
 // Icon shape matching Figma (node-id 26-3, file grYg39698ogy0nEBd88Fup)
 export function UndoIcon({ disabled }: { disabled: boolean }) {

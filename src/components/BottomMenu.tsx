@@ -25,7 +25,7 @@ import {
   ThemeMode,
   ToastStatus,
 } from "../types";
-import { ImportResult, ImportResultType } from "../storage/storage";
+import { ImportResult, ImportResultType } from "../storage/StorageService";
 import { useTheme } from "../theme/ThemeContext";
 
 // Narrows a parsed import file down to just the categories the user kept
@@ -302,7 +302,13 @@ export function BottomMenu({
       />
 
       <View
-        style={[styles.bar, { backgroundColor: colors.background, borderTopColor: colors.divider }]}
+        style={[
+          styles.bar,
+          {
+            backgroundColor: colors.background,
+            borderTopColor: colors.divider,
+          },
+        ]}
       >
         <TouchableOpacity
           style={[styles.btn, !canUndo && styles.btnDisabled]}
