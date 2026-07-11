@@ -1,15 +1,15 @@
 import { ZoneType } from "../types";
 
 // Theme-dependent chrome colors — everything that visually differs between
-// light and dark mode. Other domain/status colors (ButtonColor cycle, toast
+// light and dark mode. Other domain/status colors (PointColor cycle, toast
 // status colors) are deliberately NOT here: they carry fixed semantic
 // meaning and read fine on either background (see CLAUDE.md's "Toast
-// statuses" / "Button colour state machine" sections). Per-zone accent/glow
+// statuses" / "Point colour state machine" sections). Per-zone accent/glow
 // (zoneColors below) is the one domain color set that IS here: the same hue
 // per ZoneType, but one shade darker in LIGHT_COLORS since the original
 // pair read too faint against the light theme's bright background (used by
-// ZoneContainer's block, InjectionButton's glow halo, and HelpSheet's zone
-// legend — see CLAUDE.md's "Zones and buttons").
+// ZoneContainer's block, InjectionPoint's glow halo, and HelpSheet's zone
+// legend — see CLAUDE.md's "Zones and points").
 export interface ThemeColors {
   background: string; // root screen / bottom bar background
   icon: string; // bottom-menu icon default fill/stroke
@@ -40,7 +40,7 @@ export interface ThemeColors {
   bottomSheetHandle: string; // sheet drag-handle pill
   // Per-body-part zone accent/glow (see ZONE_TYPE in data/zones.ts to map a
   // ZoneId to its ZoneType). `accent` is the zone container fill/border
-  // colour, `glow` is the shade used for InjectionButton's radial glow halo.
+  // colour, `glow` is the shade used for InjectionPoint's radial glow halo.
   zoneColors: Record<ZoneType, ZoneColorPair>;
 }
 

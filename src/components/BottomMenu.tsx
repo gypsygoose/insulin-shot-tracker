@@ -37,7 +37,7 @@ function buildImportData(
 ): ExportedAppData {
   const filtered: ExportedAppData = {};
   if (selection.marks) {
-    filtered.buttonStates = data.buttonStates;
+    filtered.pointStates = data.pointStates;
     filtered.events = data.events;
   }
   if (selection.settings[ExportSettingKey.Mirrored]) {

@@ -1,11 +1,11 @@
 import {
   Zone,
-  ButtonDefinition,
+  PointDefinition,
   ZoneLayout,
   ZoneGroup,
   ZoneId,
   ZoneType,
-  ButtonAddress,
+  PointAddress,
 } from "../types";
 import type { TranslationKey } from "../i18n";
 
@@ -34,12 +34,12 @@ export const ZONE_LABEL_KEY: Record<ZoneId, TranslationKey> = {
 };
 
 export const ZONE_MAP: Record<ZoneId, Zone> = Object.fromEntries(
-  ZONES.map((z) => [z.id, z]),
+  ZONES.map((zone) => [zone.id, zone]),
 ) as Record<ZoneId, Zone>;
 
 // Maps each zone to its left/right counterpart, used when mirror mode is on:
 // a zone then renders in the screen position its counterpart normally
-// occupies (see ZONE_LAYOUT), while keeping its own colour/button identity.
+// occupies (see ZONE_LAYOUT), while keeping its own colour/point identity.
 export const ZONE_MIRROR_MAP: Record<ZoneId, ZoneId> = {
   [ZoneId.ShoulderRight]: ZoneId.ShoulderLeft,
   [ZoneId.ShoulderLeft]: ZoneId.ShoulderRight,
@@ -66,8 +66,8 @@ export const ZONE_TYPE: Record<ZoneId, ZoneType> = {
 // the body image container (393.46×621.91), derived from the zone rectangles
 // in the Figma "with buttons" frame (node 27:744, file grYg39698ogy0nEBd88Fup).
 // Each zone renders as an absolutely positioned block matching this box;
-// `rows`/`cols` describe the button grid
-// laid out *inside* that block (buttons are positioned relative to their own
+// `rows`/`cols` describe the point grid
+// laid out *inside* that block (points are positioned relative to their own
 // zone container, not by global coordinates).
 // ---------------------------------------------------------------------------
 
@@ -122,23 +122,23 @@ export const ZONE_LAYOUT: Record<ZoneId, ZoneLayout> = {
   },
 };
 
-// Buttons within each zone, in row-major order (matches ZONE_LAYOUT rows/cols
+// Points within each zone, in row-major order (matches ZONE_LAYOUT rows/cols
 // for that zone) — position on screen comes from the flex grid inside the
 // zone container, not from stored coordinates.
 
-const shoulderRight: ButtonDefinition[] = [
+const shoulderRight: PointDefinition[] = [
   { id: "sr-0", zoneId: ZoneId.ShoulderRight },
   { id: "sr-1", zoneId: ZoneId.ShoulderRight },
   { id: "sr-2", zoneId: ZoneId.ShoulderRight },
 ];
 
-const shoulderLeft: ButtonDefinition[] = [
+const shoulderLeft: PointDefinition[] = [
   { id: "sl-0", zoneId: ZoneId.ShoulderLeft },
   { id: "sl-1", zoneId: ZoneId.ShoulderLeft },
   { id: "sl-2", zoneId: ZoneId.ShoulderLeft },
 ];
 
-const bellyRight: ButtonDefinition[] = [
+const bellyRight: PointDefinition[] = [
   { id: "br-0", zoneId: ZoneId.BellyRight },
   { id: "br-1", zoneId: ZoneId.BellyRight },
   { id: "br-2", zoneId: ZoneId.BellyRight },
@@ -150,7 +150,7 @@ const bellyRight: ButtonDefinition[] = [
   { id: "br-8", zoneId: ZoneId.BellyRight },
 ];
 
-const bellyLeft: ButtonDefinition[] = [
+const bellyLeft: PointDefinition[] = [
   { id: "bl-0", zoneId: ZoneId.BellyLeft },
   { id: "bl-1", zoneId: ZoneId.BellyLeft },
   { id: "bl-2", zoneId: ZoneId.BellyLeft },
@@ -162,7 +162,7 @@ const bellyLeft: ButtonDefinition[] = [
   { id: "bl-8", zoneId: ZoneId.BellyLeft },
 ];
 
-const thighRight: ButtonDefinition[] = [
+const thighRight: PointDefinition[] = [
   { id: "tr-0", zoneId: ZoneId.ThighRight },
   { id: "tr-1", zoneId: ZoneId.ThighRight },
   { id: "tr-2", zoneId: ZoneId.ThighRight },
@@ -171,7 +171,7 @@ const thighRight: ButtonDefinition[] = [
   { id: "tr-5", zoneId: ZoneId.ThighRight },
 ];
 
-const thighLeft: ButtonDefinition[] = [
+const thighLeft: PointDefinition[] = [
   { id: "tl-0", zoneId: ZoneId.ThighLeft },
   { id: "tl-1", zoneId: ZoneId.ThighLeft },
   { id: "tl-2", zoneId: ZoneId.ThighLeft },
@@ -180,7 +180,7 @@ const thighLeft: ButtonDefinition[] = [
   { id: "tl-5", zoneId: ZoneId.ThighLeft },
 ];
 
-export const BUTTONS: ButtonDefinition[] = [
+export const POINTS: PointDefinition[] = [
   ...shoulderRight,
   ...shoulderLeft,
   ...bellyRight,
@@ -189,38 +189,38 @@ export const BUTTONS: ButtonDefinition[] = [
   ...thighLeft,
 ];
 
-export const BUTTON_MAP: Record<string, ButtonDefinition> = Object.fromEntries(
-  BUTTONS.map((b) => [b.id, b]),
+export const POINT_MAP: Record<string, PointDefinition> = Object.fromEntries(
+  POINTS.map((point) => [point.id, point]),
 );
 
-export const BUTTONS_BY_ZONE: Record<ZoneId, ButtonDefinition[]> = ZONES.reduce(
+export const POINTS_BY_ZONE: Record<ZoneId, PointDefinition[]> = ZONES.reduce(
   (acc, zone) => {
-    acc[zone.id] = BUTTONS.filter((b) => b.zoneId === zone.id);
+    acc[zone.id] = POINTS.filter((point) => point.zoneId === zone.id);
     return acc;
   },
-  {} as Record<ZoneId, ButtonDefinition[]>,
+  {} as Record<ZoneId, PointDefinition[]>,
 );
 
-// Body-relative "address" of each button, independent of mirror mode
+// Body-relative "address" of each point, independent of mirror mode
 // (mirroring only changes on-screen left/right, never the point's own
 // address): `row` counts top-to-bottom within its zone (1 = topmost), and
 // `column` counts outward from the body's own vertical midline (1 = closest
 // to center), regardless of which screen half the zone falls on.
 const BODY_MIDLINE_X = 0.5;
 
-export const BUTTON_ADDRESS: Record<string, ButtonAddress> = ZONES.reduce(
+export const POINT_ADDRESS: Record<string, PointAddress> = ZONES.reduce(
   (acc, zone) => {
     const layout = ZONE_LAYOUT[zone.id];
     const zoneIsLeftOfMidline = layout.x + layout.width / 2 < BODY_MIDLINE_X;
-    BUTTONS_BY_ZONE[zone.id].forEach((button, index) => {
+    POINTS_BY_ZONE[zone.id].forEach((point, index) => {
       const row = Math.floor(index / layout.cols) + 1;
       const col = index % layout.cols;
-      acc[button.id] = {
+      acc[point.id] = {
         row,
         column: zoneIsLeftOfMidline ? layout.cols - col : col + 1,
       };
     });
     return acc;
   },
-  {} as Record<string, ButtonAddress>,
+  {} as Record<string, PointAddress>,
 );

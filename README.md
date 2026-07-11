@@ -2,7 +2,7 @@
 
 A mobile app for people with diabetes who take insulin injections, to track injection sites and enforce site rotation, helping prevent lipodystrophy.
 
-Tap a button on the body diagram to log an injection at that spot. The button's color cycles over a configurable number of days (1–8, default 8) to show how recently that site was used, so you always know which sites are safe to reuse.
+Tap a point on the body diagram to log an injection at that spot. The point's color cycles over a configurable number of days (1–8, default 8) to show how recently that site was used, so you always know which sites are safe to reuse.
 
 **Platform:** iOS / Android — built with Expo (managed workflow), TypeScript, and React Native.
 
@@ -39,10 +39,10 @@ npm run android    # run on Android emulator/device
 
 ```
 src/
-├── types/index.ts          — all shared TypeScript types
+├── types/                  — shared TypeScript types, split by entity (zone.ts, point.ts, event.ts, storage.ts, theme.ts, language.ts, toast.ts, autoLock.ts), re-exported via index.ts
 ├── constants.ts            — shared non-text UI constants (durations, sizes, status colors)
 ├── format.ts               — shared formatting helpers
-├── data/zones.ts           — zone + button definitions with (x,y) positions
+├── data/zones.ts           — zone + point definitions with (x,y) positions
 ├── logic/stateMachine.ts   — pure functions: color computation, press handling
 ├── theme/                  — light/dark theme palettes + ThemeProvider/useTheme
 ├── i18n/                   — i18next setup, ru/en translations, LanguageProvider/useLanguage
@@ -53,7 +53,7 @@ src/
 App.tsx                     — entry point
 ```
 
-See [CLAUDE.md](CLAUDE.md) for full architecture notes, the button color/rotation rules, and coding conventions.
+See [CLAUDE.md](CLAUDE.md) for full architecture notes, the point color/rotation rules, and coding conventions.
 
 ## Notes
 

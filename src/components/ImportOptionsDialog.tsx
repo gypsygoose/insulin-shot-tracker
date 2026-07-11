@@ -38,7 +38,7 @@ interface Props {
 // sub-rows is disabled, i.e. the file carries no settings at all.
 export function ImportOptionsDialog({ visible, data, onConfirm, onCancel }: Props) {
   const { t } = useTranslation();
-  const marksAvailable = data.buttonStates !== undefined;
+  const marksAvailable = data.pointStates !== undefined;
   const settingsAvailable = availableSettings(data);
   const disabledSettingKeys = SETTING_KEYS.filter(
     (key) => !settingsAvailable[key],

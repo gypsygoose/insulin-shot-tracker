@@ -1,18 +1,18 @@
 import { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
-import { ButtonColor, StoredButtonState } from "../types";
+import { PointColor, StoredPointState } from "../types";
 import { getBlackoutEndAt } from "../logic/stateMachine";
 import { ContextMenu, ContextMenuItem } from "./common/ContextMenu";
-import { BUTTON_ADDRESS } from "../data/zones";
+import { POINT_ADDRESS } from "../data/zones";
 import { MINUTES_PER_DAY } from "../constants";
 import { formatDateTime } from "../format";
 
 interface Props {
   visible: boolean;
-  buttonId?: string;
+  pointId?: string;
   zoneLabel?: string;
-  color?: ButtonColor;
-  buttonState?: StoredButtonState;
+  color?: PointColor;
+  pointState?: StoredPointState;
   now: number;
   onBlock: () => void;
   onUnblock: () => void;
@@ -35,12 +35,12 @@ function formatCountdown(t: TFunction, ms: number): string {
   return parts.join(" ");
 }
 
-export function ButtonContextMenu({
+export function PointContextMenu({
   visible,
-  buttonId,
+  pointId,
   zoneLabel,
   color,
-  buttonState,
+  pointState,
   now,
   onBlock,
   onUnblock,
@@ -49,23 +49,23 @@ export function ButtonContextMenu({
   onCancel,
 }: Props) {
   const { t, i18n } = useTranslation();
-  const isGray = color === ButtonColor.Gray;
-  const isBlack = color === ButtonColor.Black;
-  const blackoutEndAt = buttonState ? getBlackoutEndAt(buttonState) : undefined;
-  const address = buttonId ? BUTTON_ADDRESS[buttonId] : undefined;
+  const isGray = color === PointColor.Gray;
+  const isBlack = color === PointColor.Black;
+  const blackoutEndAt = pointState ? getBlackoutEndAt(pointState) : undefined;
+  const address = pointId ? POINT_ADDRESS[pointId] : undefined;
 
   const infoLines: string[] = [];
-  if (buttonState?.lastInjectionAt !== undefined) {
+  if (pointState?.lastInjectionAt !== undefined) {
     infoLines.push(
       t("pointMenu.lastMark", {
-        dateTime: formatDateTime(buttonState.lastInjectionAt, i18n.language),
+        dateTime: formatDateTime(pointState.lastInjectionAt, i18n.language),
       }),
     );
   }
-  if (isGray && buttonState?.manuallyBlockedAt !== undefined) {
+  if (isGray && pointState?.manuallyBlockedAt !== undefined) {
     infoLines.push(
       t("pointMenu.manuallyBlockedAt", {
-        dateTime: formatDateTime(buttonState.manuallyBlockedAt, i18n.language),
+        dateTime: formatDateTime(pointState.manuallyBlockedAt, i18n.language),
       }),
     );
   }

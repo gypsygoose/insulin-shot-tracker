@@ -1,4 +1,4 @@
-import { ButtonColor, StoredButtonState } from "../types";
+import { PointColor, StoredPointState } from "../types";
 import { DEFAULT_DAYS_TO_WHITE } from "../constants";
 
 export const DAY_MS = 24 * 60 * 60 * 1000;
@@ -32,33 +32,33 @@ function daysBetween(from: number, to: number): number {
 // Full injection cycle (day 0 → day 7), used when daysToWhite is at its
 // maximum. Reducing daysToWhite drops colors from this list per
 // COLOR_REMOVAL_ORDER, compressing the remaining colors into fewer days.
-const FULL_CYCLE_COLORS: ButtonColor[] = [
-  ButtonColor.Maroon,
-  ButtonColor.Red,
-  ButtonColor.DarkOrange,
-  ButtonColor.Orange,
-  ButtonColor.DarkYellow,
-  ButtonColor.Yellow,
-  ButtonColor.DarkGreen,
-  ButtonColor.Green,
+const FULL_CYCLE_COLORS: PointColor[] = [
+  PointColor.Maroon,
+  PointColor.Red,
+  PointColor.DarkOrange,
+  PointColor.Orange,
+  PointColor.DarkYellow,
+  PointColor.Yellow,
+  PointColor.DarkGreen,
+  PointColor.Green,
 ];
 
 // Order in which colors are dropped from FULL_CYCLE_COLORS as daysToWhite
 // decreases from MAX_DAYS_TO_WHITE. Maroon (day 0) is never dropped.
-const COLOR_REMOVAL_ORDER: ButtonColor[] = [
-  ButtonColor.DarkYellow,
-  ButtonColor.DarkOrange,
-  ButtonColor.DarkGreen,
-  ButtonColor.Orange,
-  ButtonColor.Green,
-  ButtonColor.Red,
-  ButtonColor.Yellow,
+const COLOR_REMOVAL_ORDER: PointColor[] = [
+  PointColor.DarkYellow,
+  PointColor.DarkOrange,
+  PointColor.DarkGreen,
+  PointColor.Orange,
+  PointColor.Green,
+  PointColor.Red,
+  PointColor.Yellow,
 ];
 
 // Colors used for the normal injection cycle at a given daysToWhite setting,
 // in day order (index === days since injection). White is reached once
 // daysSince >= this list's length, i.e. on day `daysToWhite`.
-export function activeCycleColors(daysToWhite: number): ButtonColor[] {
+export function activeCycleColors(daysToWhite: number): PointColor[] {
   const removeCount = FULL_CYCLE_COLORS.length - daysToWhite;
   const removed = new Set(COLOR_REMOVAL_ORDER.slice(0, removeCount));
   return FULL_CYCLE_COLORS.filter((c) => !removed.has(c));
@@ -67,30 +67,30 @@ export function activeCycleColors(daysToWhite: number): ButtonColor[] {
 function injectionCycleColor(
   daysSince: number,
   daysToWhite: number,
-): ButtonColor {
+): PointColor {
   const active = activeCycleColors(daysToWhite);
-  return daysSince < active.length ? active[daysSince] : ButtonColor.White;
+  return daysSince < active.length ? active[daysSince] : PointColor.White;
 }
 
 // After blackout ends: cycle starts at red (maroon is skipped)
 function postBlackoutColor(
   daysSinceEnd: number,
   daysToWhite: number,
-): ButtonColor {
+): PointColor {
   const active = activeCycleColors(daysToWhite).filter(
-    (c) => c !== ButtonColor.Maroon,
+    (c) => c !== PointColor.Maroon,
   );
   return daysSinceEnd < active.length
     ? active[daysSinceEnd]
-    : ButtonColor.White;
+    : PointColor.White;
 }
 
-export function computeButtonColor(
-  state: StoredButtonState,
+export function computePointColor(
+  state: StoredPointState,
   now: number,
   daysToWhite: number = DEFAULT_DAYS_TO_WHITE,
-): ButtonColor {
-  if (state.isManuallyBlocked) return ButtonColor.Gray;
+): PointColor {
+  if (state.isManuallyBlocked) return PointColor.Gray;
 
   const hasBlackout =
     state.blackoutStartedAt !== undefined &&
@@ -104,19 +104,19 @@ export function computeButtonColor(
       state.lastInjectionAt > state.blackoutStartedAt!;
 
     if (!injectionAfterBlackout) {
-      if (now < blackoutEnd) return ButtonColor.Black;
+      if (now < blackoutEnd) return PointColor.Black;
       const days = daysBetween(blackoutEnd, now);
       return postBlackoutColor(days, daysToWhite);
     }
   }
 
-  if (state.lastInjectionAt === undefined) return ButtonColor.White;
+  if (state.lastInjectionAt === undefined) return PointColor.White;
   const days = daysBetween(state.lastInjectionAt, now);
   return injectionCycleColor(days, daysToWhite);
 }
 
 // Timestamp when the current system blackout (black state) will end, if any.
-export function getBlackoutEndAt(state: StoredButtonState): number | undefined {
+export function getBlackoutEndAt(state: StoredPointState): number | undefined {
   if (
     state.blackoutStartedAt === undefined ||
     state.blackoutDurationDays === undefined
@@ -130,16 +130,16 @@ export function getBlackoutEndAt(state: StoredButtonState): number | undefined {
 // Blackout duration by current color (days)
 // ---------------------------------------------------------------------------
 
-export function blackoutDurationFor(color: ButtonColor): number | null {
+export function blackoutDurationFor(color: PointColor): number | null {
   switch (color) {
-    case ButtonColor.Maroon:
-    case ButtonColor.Red:
+    case PointColor.Maroon:
+    case PointColor.Red:
       return 4;
-    case ButtonColor.DarkOrange:
-    case ButtonColor.Orange:
+    case PointColor.DarkOrange:
+    case PointColor.Orange:
       return 2;
-    case ButtonColor.DarkYellow:
-    case ButtonColor.Yellow:
+    case PointColor.DarkYellow:
+    case PointColor.Yellow:
       return 1;
     default:
       return null; // not a blockable color
@@ -157,25 +157,25 @@ export enum PressResultType {
 }
 
 export type PressResult =
-  | { type: PressResultType.Injection; newState: StoredButtonState }
-  | { type: PressResultType.Blackout; newState: StoredButtonState }
+  | { type: PressResultType.Injection; newState: StoredPointState }
+  | { type: PressResultType.Blackout; newState: StoredPointState }
   | { type: PressResultType.Blocked };
 
 export function onPress(
-  state: StoredButtonState,
+  state: StoredPointState,
   now: number,
   daysToWhite: number = DEFAULT_DAYS_TO_WHITE,
 ): PressResult {
-  const color = computeButtonColor(state, now, daysToWhite);
+  const color = computePointColor(state, now, daysToWhite);
 
-  if (color === ButtonColor.Gray || color === ButtonColor.Black)
+  if (color === PointColor.Gray || color === PointColor.Black)
     return { type: PressResultType.Blocked };
 
   // White, dark-green, green → fresh injection
   if (
-    color === ButtonColor.White ||
-    color === ButtonColor.DarkGreen ||
-    color === ButtonColor.Green
+    color === PointColor.White ||
+    color === PointColor.DarkGreen ||
+    color === PointColor.Green
   ) {
     return {
       type: PressResultType.Injection,
@@ -200,7 +200,7 @@ export function onPress(
   };
 }
 
-export function toggleManualBlock(state: StoredButtonState): StoredButtonState {
+export function toggleManualBlock(state: StoredPointState): StoredPointState {
   return { ...state, isManuallyBlocked: !state.isManuallyBlocked };
 }
 
@@ -208,18 +208,18 @@ export function toggleManualBlock(state: StoredButtonState): StoredButtonState {
 // Hex values for each color
 // ---------------------------------------------------------------------------
 
-export const COLOR_HEX: Record<ButtonColor, string> = {
-  [ButtonColor.White]: "#EBEBEB",
-  [ButtonColor.Maroon]: "#7B1D1D",
-  [ButtonColor.Red]: "#DC2626",
-  [ButtonColor.DarkOrange]: "#C2410C",
-  [ButtonColor.Orange]: "#EA580C",
-  [ButtonColor.DarkYellow]: "#A16207",
-  [ButtonColor.Yellow]: "#EAB308",
-  [ButtonColor.DarkGreen]: "#166534",
-  [ButtonColor.Green]: "#16A34A",
-  [ButtonColor.Black]: "#111111",
-  [ButtonColor.Gray]: "#6B7280",
+export const COLOR_HEX: Record<PointColor, string> = {
+  [PointColor.White]: "#EBEBEB",
+  [PointColor.Maroon]: "#7B1D1D",
+  [PointColor.Red]: "#DC2626",
+  [PointColor.DarkOrange]: "#C2410C",
+  [PointColor.Orange]: "#EA580C",
+  [PointColor.DarkYellow]: "#A16207",
+  [PointColor.Yellow]: "#EAB308",
+  [PointColor.DarkGreen]: "#166534",
+  [PointColor.Green]: "#16A34A",
+  [PointColor.Black]: "#111111",
+  [PointColor.Gray]: "#6B7280",
 };
 
 // Which sentence colorLabel() below describes — kept as a descriptor rather
@@ -242,17 +242,17 @@ export interface ColorLabelDescriptor {
 // Descriptor for when a color is reached, dependent on the daysToWhite
 // setting for colors that are part of the injection cycle.
 export function colorLabel(
-  color: ButtonColor,
+  color: PointColor,
   daysToWhite: number = DEFAULT_DAYS_TO_WHITE,
 ): ColorLabelDescriptor {
   switch (color) {
-    case ButtonColor.White:
+    case PointColor.White:
       return { type: ColorLabelType.White, count: daysToWhite };
-    case ButtonColor.Maroon:
+    case PointColor.Maroon:
       return { type: ColorLabelType.Maroon };
-    case ButtonColor.Black:
+    case PointColor.Black:
       return { type: ColorLabelType.Black };
-    case ButtonColor.Gray:
+    case PointColor.Gray:
       return { type: ColorLabelType.Gray };
     default: {
       const days = activeCycleColors(daysToWhite).indexOf(color);
@@ -262,11 +262,11 @@ export function colorLabel(
 }
 
 // Contrast text color for checkmark/text on each background
-export function checkmarkColor(bg: ButtonColor): string {
+export function checkmarkColor(bg: PointColor): string {
   switch (bg) {
-    case ButtonColor.White:
-    case ButtonColor.Yellow:
-    case ButtonColor.Orange:
+    case PointColor.White:
+    case PointColor.Yellow:
+    case PointColor.Orange:
       return "#111111";
     default:
       return "#FFFFFF";

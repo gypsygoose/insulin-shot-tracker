@@ -8,10 +8,10 @@ import {
   AppStorage,
   ExportedAppData,
   LanguageMode,
-  StoredButtonState,
+  StoredPointState,
   ThemeMode,
 } from "../types";
-import { BUTTONS } from "../data/zones";
+import { POINTS } from "../data/zones";
 import {
   DEFAULT_DAYS_TO_WHITE,
   MAX_DAYS_TO_WHITE,
@@ -48,23 +48,23 @@ export interface StoredAutoLock {
 }
 
 function defaultStorage(): AppStorage {
-  const buttonStates: Record<string, StoredButtonState> = {};
-  for (const btn of BUTTONS) {
-    buttonStates[btn.id] = { buttonId: btn.id, isManuallyBlocked: false };
+  const pointStates: Record<string, StoredPointState> = {};
+  for (const point of POINTS) {
+    pointStates[point.id] = { pointId: point.id, isManuallyBlocked: false };
   }
-  return { buttonStates, events: [] };
+  return { pointStates, events: [] };
 }
 
-// Merge any buttons not yet present (e.g. loading data saved by an older
+// Merge any points not yet present (e.g. loading data saved by an older
 // app version, or a file imported from a different point in time).
 function normalizeStorage(parsed: Partial<AppStorage>): AppStorage {
-  const states = parsed.buttonStates ?? {};
-  for (const btn of BUTTONS) {
-    if (!states[btn.id]) {
-      states[btn.id] = { buttonId: btn.id, isManuallyBlocked: false };
+  const states = parsed.pointStates ?? {};
+  for (const point of POINTS) {
+    if (!states[point.id]) {
+      states[point.id] = { pointId: point.id, isManuallyBlocked: false };
     }
   }
-  return { buttonStates: states, events: parsed.events ?? [] };
+  return { pointStates: states, events: parsed.events ?? [] };
 }
 
 export async function loadStorage(): Promise<AppStorage> {
@@ -193,10 +193,10 @@ export async function saveLanguageMode(mode: LanguageMode): Promise<void> {
 
 const APP_EVENT_TYPES: AppEventType[] = Object.values(AppEventType);
 
-function isValidButtonState(value: unknown): value is StoredButtonState {
+function isValidPointState(value: unknown): value is StoredPointState {
   if (!value || typeof value !== "object") return false;
-  const s = value as Partial<StoredButtonState>;
-  if (typeof s.buttonId !== "string") return false;
+  const s = value as Partial<StoredPointState>;
+  if (typeof s.pointId !== "string") return false;
   if (typeof s.isManuallyBlocked !== "boolean") return false;
   if (s.lastInjectionAt !== undefined && typeof s.lastInjectionAt !== "number")
     return false;
@@ -223,9 +223,9 @@ function isValidEvent(value: unknown): value is AppEvent {
     !APP_EVENT_TYPES.includes(e.type as AppEventType)
   )
     return false;
-  if (typeof e.buttonId !== "string") return false;
+  if (typeof e.pointId !== "string") return false;
   if (typeof e.zoneId !== "string") return false;
-  if (!isValidButtonState(e.prevButtonState)) return false;
+  if (!isValidPointState(e.prevPointState)) return false;
   return true;
 }
 
@@ -235,9 +235,9 @@ function isValidEvent(value: unknown): value is AppEvent {
 function isValidAppStorage(data: unknown): data is ExportedAppData {
   if (!data || typeof data !== "object") return false;
   const candidate = data as Partial<ExportedAppData>;
-  if (candidate.buttonStates !== undefined) {
-    if (typeof candidate.buttonStates !== "object") return false;
-    if (!Object.values(candidate.buttonStates).every(isValidButtonState))
+  if (candidate.pointStates !== undefined) {
+    if (typeof candidate.pointStates !== "object") return false;
+    if (!Object.values(candidate.pointStates).every(isValidPointState))
       return false;
   }
   if (candidate.events !== undefined) {
@@ -333,12 +333,12 @@ export async function pickImportFile(): Promise<ImportResult> {
     if (!isValidAppStorage(parsed)) return { type: ImportResultType.Invalid };
 
     const data: ExportedAppData = { ...parsed };
-    if (data.buttonStates !== undefined) {
+    if (data.pointStates !== undefined) {
       const normalized = normalizeStorage({
-        buttonStates: data.buttonStates,
+        pointStates: data.pointStates,
         events: data.events ?? [],
       });
-      data.buttonStates = normalized.buttonStates;
+      data.pointStates = normalized.pointStates;
       data.events = normalized.events;
     }
     if (data.daysToWhite !== undefined) {
@@ -354,8 +354,8 @@ export async function pickImportFile(): Promise<ImportResult> {
 // category's stored value untouched — the merge-import counterpart to
 // ExportOptionsDialog's selective export.
 export async function importStorage(data: ExportedAppData): Promise<void> {
-  if (data.buttonStates !== undefined && data.events !== undefined) {
-    await saveStorage({ buttonStates: data.buttonStates, events: data.events });
+  if (data.pointStates !== undefined && data.events !== undefined) {
+    await saveStorage({ pointStates: data.pointStates, events: data.events });
   }
   if (data.mirrored !== undefined) {
     await saveMirrored(data.mirrored);

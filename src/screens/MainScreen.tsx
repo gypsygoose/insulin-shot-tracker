@@ -12,7 +12,7 @@ import { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { ZoneContainer } from "../components/ZoneContainer";
 import { BottomMenu } from "../components/BottomMenu";
-import { ButtonContextMenu } from "../components/ButtonContextMenu";
+import { PointContextMenu } from "../components/PointContextMenu";
 import { MarkDialog } from "../components/MarkDialog";
 import { ConfirmDialog } from "../components/common/ConfirmDialog";
 import { ToastEntry, ToastStack } from "../components/common/ToastStack";
@@ -20,20 +20,20 @@ import { useAppStore } from "../store/useAppStore";
 import { useTheme } from "../theme/ThemeContext";
 import { useLanguage } from "../i18n/LanguageContext";
 import {
-  computeButtonColor,
+  computePointColor,
   onPress,
   PressResultType,
 } from "../logic/stateMachine";
 import {
   ZONES,
-  BUTTON_MAP,
+  POINT_MAP,
   ZONE_MAP,
-  BUTTON_ADDRESS,
+  POINT_ADDRESS,
   ZONE_LABEL_KEY,
 } from "../data/zones";
 import {
-  ButtonColor,
-  StoredButtonState,
+  PointColor,
+  StoredPointState,
   ThemeMode,
   ToastStatus,
   ZoneGroup,
@@ -53,11 +53,11 @@ import {
 // about via its body-relative address.
 function buildPointAddressSuffix(
   t: TFunction,
-  buttonId: string,
+  pointId: string,
 ): string | null {
-  const btn = BUTTON_MAP[buttonId];
-  const zone = btn ? ZONE_MAP[btn.zoneId] : undefined;
-  const address = BUTTON_ADDRESS[buttonId];
+  const point = POINT_MAP[pointId];
+  const zone = point ? ZONE_MAP[point.zoneId] : undefined;
+  const address = POINT_ADDRESS[pointId];
   if (!zone || !address) return null;
   return t("toast.pointAddressSuffix", {
     zoneLabel: t(ZONE_LABEL_KEY[zone.id]),
@@ -79,18 +79,18 @@ interface MarkToastMessage {
 function buildMarkToastMessage(
   t: TFunction,
   locale: string,
-  buttonId: string,
-  buttonState: StoredButtonState,
+  pointId: string,
+  pointState: StoredPointState,
   timestamp: number,
   daysToWhite: number,
 ): MarkToastMessage | null {
-  const addressSuffix = buildPointAddressSuffix(t, buttonId);
+  const addressSuffix = buildPointAddressSuffix(t, pointId);
   if (!addressSuffix) return null;
 
   let message = t("toast.pointMarked", { address: addressSuffix });
   let status = ToastStatus.Success;
 
-  const result = onPress(buttonState, timestamp, daysToWhite);
+  const result = onPress(pointState, timestamp, daysToWhite);
   if (result.type === PressResultType.Blackout) {
     const days = result.newState.blackoutDurationDays!;
     message += t("toast.markBlackoutSuffix", { count: days });
@@ -107,10 +107,10 @@ function buildMarkToastMessage(
 }
 
 export function MainScreen() {
-  // Long-pressed button awaiting an action from the menu / follow-up dialogs.
-  const [menuButtonId, setMenuButtonId] = useState<string | null>(null);
-  const [markButtonId, setMarkButtonId] = useState<string | null>(null);
-  const [clearButtonId, setClearButtonId] = useState<string | null>(null);
+  // Long-pressed point awaiting an action from the menu / follow-up dialogs.
+  const [menuPointId, setMenuPointId] = useState<string | null>(null);
+  const [markPointId, setMarkPointId] = useState<string | null>(null);
+  const [clearPointId, setClearPointId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastEntry[]>([]);
   const nextToastIdRef = useRef(0);
 
@@ -152,13 +152,13 @@ export function MainScreen() {
 
   const handlePress = useCallback(
     (id: string) => {
-      const color = computeButtonColor(
-        state.buttonStates[id],
+      const color = computePointColor(
+        state.pointStates[id],
         state.now,
         state.daysToWhite,
       );
 
-      if (color === ButtonColor.Gray || color === ButtonColor.Black) {
+      if (color === PointColor.Gray || color === PointColor.Black) {
         showToast(t("toast.blocked"), ToastStatus.Info, TOAST_DURATION_MS);
         return;
       }
@@ -173,12 +173,12 @@ export function MainScreen() {
       }
 
       const timestamp = Date.now();
-      actions.pressButton(id);
+      actions.pressPoint(id);
       const toast = buildMarkToastMessage(
         t,
         i18n.language,
         id,
-        state.buttonStates[id],
+        state.pointStates[id],
         timestamp,
         state.daysToWhite,
       );
@@ -186,7 +186,7 @@ export function MainScreen() {
     },
     [
       actions,
-      state.buttonStates,
+      state.pointStates,
       state.now,
       state.daysToWhite,
       state.interfaceLocked,
@@ -195,17 +195,17 @@ export function MainScreen() {
       i18n.language,
     ],
   );
-  const handleLongPress = useCallback((id: string) => setMenuButtonId(id), []);
+  const handleLongPress = useCallback((id: string) => setMenuPointId(id), []);
 
-  const menuZone = menuButtonId
-    ? ZONE_MAP[BUTTON_MAP[menuButtonId]?.zoneId]
+  const menuZone = menuPointId
+    ? ZONE_MAP[POINT_MAP[menuPointId]?.zoneId]
     : undefined;
   const menuZoneLabel = menuZone ? t(ZONE_LABEL_KEY[menuZone.id]) : undefined;
-  const menuButtonState = menuButtonId
-    ? state.buttonStates[menuButtonId]
+  const menuPointState = menuPointId
+    ? state.pointStates[menuPointId]
     : undefined;
-  const menuButtonColor = menuButtonState
-    ? computeButtonColor(menuButtonState, state.now, state.daysToWhite)
+  const menuPointColor = menuPointState
+    ? computePointColor(menuPointState, state.now, state.daysToWhite)
     : undefined;
 
   if (!state.isLoaded) {
@@ -241,7 +241,7 @@ export function MainScreen() {
         </View>
       </SafeAreaView>
 
-      {/* Body image + buttons overlay */}
+      {/* Body image + points overlay */}
       <View style={styles.bodyWrap}>
         <View style={styles.imageContainer}>
           <Image
@@ -269,16 +269,16 @@ export function MainScreen() {
               key={zone.id}
               zoneId={zone.id}
               mirrored={state.mirrored}
-              getColor={(buttonId) =>
-                computeButtonColor(
-                  state.buttonStates[buttonId],
+              getColor={(pointId) =>
+                computePointColor(
+                  state.pointStates[pointId],
                   state.now,
                   state.daysToWhite,
                 )
               }
-              isCheckmarked={(buttonId) =>
-                state.lastInGroup[ZoneGroup.Thighs] === buttonId ||
-                state.lastInGroup[ZoneGroup.ShouldersAndBelly] === buttonId
+              isCheckmarked={(pointId) =>
+                state.lastInGroup[ZoneGroup.Thighs] === pointId ||
+                state.lastInGroup[ZoneGroup.ShouldersAndBelly] === pointId
               }
               onPress={handlePress}
               onLongPress={handleLongPress}
@@ -337,18 +337,18 @@ export function MainScreen() {
         onNotify={showToast}
       />
 
-      {/* Long-press menu for a single button */}
-      <ButtonContextMenu
-        visible={menuButtonId !== null}
-        buttonId={menuButtonId ?? undefined}
+      {/* Long-press menu for a single point */}
+      <PointContextMenu
+        visible={menuPointId !== null}
+        pointId={menuPointId ?? undefined}
         zoneLabel={menuZoneLabel}
-        color={menuButtonColor}
-        buttonState={menuButtonState}
+        color={menuPointColor}
+        pointState={menuPointState}
         now={state.now}
         onBlock={() => {
-          if (menuButtonId) {
-            actions.blockButton(menuButtonId);
-            const addressSuffix = buildPointAddressSuffix(t, menuButtonId);
+          if (menuPointId) {
+            actions.blockPoint(menuPointId);
+            const addressSuffix = buildPointAddressSuffix(t, menuPointId);
             if (addressSuffix) {
               showToast(
                 t("toast.labeledValue", {
@@ -359,12 +359,12 @@ export function MainScreen() {
               );
             }
           }
-          setMenuButtonId(null);
+          setMenuPointId(null);
         }}
         onUnblock={() => {
-          if (menuButtonId) {
-            actions.unblockButton(menuButtonId);
-            const addressSuffix = buildPointAddressSuffix(t, menuButtonId);
+          if (menuPointId) {
+            actions.unblockPoint(menuPointId);
+            const addressSuffix = buildPointAddressSuffix(t, menuPointId);
             if (addressSuffix) {
               showToast(
                 t("toast.labeledValue", {
@@ -375,53 +375,53 @@ export function MainScreen() {
               );
             }
           }
-          setMenuButtonId(null);
+          setMenuPointId(null);
         }}
         onMark={() => {
-          setMarkButtonId(menuButtonId);
-          setMenuButtonId(null);
+          setMarkPointId(menuPointId);
+          setMenuPointId(null);
         }}
         onClear={() => {
-          setClearButtonId(menuButtonId);
-          setMenuButtonId(null);
+          setClearPointId(menuPointId);
+          setMenuPointId(null);
         }}
-        onCancel={() => setMenuButtonId(null)}
+        onCancel={() => setMenuPointId(null)}
       />
 
       <MarkDialog
-        visible={markButtonId !== null}
+        visible={markPointId !== null}
         minDate={
-          markButtonId
-            ? state.buttonStates[markButtonId]?.lastInjectionAt
+          markPointId
+            ? state.pointStates[markPointId]?.lastInjectionAt
             : undefined
         }
         onConfirm={(timestamp) => {
-          if (markButtonId) {
+          if (markPointId) {
             const toast = buildMarkToastMessage(
               t,
               i18n.language,
-              markButtonId,
-              state.buttonStates[markButtonId],
+              markPointId,
+              state.pointStates[markPointId],
               timestamp,
               state.daysToWhite,
             );
-            actions.markButtonAt(markButtonId, timestamp);
+            actions.markPointAt(markPointId, timestamp);
             if (toast) showToast(toast.message, toast.status);
           }
-          setMarkButtonId(null);
+          setMarkPointId(null);
         }}
-        onCancel={() => setMarkButtonId(null)}
+        onCancel={() => setMarkPointId(null)}
       />
 
       <ConfirmDialog
-        visible={clearButtonId !== null}
+        visible={clearPointId !== null}
         title={t("mainScreen.clearPointConfirm.title")}
         message={t("mainScreen.clearPointConfirm.message")}
         confirmLabel={t("common.clear")}
         onConfirm={() => {
-          if (clearButtonId) {
-            actions.clearButton(clearButtonId);
-            const addressSuffix = buildPointAddressSuffix(t, clearButtonId);
+          if (clearPointId) {
+            actions.clearPoint(clearPointId);
+            const addressSuffix = buildPointAddressSuffix(t, clearPointId);
             if (addressSuffix) {
               showToast(
                 t("toast.labeledValue", {
@@ -432,9 +432,9 @@ export function MainScreen() {
               );
             }
           }
-          setClearButtonId(null);
+          setClearPointId(null);
         }}
-        onCancel={() => setClearButtonId(null)}
+        onCancel={() => setClearPointId(null)}
         destructive
       />
     </View>

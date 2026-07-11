@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import Svg, { Defs, RadialGradient, Stop, Circle } from "react-native-svg";
-import { ButtonColor } from "../types";
+import { PointColor } from "../types";
 import { COLOR_HEX, checkmarkColor } from "../logic/stateMachine";
 
 // Sizes match the Figma "with buttons" frame (node 27:744, file
@@ -19,14 +19,14 @@ const LONG_PRESS_DELAY_MS = 800;
 
 interface Props {
   id: string;
-  color: ButtonColor;
+  color: PointColor;
   glowColor: string;
   showCheckmark: boolean;
   onPress: () => void;
   onLongPress: () => void;
 }
 
-export function InjectionButton({
+export function InjectionPoint({
   id,
   color,
   glowColor,

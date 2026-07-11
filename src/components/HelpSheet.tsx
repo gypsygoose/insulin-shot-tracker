@@ -1,7 +1,7 @@
 import { ScrollView, Text, View, StyleSheet } from "react-native";
 import { TFunction } from "i18next";
 import { Trans, useTranslation } from "react-i18next";
-import { ButtonColor, ZoneType } from "../types";
+import { PointColor, ZoneType } from "../types";
 import {
   activeCycleColors,
   COLOR_HEX,
@@ -18,7 +18,7 @@ import type { TranslationKey } from "../i18n";
 // from `colors.zoneColors`, which already resolves to the theme's darker
 // shade in light mode — the plain dark-theme accent reads too faint as
 // text/a badge border on the light theme's white sheet surface (same issue
-// as ZoneContainer's block — see CLAUDE.md's "Zones and buttons").
+// as ZoneContainer's block — see CLAUDE.md's "Zones and points").
 const HELP_ZONE_TYPES: ZoneType[] = [
   ZoneType.Shoulder,
   ZoneType.Belly,
@@ -52,12 +52,12 @@ const HELP_ZONE_KEY: Record<ZoneType, HelpZoneKeys> = {
 // Color scheme rows shown in order: white (free), the active injection
 // cycle (fewer entries when daysToWhite is reduced), then the two block
 // states.
-function colorOrder(daysToWhite: number): ButtonColor[] {
+function colorOrder(daysToWhite: number): PointColor[] {
   return [
-    ButtonColor.White,
+    PointColor.White,
     ...activeCycleColors(daysToWhite),
-    ButtonColor.Black,
-    ButtonColor.Gray,
+    PointColor.Black,
+    PointColor.Gray,
   ];
 }
 

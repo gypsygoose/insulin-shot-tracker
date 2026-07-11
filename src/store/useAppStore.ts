@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { AppStorage, AppEvent, AppEventType, ExportedAppData, ExportSelection, ExportSettingKey, LanguageMode, StoredButtonState, ThemeMode, ZoneGroup } from '../types';
+import { AppStorage, AppEvent, AppEventType, ExportedAppData, ExportSelection, ExportSettingKey, LanguageMode, StoredPointState, ThemeMode, ZoneGroup } from '../types';
 import {
   loadStorage,
   saveStorage,
@@ -21,7 +21,7 @@ import {
   ImportResult,
 } from '../storage/storage';
 import { onPress, PressResultType } from '../logic/stateMachine';
-import { BUTTON_MAP, ZONE_MAP } from '../data/zones';
+import { POINT_MAP, ZONE_MAP } from '../data/zones';
 import {
   SECOND_MS,
   DEFAULT_DAYS_TO_WHITE,
@@ -54,11 +54,11 @@ export interface AppState extends AppStorage {
 }
 
 export interface AppActions {
-  pressButton(buttonId: string): void;
-  blockButton(buttonId: string): void;
-  unblockButton(buttonId: string): void;
-  markButtonAt(buttonId: string, timestamp: number): void;
-  clearButton(buttonId: string): void;
+  pressPoint(pointId: string): void;
+  blockPoint(pointId: string): void;
+  unblockPoint(pointId: string): void;
+  markPointAt(pointId: string, timestamp: number): void;
+  clearPoint(pointId: string): void;
   undo(): void;
   clearAll(): void;
   setMirrored(mirrored: boolean): void;
@@ -77,13 +77,13 @@ export interface AppActions {
   applyImport(data: ExportedAppData): void;
 }
 
-// Derive checked buttonId per group: the button with the latest press date
+// Derive checked pointId per group: the point with the latest press date
 // (lastInjectionAt or blackoutStartedAt, whichever is more recent) in that
 // group. Based on actual timestamps rather than event-log order, so a
-// backdated entry (via markButtonAt) never wins over a genuinely more recent
+// backdated entry (via markPointAt) never wins over a genuinely more recent
 // press just because it was recorded later.
 function lastPressedByGroup(
-  buttonStates: Record<string, StoredButtonState>,
+  pointStates: Record<string, StoredPointState>,
 ): Record<ZoneGroup, string | null> {
   const result: Record<ZoneGroup, string | null> = {
     [ZoneGroup.Thighs]: null,
@@ -93,20 +93,20 @@ function lastPressedByGroup(
     [ZoneGroup.Thighs]: -Infinity,
     [ZoneGroup.ShouldersAndBelly]: -Infinity,
   };
-  for (const buttonId in buttonStates) {
-    const btnState = buttonStates[buttonId];
-    const btn = BUTTON_MAP[buttonId];
-    if (!btn) continue;
-    const zone = ZONE_MAP[btn.zoneId];
+  for (const pointId in pointStates) {
+    const pointState = pointStates[pointId];
+    const point = POINT_MAP[pointId];
+    if (!point) continue;
+    const zone = ZONE_MAP[point.zoneId];
     if (!zone) continue;
     const time = Math.max(
-      btnState.lastInjectionAt ?? -Infinity,
-      btnState.blackoutStartedAt ?? -Infinity,
+      pointState.lastInjectionAt ?? -Infinity,
+      pointState.blackoutStartedAt ?? -Infinity,
     );
     if (time === -Infinity) continue;
     if (time > bestTime[zone.group]) {
       bestTime[zone.group] = time;
-      result[zone.group] = buttonId;
+      result[zone.group] = pointId;
     }
   }
   return result;
@@ -121,7 +121,7 @@ export function useAppStore(
   onAutoLockFired?: () => void,
 ): [AppState & { lastInGroup: Record<ZoneGroup, string | null> }, AppActions] {
   const [state, setState] = useState<AppState>({
-    buttonStates: {},
+    pointStates: {},
     events: [],
     now: Date.now(),
     isLoaded: false,
@@ -192,7 +192,7 @@ export function useAppStore(
   }, []);
 
   // Fires the pending auto-lock deadline (set by an unlock or a mark, see
-  // setInterfaceLocked/pressButton below) while the app is running. Reruns
+  // setInterfaceLocked/pressPoint below) while the app is running. Reruns
   // whenever the deadline is pushed out, so the latest one always wins.
   useEffect(() => {
     if (!state.isLoaded) return;
@@ -234,14 +234,14 @@ export function useAppStore(
     saveRef.current = setTimeout(() => saveStorage(nextState), SAVE_DEBOUNCE_MS);
   }
 
-  const pressButton = useCallback((buttonId: string) => {
+  const pressPoint = useCallback((pointId: string) => {
     setState((prev) => {
       const now = Date.now();
-      const btn = BUTTON_MAP[buttonId];
-      if (!btn) return prev;
+      const point = POINT_MAP[pointId];
+      if (!point) return prev;
 
-      const currentBtnState = prev.buttonStates[buttonId];
-      const result = onPress(currentBtnState, now, prev.daysToWhite);
+      const currentPointState = prev.pointStates[pointId];
+      const result = onPress(currentPointState, now, prev.daysToWhite);
       if (result.type === PressResultType.Blocked) return prev;
 
       const event: AppEvent = {
@@ -251,17 +251,17 @@ export function useAppStore(
           result.type === PressResultType.Injection
             ? AppEventType.Injection
             : AppEventType.Blackout,
-        buttonId,
-        zoneId: btn.zoneId,
-        prevButtonState: { ...currentBtnState },
+        pointId,
+        zoneId: point.zoneId,
+        prevPointState: { ...currentPointState },
       };
 
-      const nextButtonStates = {
-        ...prev.buttonStates,
-        [buttonId]: result.newState,
+      const nextPointStates = {
+        ...prev.pointStates,
+        [pointId]: result.newState,
       };
       const nextEvents = [...prev.events, event];
-      const next: AppStorage = { buttonStates: nextButtonStates, events: nextEvents };
+      const next: AppStorage = { pointStates: nextPointStates, events: nextEvents };
       scheduleSave(next);
 
       // Marking a zone re-arms the auto-lock countdown.
@@ -280,16 +280,16 @@ export function useAppStore(
     });
   }, []);
 
-  const blockButton = useCallback((buttonId: string) => {
+  const blockPoint = useCallback((pointId: string) => {
     setState((prev) => {
       const now = Date.now();
-      const btn = BUTTON_MAP[buttonId];
-      if (!btn) return prev;
+      const point = POINT_MAP[pointId];
+      if (!point) return prev;
 
-      const currentBtnState = prev.buttonStates[buttonId];
-      const newBtnState: StoredButtonState = {
-        ...currentBtnState,
-        buttonId,
+      const currentPointState = prev.pointStates[pointId];
+      const newPointState: StoredPointState = {
+        ...currentPointState,
+        pointId,
         isManuallyBlocked: true,
         manuallyBlockedAt: now,
       };
@@ -298,31 +298,31 @@ export function useAppStore(
         id: uuid(),
         timestamp: now,
         type: AppEventType.ManualBlock,
-        buttonId,
-        zoneId: btn.zoneId,
-        prevButtonState: currentBtnState
-          ? { ...currentBtnState }
-          : { buttonId, isManuallyBlocked: false },
+        pointId,
+        zoneId: point.zoneId,
+        prevPointState: currentPointState
+          ? { ...currentPointState }
+          : { pointId, isManuallyBlocked: false },
       };
 
-      const nextButtonStates = { ...prev.buttonStates, [buttonId]: newBtnState };
+      const nextPointStates = { ...prev.pointStates, [pointId]: newPointState };
       const nextEvents = [...prev.events, event];
-      const next: AppStorage = { buttonStates: nextButtonStates, events: nextEvents };
+      const next: AppStorage = { pointStates: nextPointStates, events: nextEvents };
       scheduleSave(next);
       return { ...prev, ...next, now };
     });
   }, []);
 
-  const unblockButton = useCallback((buttonId: string) => {
+  const unblockPoint = useCallback((pointId: string) => {
     setState((prev) => {
       const now = Date.now();
-      const btn = BUTTON_MAP[buttonId];
-      if (!btn) return prev;
+      const point = POINT_MAP[pointId];
+      if (!point) return prev;
 
-      const currentBtnState = prev.buttonStates[buttonId];
-      if (!currentBtnState) return prev;
-      const newBtnState: StoredButtonState = {
-        ...currentBtnState,
+      const currentPointState = prev.pointStates[pointId];
+      if (!currentPointState) return prev;
+      const newPointState: StoredPointState = {
+        ...currentPointState,
         isManuallyBlocked: false,
         manuallyBlockedAt: undefined,
       };
@@ -331,29 +331,29 @@ export function useAppStore(
         id: uuid(),
         timestamp: now,
         type: AppEventType.ManualUnblock,
-        buttonId,
-        zoneId: btn.zoneId,
-        prevButtonState: { ...currentBtnState },
+        pointId,
+        zoneId: point.zoneId,
+        prevPointState: { ...currentPointState },
       };
 
-      const nextButtonStates = { ...prev.buttonStates, [buttonId]: newBtnState };
+      const nextPointStates = { ...prev.pointStates, [pointId]: newPointState };
       const nextEvents = [...prev.events, event];
-      const next: AppStorage = { buttonStates: nextButtonStates, events: nextEvents };
+      const next: AppStorage = { pointStates: nextPointStates, events: nextEvents };
       scheduleSave(next);
       return { ...prev, ...next, now };
     });
   }, []);
 
-  // Records the button as if it had been pressed at the given timestamp
+  // Records the point as if it had been pressed at the given timestamp
   // instead of now, reusing the normal press state machine.
-  const markButtonAt = useCallback((buttonId: string, timestamp: number) => {
+  const markPointAt = useCallback((pointId: string, timestamp: number) => {
     setState((prev) => {
       const now = Date.now();
-      const btn = BUTTON_MAP[buttonId];
-      if (!btn) return prev;
+      const point = POINT_MAP[pointId];
+      if (!point) return prev;
 
-      const currentBtnState = prev.buttonStates[buttonId];
-      const result = onPress(currentBtnState, timestamp, prev.daysToWhite);
+      const currentPointState = prev.pointStates[pointId];
+      const result = onPress(currentPointState, timestamp, prev.daysToWhite);
       if (result.type === PressResultType.Blocked) return prev;
 
       const event: AppEvent = {
@@ -363,44 +363,44 @@ export function useAppStore(
           result.type === PressResultType.Injection
             ? AppEventType.Injection
             : AppEventType.Blackout,
-        buttonId,
-        zoneId: btn.zoneId,
-        prevButtonState: currentBtnState
-          ? { ...currentBtnState }
-          : { buttonId, isManuallyBlocked: false },
+        pointId,
+        zoneId: point.zoneId,
+        prevPointState: currentPointState
+          ? { ...currentPointState }
+          : { pointId, isManuallyBlocked: false },
       };
 
-      const nextButtonStates = { ...prev.buttonStates, [buttonId]: result.newState };
+      const nextPointStates = { ...prev.pointStates, [pointId]: result.newState };
       const nextEvents = [...prev.events, event];
-      const next: AppStorage = { buttonStates: nextButtonStates, events: nextEvents };
+      const next: AppStorage = { pointStates: nextPointStates, events: nextEvents };
       scheduleSave(next);
       return { ...prev, ...next, now };
     });
   }, []);
 
-  const clearButton = useCallback((buttonId: string) => {
+  const clearPoint = useCallback((pointId: string) => {
     setState((prev) => {
       const now = Date.now();
-      const btn = BUTTON_MAP[buttonId];
-      if (!btn) return prev;
+      const point = POINT_MAP[pointId];
+      if (!point) return prev;
 
-      const currentBtnState = prev.buttonStates[buttonId];
-      const newBtnState: StoredButtonState = { buttonId, isManuallyBlocked: false };
+      const currentPointState = prev.pointStates[pointId];
+      const newPointState: StoredPointState = { pointId, isManuallyBlocked: false };
 
       const event: AppEvent = {
         id: uuid(),
         timestamp: now,
         type: AppEventType.ManualClear,
-        buttonId,
-        zoneId: btn.zoneId,
-        prevButtonState: currentBtnState
-          ? { ...currentBtnState }
-          : { buttonId, isManuallyBlocked: false },
+        pointId,
+        zoneId: point.zoneId,
+        prevPointState: currentPointState
+          ? { ...currentPointState }
+          : { pointId, isManuallyBlocked: false },
       };
 
-      const nextButtonStates = { ...prev.buttonStates, [buttonId]: newBtnState };
+      const nextPointStates = { ...prev.pointStates, [pointId]: newPointState };
       const nextEvents = [...prev.events, event];
-      const next: AppStorage = { buttonStates: nextButtonStates, events: nextEvents };
+      const next: AppStorage = { pointStates: nextPointStates, events: nextEvents };
       scheduleSave(next);
       return { ...prev, ...next, now };
     });
@@ -410,12 +410,12 @@ export function useAppStore(
     setState((prev) => {
       if (prev.events.length === 0) return prev;
       const last = prev.events[prev.events.length - 1];
-      const nextButtonStates = {
-        ...prev.buttonStates,
-        [last.buttonId]: last.prevButtonState,
+      const nextPointStates = {
+        ...prev.pointStates,
+        [last.pointId]: last.prevPointState,
       };
       const nextEvents = prev.events.slice(0, -1);
-      const next: AppStorage = { buttonStates: nextButtonStates, events: nextEvents };
+      const next: AppStorage = { pointStates: nextPointStates, events: nextEvents };
       scheduleSave(next);
       return { ...prev, ...next };
     });
@@ -540,7 +540,7 @@ export function useAppStore(
     ) => {
       const data: ExportedAppData = {};
       if (selection.marks) {
-        data.buttonStates = state.buttonStates;
+        data.pointStates = state.pointStates;
         data.events = state.events;
       }
       if (selection.settings[ExportSettingKey.Mirrored]) {
@@ -563,7 +563,7 @@ export function useAppStore(
       await exportStorageToFile(data, dialogTitle);
     },
     [
-      state.buttonStates,
+      state.pointStates,
       state.events,
       state.mirrored,
       state.autoLockEnabled,
@@ -582,7 +582,7 @@ export function useAppStore(
     setState((prev) => {
       const next: AppState = { ...prev };
 
-      if (data.buttonStates !== undefined) next.buttonStates = data.buttonStates;
+      if (data.pointStates !== undefined) next.pointStates = data.pointStates;
       if (data.events !== undefined) next.events = data.events;
       if (data.mirrored !== undefined) next.mirrored = data.mirrored;
 
@@ -617,16 +617,16 @@ export function useAppStore(
     importStorage(data);
   }, []);
 
-  const lastInGroup = lastPressedByGroup(state.buttonStates);
+  const lastInGroup = lastPressedByGroup(state.pointStates);
 
   return [
     { ...state, lastInGroup },
     {
-      pressButton,
-      blockButton,
-      unblockButton,
-      markButtonAt,
-      clearButton,
+      pressPoint,
+      blockPoint,
+      unblockPoint,
+      markPointAt,
+      clearPoint,
       undo,
       clearAll,
       setMirrored,

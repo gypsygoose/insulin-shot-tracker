@@ -37,7 +37,7 @@ export const ACCORDION_ANIMATION_DURATION_MS = 150;
 
 // Toast status accent colors — each drives both the toast's left-edge/icon
 // tint and its icon shape (src/components/icons/Toast*Icon.tsx). Chosen
-// distinct from ButtonColor's cycle colors despite some value proximity,
+// distinct from PointColor's cycle colors despite some value proximity,
 // since they mean "message severity", not "days since injection".
 export const TOAST_INFO_COLOR = "#3B82F6";
 export const TOAST_WARN_COLOR = "#F59E0B";
