@@ -9,9 +9,14 @@ export const THEME_MODE_KEY: Record<ThemeMode, TranslationKey> = {
   [ThemeMode.System]: "menu.themeDialog.system",
 };
 
-// Shared with LanguageDialog.tsx, which offers the same three options.
+// Shared with LanguageDialog.tsx, which offers the same eight options.
 export const LANGUAGE_MODE_KEY: Record<LanguageMode, TranslationKey> = {
   [LanguageMode.Russian]: "menu.languageDialog.russian",
   [LanguageMode.English]: "menu.languageDialog.english",
+  [LanguageMode.German]: "menu.languageDialog.german",
+  [LanguageMode.Spanish]: "menu.languageDialog.spanish",
+  [LanguageMode.French]: "menu.languageDialog.french",
+  [LanguageMode.Turkish]: "menu.languageDialog.turkish",
+  [LanguageMode.Portuguese]: "menu.languageDialog.portuguese",
   [LanguageMode.System]: "menu.languageDialog.system",
 };

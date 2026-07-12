@@ -1,11 +1,16 @@
 import i18next from "i18next";
 import { initReactI18next } from "react-i18next";
-import { ru, en } from "./locales";
+import { ru, en, es, de, fr, tr, pt } from "./locales";
 import { getDeviceLanguage } from "./utils";
 
 export const resources = {
   ru: { translation: ru },
   en: { translation: en },
+  es: { translation: es },
+  de: { translation: de },
+  fr: { translation: fr },
+  tr: { translation: tr },
+  pt: { translation: pt },
 };
 
 // Defined in ./types (not here) so data/zones.ts can import it without a
@@ -20,7 +25,7 @@ export type { TranslationKey } from "./types";
 i18next.use(initReactI18next).init({
   resources,
   lng: getDeviceLanguage(),
-  fallbackLng: "ru",
+  fallbackLng: "en",
   interpolation: { escapeValue: false },
 });
 

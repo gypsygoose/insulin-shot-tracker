@@ -112,6 +112,11 @@ export const en = {
       system: "System",
       russian: "Русский",
       english: "English",
+      german: "Deutsch",
+      spanish: "Español",
+      french: "Français",
+      turkish: "Türkçe",
+      portuguese: "Português (Brasil)",
     },
     exportOptionsDialog: {
       title: "Export data",

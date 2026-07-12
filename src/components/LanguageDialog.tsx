@@ -10,6 +10,11 @@ const LANGUAGE_MODE_OPTIONS: LanguageMode[] = [
   LanguageMode.System,
   LanguageMode.English,
   LanguageMode.Russian,
+  LanguageMode.German,
+  LanguageMode.Spanish,
+  LanguageMode.French,
+  LanguageMode.Turkish,
+  LanguageMode.Portuguese,
 ];
 
 interface Props {

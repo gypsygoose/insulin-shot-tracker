@@ -17,7 +17,7 @@ Tap a point on the body diagram to log an injection at that spot. The point's co
 - Automatic "blackout" cooldown when a site is reused too early, with duration based on how recently it was used
 - Manual site lock (long-press) to mark a spot as temporarily unavailable
 - Light, dark, or system-matched theme, switchable from the menu (defaults to following the OS appearance)
-- Russian and English UI, switchable from the menu (defaults to following the device language)
+- Russian, English, Spanish, German, French, Turkish, and Brazilian Portuguese UI, switchable from the menu (defaults to following the device language)
 - Undo, injection history, and selective import/export/clear of your data (choose which of active points / manually blocked points / individual app settings to include on export; on import, pick which of the categories actually present in the file to apply; on clear, pick which of those same categories to permanently reset to their defaults) — all stored locally on-device, no account or backend required
 
 ## Getting started
@@ -59,7 +59,7 @@ See [CLAUDE.md](CLAUDE.md) for full architecture notes, the point color/rotation
 ## Notes
 
 - All data is stored locally on-device (AsyncStorage) — there is no backend or cloud sync.
-- UI is available in Russian and English (see the "Язык"/"Language" menu row); more languages may be added later.
+- UI is available in Russian, English, Spanish, German, French, Turkish, and Brazilian Portuguese (see the "Язык"/"Language" menu row); more languages may be added later.
 - This app supports injection-site rotation tracking and is not a substitute for medical advice.
 
 ## License

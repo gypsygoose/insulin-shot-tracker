@@ -111,6 +111,11 @@ export const ru: AppLocale = {
       system: "Системный",
       russian: "Русский",
       english: "English",
+      german: "Deutsch",
+      spanish: "Español",
+      french: "Français",
+      turkish: "Türkçe",
+      portuguese: "Português (Brasil)",
     },
     exportOptionsDialog: {
       title: "Экспорт данных",
