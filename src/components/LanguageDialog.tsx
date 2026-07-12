@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "./common";
 import { useTheme } from "../theme";
@@ -33,6 +34,7 @@ export function LanguageDialog({
   const { t } = useTranslation();
   const { colors } = useTheme();
   const [mode, setMode] = useState(initialLanguageMode);
+  const pickerItemColor = Platform.OS === "android" ? colors.primaryText : undefined;
 
   useEffect(() => {
     if (!visible) return;
@@ -48,61 +50,32 @@ export function LanguageDialog({
       onConfirm={() => onConfirm(mode)}
       onCancel={onCancel}
     >
-      <View style={styles.options}>
-        {LANGUAGE_MODE_OPTIONS.map((option) => {
-          const selected = option === mode;
-          return (
-            <TouchableOpacity
-              key={option}
-              style={[
-                styles.option,
-                { borderColor: colors.cardBorder },
-                selected && {
-                  borderColor: colors.primaryAction,
-                  backgroundColor: `${colors.primaryAction}1A`,
-                },
-              ]}
-              onPress={() => setMode(option)}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.optionLabel, { color: colors.primaryText }]}>
-                {t(LANGUAGE_MODE_KEY[option])}
-              </Text>
-              {selected ? (
-                <Text
-                  style={[styles.checkmark, { color: colors.primaryAction }]}
-                >
-                  ✓
-                </Text>
-              ) : null}
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      <Picker
+        style={[styles.picker, { color: colors.primaryText }]}
+        itemStyle={[styles.pickerItem, { color: colors.primaryText }]}
+        selectedValue={mode}
+        onValueChange={(value) => setMode(value as LanguageMode)}
+        dropdownIconColor={colors.primaryText}
+      >
+        {LANGUAGE_MODE_OPTIONS.map((option) => (
+          <Picker.Item
+            key={option}
+            label={t(LANGUAGE_MODE_KEY[option])}
+            value={option}
+            color={pickerItemColor}
+          />
+        ))}
+      </Picker>
     </Dialog>
   );
 }
 
 const styles = StyleSheet.create({
-  options: {
-    gap: 10,
-    marginBottom: 4,
+  picker: {
+    width: "100%",
   },
-  option: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderRadius: 10,
-    borderWidth: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-  },
-  optionLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  checkmark: {
-    fontSize: 15,
-    fontWeight: "700",
+  pickerItem: {
+    fontSize: 18,
+    height: 120,
   },
 });
