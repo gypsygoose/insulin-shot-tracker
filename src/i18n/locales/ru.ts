@@ -148,6 +148,7 @@ export const ru: AppLocale = {
     title: "Справка",
     sectionZones: "Зоны введения",
     sectionColorScheme: "Цветовая схема",
+    sectionRecommendations: "Рекомендации",
     sectionControls: "Управление",
     sectionBottomBar: "Нижняя панель",
     sectionMenuItems: "Пункты меню",
@@ -170,6 +171,10 @@ export const ru: AppLocale = {
         description:
           "Медленное всасывание. Для пролонгированного инсулина. Пик действия через 90–120 минут.",
       },
+    },
+    recommendations: {
+      varySpot:
+        "Даже соблюдая ротацию мест уколов, не колите каждый раз ровно в одну и ту же точку — слегка варьируйте точное место укола даже в рамках одного места.",
     },
     controls: {
       press: "<bold>Нажатие</bold> — зафиксировать укол.",

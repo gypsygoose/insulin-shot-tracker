@@ -121,6 +121,11 @@ export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
           </View>
         ))}
 
+        <Text style={sectionTitleStyle}>
+          {t("help.sectionRecommendations")}
+        </Text>
+        <Text style={hintStyle}>{t("help.recommendations.varySpot")}</Text>
+
         <Text style={sectionTitleStyle}>{t("help.sectionControls")}</Text>
         <Text style={hintStyle}>
           <Trans i18nKey="help.controls.press" components={boldComponents} />

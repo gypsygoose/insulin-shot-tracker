@@ -148,6 +148,7 @@ export const en = {
     title: "Help",
     sectionZones: "Injection zones",
     sectionColorScheme: "Color scheme",
+    sectionRecommendations: "Recommendations",
     sectionControls: "Controls",
     sectionBottomBar: "Bottom bar",
     sectionMenuItems: "Menu items",
@@ -170,6 +171,10 @@ export const en = {
         description:
           "Slow absorption. For long-acting insulin. Peak effect in 90–120 minutes.",
       },
+    },
+    recommendations: {
+      varySpot:
+        "Even when following the site rotation, don't inject into the exact same spot every time — vary the precise injection point slightly within the same site as well.",
     },
     controls: {
       press: "<bold>Tap</bold> — record an injection.",
