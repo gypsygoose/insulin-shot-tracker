@@ -175,7 +175,7 @@ const SHOULDER_BELLY_MIN_GAP = 0.02;
 function shouldRaiseShoulderZones(zonePointCounts: ZonePointCounts): boolean {
   const { cols: shoulderCols } = zonePointCounts[ZoneType.Shoulder];
   const { cols: bellyCols } = zonePointCounts[ZoneType.Belly];
-  return (shoulderCols > 1 && bellyCols > 2) || bellyCols > 3;
+  return shoulderCols + bellyCols > 4;
 }
 
 // Recomputes the shoulder zone's centerY so its box clears the belly zone's
@@ -224,7 +224,9 @@ function shouldWidenBellyGap(zonePointCounts: ZonePointCounts): boolean {
 // widened gap visually centered exactly where the fixed-width belly zones
 // already are, instead of drifting off the navel.
 const BELLY_ZONES_MIDLINE_X =
-  (ZONE_ANCHOR[ZoneId.BellyRight].centerX + ZONE_ANCHOR[ZoneId.BellyLeft].centerX) / 2;
+  (ZONE_ANCHOR[ZoneId.BellyRight].centerX +
+    ZONE_ANCHOR[ZoneId.BellyLeft].centerX) /
+  2;
 
 // Recomputes a belly zone's centerX so its inner (toward-midline) edge sits
 // BELLY_ZONES_MIN_GAP / 2 away from BELLY_ZONES_MIDLINE_X, instead of using
@@ -263,9 +265,10 @@ function buildZoneLayout(
   zonePointCounts: ZonePointCounts,
 ): Record<ZoneId, ZoneLayout> {
   const zoneLayout = {} as Record<ZoneId, ZoneLayout>;
-  const raiseShoulderZones = shouldRaiseShoulderZones(zonePointCounts);
   const widenBellyGap = shouldWidenBellyGap(zonePointCounts);
-  const lowerShoulderAndBelly = shouldLowerShoulderAndBellyZones(zonePointCounts);
+  const raiseShoulderZones = shouldRaiseShoulderZones(zonePointCounts);
+  const lowerShoulderAndBelly =
+    raiseShoulderZones && shouldLowerShoulderAndBellyZones(zonePointCounts);
   for (const zone of ZONES) {
     const zoneType = ZONE_TYPE[zone.id];
     const { rows, cols } = zonePointCounts[zoneType];
@@ -281,7 +284,10 @@ function buildZoneLayout(
       raiseShoulderZones && zoneType === ZoneType.Shoulder
         ? raisedShoulderCenterY(zonePointCounts, height)
         : centerY;
-    if (lowerShoulderAndBelly && (zoneType === ZoneType.Shoulder || zoneType === ZoneType.Belly)) {
+    if (
+      lowerShoulderAndBelly &&
+      (zoneType === ZoneType.Shoulder || zoneType === ZoneType.Belly)
+    ) {
       resolvedCenterY += SHOULDER_BELLY_ROWS_LOWER_OFFSET;
     }
     zoneLayout[zone.id] = {
