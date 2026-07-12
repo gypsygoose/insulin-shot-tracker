@@ -9,9 +9,13 @@ import {
 } from "../AppDataSelector";
 import { ExportSelection } from "../../types";
 
+// Unlike ExportOptionsDialog (everything defaults to checked), only "Активные
+// точки" defaults to checked here — clearing is destructive, so the default
+// selection stays narrow rather than reproducing the old all-or-nothing
+// "Очистить" behavior; every other category needs a deliberate opt-in.
 const DEFAULT_SELECTION: ExportSelection = {
-  marks: allMarks(true),
-  settings: allSettings(true),
+  marks: { ...allMarks(false) },
+  settings: allSettings(false),
 };
 const DEFAULT_MARKS_EXPANDED = false;
 const DEFAULT_SETTINGS_EXPANDED = false;
@@ -22,7 +26,7 @@ interface Props {
   onCancel: () => void;
 }
 
-export function ExportOptionsDialog({ visible, onConfirm, onCancel }: Props) {
+export function ClearOptionsDialog({ visible, onConfirm, onCancel }: Props) {
   const { t } = useTranslation();
   const [selection, setSelection] =
     useState<ExportSelection>(DEFAULT_SELECTION);
@@ -41,12 +45,13 @@ export function ExportOptionsDialog({ visible, onConfirm, onCancel }: Props) {
   return (
     <Dialog
       visible={visible}
-      title={t("menu.exportOptionsDialog.title")}
-      message={t("menu.exportOptionsDialog.message")}
-      confirmLabel={t("menu.exportOptionsDialog.confirmLabel")}
+      title={t("menu.clearOptionsDialog.title")}
+      message={t("menu.clearOptionsDialog.message")}
+      confirmLabel={t("menu.clearOptionsDialog.confirmLabel")}
       confirmDisabled={isSelectionEmpty(selection)}
       onConfirm={() => onConfirm(selection)}
       onCancel={onCancel}
+      destructive
       scrollable
     >
       <AppDataSelector

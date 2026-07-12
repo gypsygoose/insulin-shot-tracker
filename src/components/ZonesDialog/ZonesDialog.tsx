@@ -27,7 +27,7 @@ interface Props {
 // One collapsed-by-default accordion per zone type (Плечи/Живот/Бёдра), each
 // with a bulk header checkbox plus two per-side checkboxes (e.g. Левое
 // плечо/Правое плечо) — same accordion-with-checkbox-header pattern as
-// ImportExportOptions' "Настройки приложения" group, generalized to three
+// AppDataSelector's "Настройки приложения" group, generalized to three
 // independent groups instead of one. At least one zone must stay enabled, so
 // toggling off the last remaining one is a no-op (see the `allDisabled`
 // guard below) — otherwise the body diagram would have nowhere left to mark

@@ -21,6 +21,7 @@ import {
   lastPressedByGroup,
   partitionPointStatesByBlock,
   partitionEventsByBlock,
+  resetPointStates,
 } from '../utils';
 
 // Debounce delay before persisting a state change to AsyncStorage.
@@ -52,7 +53,7 @@ export interface AppActions {
   markPointAt(pointId: string, timestamp: number): void;
   clearPoint(pointId: string): void;
   undo(): void;
-  clearAll(): void;
+  clearSelected(selection: ExportSelection): void;
   setMirrored(mirrored: boolean): void;
   setInterfaceLocked(locked: boolean): void;
   enableAutoLock(afterMarkSeconds: number, afterUnlockSeconds: number): void;
@@ -407,9 +408,110 @@ export function useAppStore(
     });
   }, []);
 
-  const clearAll = useCallback(() => {
-    StorageService.clearStorage(zoneDataRef.current.points).then((fresh) => {
-      setState((prev) => ({ ...prev, ...fresh }));
+  // Resets exactly the selected marks/settings categories to their
+  // defaults, leaving every unselected category — and, within marks, the
+  // unselected partition — untouched. Mirrors exportData's selection
+  // semantics as an in-place reset instead of a file write (see
+  // ClearOptionsDialog, built on AppDataSelector). Doesn't reset
+  // themeMode/languageMode: like applyImport, the caller resets those via
+  // ThemeProvider/LanguageProvider's own setMode when
+  // selection.settings[ExportSettingKey.Theme/Language] is checked.
+  const clearSelected = useCallback((selection: ExportSelection) => {
+    setState((prev) => {
+      const next: AppState = { ...prev };
+
+      const activePointsSelected = selection.marks[ExportMarksKey.ActivePoints];
+      const blockedPointsSelected = selection.marks[ExportMarksKey.BlockedPoints];
+      if (activePointsSelected || blockedPointsSelected) {
+        const { active, blocked } = partitionPointStatesByBlock(prev.pointStates);
+        const { active: activeEvents, blocked: blockedEvents } =
+          partitionEventsByBlock(prev.events);
+        if (activePointsSelected && blockedPointsSelected) {
+          next.pointStates = resetPointStates(Object.keys(prev.pointStates));
+          next.events = [];
+        } else if (activePointsSelected) {
+          next.pointStates = {
+            ...blocked,
+            ...resetPointStates(Object.keys(active)),
+          };
+          next.events = blockedEvents;
+        } else {
+          next.pointStates = {
+            ...active,
+            ...resetPointStates(Object.keys(blocked)),
+          };
+          next.events = activeEvents;
+        }
+        StorageService.saveStorage({
+          pointStates: next.pointStates,
+          events: next.events,
+        });
+      }
+
+      if (selection.settings[ExportSettingKey.Mirrored]) {
+        next.mirrored = false;
+        StorageService.saveMirrored(false);
+      }
+
+      if (selection.settings[ExportSettingKey.AutoLock]) {
+        next.autoLockEnabled = false;
+        next.autoLockAfterMarkSeconds = DEFAULT_AUTO_LOCK_AFTER_MARK_SECONDS;
+        next.autoLockAfterUnlockSeconds = DEFAULT_AUTO_LOCK_AFTER_UNLOCK_SECONDS;
+        next.autoLockDeadline = null;
+        StorageService.saveAutoLock({
+          enabled: false,
+          afterMarkSeconds: DEFAULT_AUTO_LOCK_AFTER_MARK_SECONDS,
+          afterUnlockSeconds: DEFAULT_AUTO_LOCK_AFTER_UNLOCK_SECONDS,
+          deadline: null,
+        });
+      }
+
+      if (selection.settings[ExportSettingKey.DaysToWhite]) {
+        next.daysToWhite = DEFAULT_DAYS_TO_WHITE;
+        StorageService.saveDaysToWhite(DEFAULT_DAYS_TO_WHITE);
+      }
+
+      // Same combined-backfill treatment as applyImport/setZonePointCounts/
+      // setEnabledZones, since resetting either the grid or the zone
+      // selection may bring previously out-of-range/disabled slots into
+      // range — handled together so resetting only one still recomputes
+      // active points against the other's current value instead of stale
+      // data.
+      if (
+        selection.settings[ExportSettingKey.ZonePointCounts] ||
+        selection.settings[ExportSettingKey.EnabledZones]
+      ) {
+        const nextZonePointCounts = selection.settings[
+          ExportSettingKey.ZonePointCounts
+        ]
+          ? DEFAULT_ZONE_POINT_COUNTS
+          : prev.zonePointCounts;
+        const nextEnabledZones = selection.settings[
+          ExportSettingKey.EnabledZones
+        ]
+          ? DEFAULT_ENABLED_ZONES
+          : prev.enabledZones;
+        const nextActivePoints = buildZoneData(
+          nextZonePointCounts,
+          nextEnabledZones,
+        ).points;
+        const normalized = normalizeStorage(
+          { pointStates: next.pointStates, events: next.events },
+          nextActivePoints,
+        );
+        next.pointStates = normalized.pointStates;
+        next.events = normalized.events;
+        if (selection.settings[ExportSettingKey.ZonePointCounts]) {
+          next.zonePointCounts = DEFAULT_ZONE_POINT_COUNTS;
+          StorageService.saveZonePointCounts(DEFAULT_ZONE_POINT_COUNTS);
+        }
+        if (selection.settings[ExportSettingKey.EnabledZones]) {
+          next.enabledZones = DEFAULT_ENABLED_ZONES;
+          StorageService.saveEnabledZones(DEFAULT_ENABLED_ZONES);
+        }
+      }
+
+      return next;
     });
   }, []);
 
@@ -710,7 +812,7 @@ export function useAppStore(
       markPointAt,
       clearPoint,
       undo,
-      clearAll,
+      clearSelected,
       setMirrored,
       setInterfaceLocked,
       enableAutoLock,

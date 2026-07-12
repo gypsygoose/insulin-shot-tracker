@@ -1,5 +1,5 @@
 import { ExportedAppData, ExportSettingKey } from "../../../types";
-import { SETTING_KEYS } from "../../ImportExportOptions";
+import { SETTING_KEYS } from "../../AppDataSelector";
 
 const SETTING_AVAILABLE: Record<
   ExportSettingKey,

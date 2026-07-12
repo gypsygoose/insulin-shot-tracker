@@ -1,1 +1,0 @@
-export { isSelectionEmpty } from "./isSelectionEmpty";

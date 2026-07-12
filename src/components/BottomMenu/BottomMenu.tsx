@@ -11,6 +11,7 @@ import { ZonePointsDialog } from "../ZonePointsDialog";
 import { ZonesDialog } from "../ZonesDialog";
 import { ThemeDialog } from "../ThemeDialog";
 import { LanguageDialog } from "../LanguageDialog";
+import { ClearOptionsDialog } from "../ClearOptionsDialog";
 import { ExportOptionsDialog } from "../ExportOptionsDialog";
 import { ImportOptionsDialog } from "../ImportOptionsDialog";
 import {
@@ -25,6 +26,7 @@ import {
   EnabledZones,
   ExportedAppData,
   ExportSelection,
+  ExportSettingKey,
   LanguageMode,
   ThemeMode,
   ToastStatus,
@@ -37,7 +39,7 @@ import { buildImportData } from "./utils";
 interface Props {
   canUndo: boolean;
   onUndo: () => void;
-  onClear: () => void;
+  onClear: (selection: ExportSelection) => void;
   mirrored: boolean;
   onToggleMirrored: (value: boolean) => void;
   interfaceLocked: boolean;
@@ -102,7 +104,7 @@ export function BottomMenu({
   const { t } = useTranslation();
   const { colors } = useTheme();
   const [showUndo, setShowUndo] = useState(false);
-  const [showClear, setShowClear] = useState(false);
+  const [showClearOptions, setShowClearOptions] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [autoLockDialogIntent, setAutoLockDialogIntent] =
@@ -208,7 +210,7 @@ export function BottomMenu({
         }}
         onClear={() => {
           setShowMenu(false);
-          setShowClear(true);
+          setShowClearOptions(true);
         }}
       />
 
@@ -319,6 +321,22 @@ export function BottomMenu({
         onCancel={() => setShowExportOptions(false)}
       />
 
+      <ClearOptionsDialog
+        visible={showClearOptions}
+        onConfirm={(selection) => {
+          setShowClearOptions(false);
+          onClear(selection);
+          if (selection.settings[ExportSettingKey.Theme]) {
+            onSetThemeMode(ThemeMode.System);
+          }
+          if (selection.settings[ExportSettingKey.Language]) {
+            onSetLanguageMode(LanguageMode.System);
+          }
+          onNotify(t("toast.clearSuccess"), ToastStatus.Success);
+        }}
+        onCancel={() => setShowClearOptions(false)}
+      />
+
       <View
         style={[styles.bar, { backgroundColor: colors.background, borderTopColor: colors.divider }]}
       >
@@ -381,21 +399,6 @@ export function BottomMenu({
           onNotify(t("toast.undo"), ToastStatus.Success);
         }}
         onCancel={() => setShowUndo(false)}
-      />
-
-      <ConfirmDialog
-        visible={showClear}
-        title={t("menu.clearAllConfirm.title")}
-        message={t("menu.clearAllConfirm.message")}
-        confirmLabel={t("common.clear")}
-        cancelLabel={t("common.cancel")}
-        onConfirm={() => {
-          setShowClear(false);
-          onClear();
-          onNotify(t("toast.clearAll"), ToastStatus.Success);
-        }}
-        onCancel={() => setShowClear(false)}
-        destructive
       />
 
       <ImportOptionsDialog

@@ -232,7 +232,7 @@ export function MainScreen() {
       <BottomMenu
         canUndo={state.events.length > 0}
         onUndo={actions.undo}
-        onClear={actions.clearAll}
+        onClear={actions.clearSelected}
         mirrored={state.mirrored}
         onToggleMirrored={actions.setMirrored}
         interfaceLocked={state.interfaceLocked}

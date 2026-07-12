@@ -39,7 +39,7 @@ export const en = {
     interfaceLockEnabled: "Interface locked",
     interfaceLockDisabled: "Interface unlocked",
     autoLockFired: "Interface locked automatically",
-    clearAll: "All data cleared",
+    clearSuccess: "Data cleared",
     undo: "Last action undone",
     exportSuccess: "Data exported",
     importSuccess: "Data imported",
@@ -135,10 +135,11 @@ export const en = {
         "The last recorded injection will be removed. This action can't be undone again.",
       confirmLabel: "Undo injection",
     },
-    clearAllConfirm: {
-      title: "Clear all data?",
+    clearOptionsDialog: {
+      title: "Clear data",
       message:
-        "All injection history will be removed. All points will turn white. This action can't be undone.",
+        "Choose what to clear. Selected injection point marks and/or app settings will be permanently reset to their defaults — this action can't be undone.",
+      confirmLabel: "Clear",
     },
   },
   pointMenu: {
@@ -227,7 +228,7 @@ export const en = {
       import:
         "<bold>{{label}}</bold> — choose what to apply from a file: injection point marks and/or app settings (individually). Categories not present in the file are unavailable to select; other current data is left untouched.",
       clear:
-        "<bold>{{label}}</bold> — delete all injection history with no way to recover it.",
+        "<bold>{{label}}</bold> — choose what to reset: injection point marks and/or app settings (individually), permanently and with no way to recover them.",
     },
   },
   stateMachine: {

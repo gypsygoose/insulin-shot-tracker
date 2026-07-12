@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "../common";
-import { ImportExportOptions, isSelectionEmpty, MARKS_KEYS, SETTING_KEYS } from "../ImportExportOptions";
+import { AppDataSelector, isSelectionEmpty, MARKS_KEYS, SETTING_KEYS } from "../AppDataSelector";
 import { ExportedAppData, ExportSelection } from "../../types";
 import { availableMarks, availableSettings } from "./utils";
-
-const DEFAULT_MARKS_EXPANDED = false;
-const DEFAULT_SETTINGS_EXPANDED = false;
 
 interface Props {
   visible: boolean;
@@ -32,16 +29,20 @@ export function ImportOptionsDialog({ visible, data, onConfirm, onCancel }: Prop
     marks: marksAvailable,
     settings: settingsAvailable,
   });
-  const [marksExpanded, setMarksExpanded] = useState(DEFAULT_MARKS_EXPANDED);
+  const [marksExpanded, setMarksExpanded] = useState(
+    disabledMarksKeys.length > 0,
+  );
   const [settingsExpanded, setSettingsExpanded] = useState(
-    DEFAULT_SETTINGS_EXPANDED,
+    disabledSettingKeys.length > 0,
   );
 
   useEffect(() => {
     if (!visible) return;
-    setSelection({ marks: availableMarks(data), settings: availableSettings(data) });
-    setMarksExpanded(DEFAULT_MARKS_EXPANDED);
-    setSettingsExpanded(DEFAULT_SETTINGS_EXPANDED);
+    const nextMarksAvailable = availableMarks(data);
+    const nextSettingsAvailable = availableSettings(data);
+    setSelection({ marks: nextMarksAvailable, settings: nextSettingsAvailable });
+    setMarksExpanded(MARKS_KEYS.some((key) => !nextMarksAvailable[key]));
+    setSettingsExpanded(SETTING_KEYS.some((key) => !nextSettingsAvailable[key]));
     // Only re-run when the dialog opens or the underlying file changes, not
     // on every selection edit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -59,13 +60,15 @@ export function ImportOptionsDialog({ visible, data, onConfirm, onCancel }: Prop
       destructive
       scrollable
     >
-      <ImportExportOptions
+      <AppDataSelector
         selection={selection}
         onSelectionChange={setSelection}
         marksExpanded={marksExpanded}
-        onToggleMarksExpanded={() => setMarksExpanded((v) => !v)}
+        onToggleMarksExpanded={() => setMarksExpanded((expanded) => !expanded)}
         settingsExpanded={settingsExpanded}
-        onToggleSettingsExpanded={() => setSettingsExpanded((v) => !v)}
+        onToggleSettingsExpanded={() =>
+          setSettingsExpanded((expanded) => !expanded)
+        }
         disabledMarksKeys={disabledMarksKeys}
         disabledSettingKeys={disabledSettingKeys}
       />

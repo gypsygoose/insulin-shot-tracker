@@ -18,7 +18,7 @@ Tap a point on the body diagram to log an injection at that spot. The point's co
 - Manual site lock (long-press) to mark a spot as temporarily unavailable
 - Light, dark, or system-matched theme, switchable from the menu (defaults to following the OS appearance)
 - Russian and English UI, switchable from the menu (defaults to following the device language)
-- Undo, injection history, and selective import/export of your data (choose which of active points / manually blocked points / individual app settings to include on export; on import, pick which of the categories actually present in the file to apply) — all stored locally on-device, no account or backend required
+- Undo, injection history, and selective import/export/clear of your data (choose which of active points / manually blocked points / individual app settings to include on export; on import, pick which of the categories actually present in the file to apply; on clear, pick which of those same categories to permanently reset to their defaults) — all stored locally on-device, no account or backend required
 
 ## Getting started
 
@@ -48,7 +48,7 @@ src/
 ├── logic/                  — pure functions: color computation, press handling (stateMachine.ts), re-exported via index.ts
 ├── theme/                  — light/dark theme palettes + ThemeProvider/useTheme, re-exported via index.ts
 ├── i18n/                   — i18next setup, ru/en translations, LanguageProvider/useLanguage
-├── storage/StorageService.ts — AsyncStorage load/save/clear, re-exported via index.ts
+├── storage/StorageService.ts — AsyncStorage load/save + export/import, re-exported via index.ts
 ├── components/             — app screens and components (helper-heavy ones live in their own ComponentName/ folder alongside their utils/constants/types — see CLAUDE.md); every folder, down to each ComponentName/utils/, has an index.ts barrel, so imports always go through a folder, never a concrete file inside it
 └── screens/MainScreen/     — root screen
 App.tsx                     — entry point

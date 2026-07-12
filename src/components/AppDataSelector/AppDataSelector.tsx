@@ -26,20 +26,22 @@ interface Props {
   onToggleMarksExpanded: () => void;
   settingsExpanded: boolean;
   onToggleSettingsExpanded: () => void;
-  // Disables individual marks/setting checkboxes. ExportOptionsDialog leaves
-  // both at their defaults (nothing disabled, since every category is always
-  // available to export); ImportOptionsDialog passes these in to grey out a
-  // category absent from the imported file.
+  // Disables individual marks/setting checkboxes. ExportOptionsDialog and
+  // ClearOptionsDialog both leave these at their defaults (nothing disabled,
+  // since every category is always available to export/clear);
+  // ImportOptionsDialog passes these in to grey out a category absent from
+  // the imported file.
   disabledMarksKeys?: ExportMarksKey[];
   disabledSettingKeys?: ExportSettingKey[];
 }
 
 // The "Отметки точек укола" accordion of active/blocked-points checkboxes
 // plus the "Настройки приложения" accordion of per-setting checkboxes,
-// shared by ExportOptionsDialog and ImportOptionsDialog — only the meaning
-// of a disabled row differs between the two (export: never; import:
-// category absent from the file).
-export function ImportExportOptions({
+// shared by ExportOptionsDialog, ImportOptionsDialog, and ClearOptionsDialog
+// — only the meaning of a disabled row differs across the three (export:
+// never; import: category absent from the file; clear: never, same as
+// export).
+export function AppDataSelector({
   selection,
   onSelectionChange,
   marksExpanded,

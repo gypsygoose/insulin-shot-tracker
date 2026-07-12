@@ -5,6 +5,7 @@ export { partitionEventsByBlock } from "./partitionEventsByBlock";
 export type { PartitionedEvents } from "./partitionEventsByBlock";
 export { partitionPointStatesByBlock } from "./partitionPointStatesByBlock";
 export type { PartitionedPointStates } from "./partitionPointStatesByBlock";
+export { resetPointStates } from "./resetPointStates";
 export { SECONDS_PER_MINUTE, splitSeconds } from "./splitSeconds";
 export type { SplitSeconds } from "./splitSeconds";
 export { uuid } from "./uuid";

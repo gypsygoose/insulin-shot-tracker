@@ -67,12 +67,6 @@ export class StorageService {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
 
-  static async clearStorage(activePoints: PointDefinition[]): Promise<AppStorage> {
-    const fresh = defaultStorage(activePoints);
-    await StorageService.saveStorage(fresh);
-    return fresh;
-  }
-
   static async loadMirrored(): Promise<boolean> {
     try {
       return (await AsyncStorage.getItem(MIRROR_KEY)) === STORED_TRUE;
