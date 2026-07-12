@@ -73,8 +73,12 @@ export function MainScreen() {
 
   // ThemeProvider/LanguageProvider are mounted in App.tsx, above MainScreen,
   // so they're read through context here like any other descendant.
-  const { resolvedScheme, colors, mode: themeMode, setMode: onSetThemeMode } =
-    useTheme();
+  const {
+    resolvedScheme,
+    colors,
+    mode: themeMode,
+    setMode: onSetThemeMode,
+  } = useTheme();
   const { mode: languageMode, setMode: onSetLanguageMode } = useLanguage();
 
   const handlePress = useCallback(
@@ -132,7 +136,11 @@ export function MainScreen() {
     ? state.pointStates[menuPointId]
     : undefined;
   const menuPointColor = menuPointState
-    ? PointService.computePointColor(menuPointState, state.now, state.daysToWhite)
+    ? PointService.computePointColor(
+        menuPointState,
+        state.now,
+        state.daysToWhite,
+      )
     : undefined;
 
   if (!state.isLoaded) {
@@ -147,9 +155,7 @@ export function MainScreen() {
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <StatusBar
         barStyle={
-          resolvedScheme === ThemeMode.Light
-            ? "dark-content"
-            : "light-content"
+          resolvedScheme === ThemeMode.Light ? "dark-content" : "light-content"
         }
         backgroundColor={colors.background}
       />
@@ -172,7 +178,7 @@ export function MainScreen() {
       <View style={styles.bodyWrap}>
         <View style={styles.imageContainer}>
           <Image
-            source={require("../../assets/images/body.png")}
+            source={require("../../../assets/images/body.png")}
             style={[styles.image, StyleSheet.absoluteFill]}
             resizeMode="contain"
           />

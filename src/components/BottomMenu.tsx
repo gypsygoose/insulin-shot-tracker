@@ -25,8 +25,8 @@ import {
   ThemeMode,
   ToastStatus,
 } from "../types";
-import { ImportResult, ImportResultType } from "../storage/StorageService";
-import { useTheme } from "../theme/ThemeContext";
+import { ImportResult, ImportResultType } from "../storage";
+import { useTheme } from "../theme";
 
 // Narrows a parsed import file down to just the categories the user kept
 // checked in ImportOptionsDialog, mirroring useAppStore's exportData filter
