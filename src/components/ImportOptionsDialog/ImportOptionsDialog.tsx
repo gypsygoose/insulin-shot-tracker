@@ -29,9 +29,6 @@ export function ImportOptionsDialog({ visible, data, onConfirm, onCancel }: Prop
     marks: marksAvailable,
     settings: settingsAvailable,
   });
-  const [marksExpanded, setMarksExpanded] = useState(
-    disabledMarksKeys.length > 0,
-  );
   const [settingsExpanded, setSettingsExpanded] = useState(
     disabledSettingKeys.length > 0,
   );
@@ -41,7 +38,6 @@ export function ImportOptionsDialog({ visible, data, onConfirm, onCancel }: Prop
     const nextMarksAvailable = availableMarks(data);
     const nextSettingsAvailable = availableSettings(data);
     setSelection({ marks: nextMarksAvailable, settings: nextSettingsAvailable });
-    setMarksExpanded(MARKS_KEYS.some((key) => !nextMarksAvailable[key]));
     setSettingsExpanded(SETTING_KEYS.some((key) => !nextSettingsAvailable[key]));
     // Only re-run when the dialog opens or the underlying file changes, not
     // on every selection edit.
@@ -63,8 +59,6 @@ export function ImportOptionsDialog({ visible, data, onConfirm, onCancel }: Prop
       <AppDataSelector
         selection={selection}
         onSelectionChange={setSelection}
-        marksExpanded={marksExpanded}
-        onToggleMarksExpanded={() => setMarksExpanded((expanded) => !expanded)}
         settingsExpanded={settingsExpanded}
         onToggleSettingsExpanded={() =>
           setSettingsExpanded((expanded) => !expanded)

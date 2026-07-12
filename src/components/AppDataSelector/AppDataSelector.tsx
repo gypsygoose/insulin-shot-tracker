@@ -22,8 +22,18 @@ const SETTING_LABEL_KEY: Record<ExportSettingKey, TranslationKey> = {
 interface Props {
   selection: ExportSelection;
   onSelectionChange: (next: ExportSelection) => void;
-  marksExpanded: boolean;
-  onToggleMarksExpanded: () => void;
+  // Renders the marks row as an accordion with independent Active/Blocked
+  // checkboxes when true. ExportOptionsDialog/ImportOptionsDialog leave this
+  // false — export and import always act on both marks sub-categories
+  // together (see ImportOptionsDialog/utils/availableMarks.ts: a file can
+  // never carry just one), so a single flat checkbox is enough there. Only
+  // ClearOptionsDialog sets this true, since its default selection (only
+  // "Активные точки" checked) needs the two sub-categories choosable
+  // independently. marksExpanded/onToggleMarksExpanded are only read in the
+  // accordion branch.
+  marksExpandable?: boolean;
+  marksExpanded?: boolean;
+  onToggleMarksExpanded?: () => void;
   settingsExpanded: boolean;
   onToggleSettingsExpanded: () => void;
   // Disables individual marks/setting checkboxes. ExportOptionsDialog and
@@ -35,16 +45,18 @@ interface Props {
   disabledSettingKeys?: ExportSettingKey[];
 }
 
-// The "Отметки точек укола" accordion of active/blocked-points checkboxes
-// plus the "Настройки приложения" accordion of per-setting checkboxes,
-// shared by ExportOptionsDialog, ImportOptionsDialog, and ClearOptionsDialog
-// — only the meaning of a disabled row differs across the three (export:
-// never; import: category absent from the file; clear: never, same as
-// export).
+// The "Отметки точек укола" row (a plain checkbox, or an accordion of
+// independent active/blocked-points checkboxes when marksExpandable) plus
+// the "Настройки приложения" accordion of per-setting checkboxes, shared by
+// ExportOptionsDialog, ImportOptionsDialog, and ClearOptionsDialog — beyond
+// marksExpandable, only the meaning of a disabled row differs across the
+// three (export: never; import: category absent from the file; clear:
+// never, same as export).
 export function AppDataSelector({
   selection,
   onSelectionChange,
-  marksExpanded,
+  marksExpandable = false,
+  marksExpanded = false,
   onToggleMarksExpanded,
   settingsExpanded,
   onToggleSettingsExpanded,
@@ -106,30 +118,39 @@ export function AppDataSelector({
 
   return (
     <>
-      <Accordion
-        label={
-          <Checkbox
-            label={t("menu.exportOptionsDialog.marksLabel")}
-            checked={allMarksChecked}
-            indeterminate={!allMarksChecked && !noMarksChecked}
-            onToggle={toggleAllMarks}
-            disabled={marksGroupDisabled}
-          />
-        }
-        expanded={marksExpanded}
-        onToggleExpanded={onToggleMarksExpanded}
-        disabled={marksGroupDisabled}
-      >
-        {MARKS_KEYS.map((key) => (
-          <Checkbox
-            key={key}
-            label={t(MARKS_LABEL_KEY[key])}
-            checked={selection.marks[key]}
-            onToggle={() => toggleMark(key)}
-            disabled={disabledMarksKeys.includes(key)}
-          />
-        ))}
-      </Accordion>
+      {marksExpandable ? (
+        <Accordion
+          label={
+            <Checkbox
+              label={t("menu.exportOptionsDialog.marksLabel")}
+              checked={allMarksChecked}
+              indeterminate={!allMarksChecked && !noMarksChecked}
+              onToggle={toggleAllMarks}
+              disabled={marksGroupDisabled}
+            />
+          }
+          expanded={marksExpanded}
+          onToggleExpanded={onToggleMarksExpanded ?? (() => {})}
+          disabled={marksGroupDisabled}
+        >
+          {MARKS_KEYS.map((key) => (
+            <Checkbox
+              key={key}
+              label={t(MARKS_LABEL_KEY[key])}
+              checked={selection.marks[key]}
+              onToggle={() => toggleMark(key)}
+              disabled={disabledMarksKeys.includes(key)}
+            />
+          ))}
+        </Accordion>
+      ) : (
+        <Checkbox
+          label={t("menu.exportOptionsDialog.marksLabel")}
+          checked={allMarksChecked}
+          onToggle={toggleAllMarks}
+          disabled={marksGroupDisabled}
+        />
+      )}
 
       <Accordion
         label={

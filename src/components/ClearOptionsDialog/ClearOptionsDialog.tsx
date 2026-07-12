@@ -57,6 +57,7 @@ export function ClearOptionsDialog({ visible, onConfirm, onCancel }: Props) {
       <AppDataSelector
         selection={selection}
         onSelectionChange={setSelection}
+        marksExpandable
         marksExpanded={marksExpanded}
         onToggleMarksExpanded={() => setMarksExpanded((v) => !v)}
         settingsExpanded={settingsExpanded}
