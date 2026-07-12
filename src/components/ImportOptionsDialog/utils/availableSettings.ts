@@ -11,6 +11,7 @@ const SETTING_AVAILABLE: Record<
   [ExportSettingKey.Theme]: (data) => data.themeMode !== undefined,
   [ExportSettingKey.Language]: (data) => data.languageMode !== undefined,
   [ExportSettingKey.ZonePointCounts]: (data) => data.zonePointCounts !== undefined,
+  [ExportSettingKey.EnabledZones]: (data) => data.enabledZones !== undefined,
 };
 
 export function availableSettings(

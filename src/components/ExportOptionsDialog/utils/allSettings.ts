@@ -8,5 +8,6 @@ export function allSettings(value: boolean): Record<ExportSettingKey, boolean> {
     [ExportSettingKey.Theme]: value,
     [ExportSettingKey.Language]: value,
     [ExportSettingKey.ZonePointCounts]: value,
+    [ExportSettingKey.EnabledZones]: value,
   };
 }

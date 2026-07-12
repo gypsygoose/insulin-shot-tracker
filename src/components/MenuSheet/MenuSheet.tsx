@@ -19,6 +19,7 @@ interface Props {
   daysToWhite: number;
   onEditDaysToWhite: () => void;
   onEditZonePointCounts: () => void;
+  onEditZones: () => void;
   themeMode: ThemeMode;
   onEditTheme: () => void;
   languageMode: LanguageMode;
@@ -41,6 +42,7 @@ export function MenuSheet({
   daysToWhite,
   onEditDaysToWhite,
   onEditZonePointCounts,
+  onEditZones,
   themeMode,
   onEditTheme,
   languageMode,
@@ -112,6 +114,12 @@ export function MenuSheet({
       >
         <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
           {t("menu.zonePointsRow")}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.row} onPress={onEditZones} activeOpacity={0.7}>
+        <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
+          {t("menu.zonesRow")}
         </Text>
       </TouchableOpacity>
 

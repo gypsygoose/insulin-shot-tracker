@@ -6,6 +6,7 @@ import {
   ZoneId,
   ZoneType,
   ZonePointCounts,
+  EnabledZones,
   ZoneRuntimeData,
   PointAddress,
 } from "../types";
@@ -74,6 +75,26 @@ export const ZONE_TYPE: Record<ZoneId, ZoneType> = {
   [ZoneId.BellyLeft]: ZoneType.Belly,
   [ZoneId.ThighRight]: ZoneType.Thigh,
   [ZoneId.ThighLeft]: ZoneType.Thigh,
+};
+
+// Both ZoneIds sharing a given ZoneType (right then left, matching ZONES'
+// own ordering) — used by ZonesDialog's per-type accordion to bulk-toggle
+// both zones of a type at once.
+export const ZONE_TYPE_ZONE_IDS: Record<ZoneType, ZoneId[]> = {
+  [ZoneType.Shoulder]: [ZoneId.ShoulderRight, ZoneId.ShoulderLeft],
+  [ZoneType.Belly]: [ZoneId.BellyRight, ZoneId.BellyLeft],
+  [ZoneType.Thigh]: [ZoneId.ThighRight, ZoneId.ThighLeft],
+};
+
+// Every zone enabled — the starting value for the configurable setting
+// (ZonesDialog).
+export const DEFAULT_ENABLED_ZONES: EnabledZones = {
+  [ZoneId.ShoulderRight]: true,
+  [ZoneId.ShoulderLeft]: true,
+  [ZoneId.BellyRight]: true,
+  [ZoneId.BellyLeft]: true,
+  [ZoneId.ThighRight]: true,
+  [ZoneId.ThighLeft]: true,
 };
 
 // Default point grid per zone type — today's fixed counts, kept as the
@@ -316,8 +337,9 @@ const ZONE_ID_PREFIX: Record<ZoneId, string> = {
 // Builds every zone/point-derived value from the current ZonePointCounts
 // setting — replaces what used to be static consts (POINTS/POINT_MAP/
 // POINTS_BY_ZONE/ZONE_LAYOUT/POINT_ADDRESS) computed once from a fixed
-// layout. Called once per ZonePointCounts change (see useAppStore.ts's
-// `zoneData`, memoized on that setting) rather than on every render.
+// layout. Called once per ZonePointCounts/EnabledZones change (see
+// useAppStore.ts's `zoneData`, memoized on both settings) rather than on
+// every render.
 //
 // Point ids are keyed by (row, column) within their zone type's grid — e.g.
 // "br-r2c3" — rather than a flat sequential index, so a point's identity
@@ -336,8 +358,17 @@ const ZONE_ID_PREFIX: Record<ZoneId, string> = {
 // resizing only ever adds/removes the outermost (farthest-from-center)
 // column, never renumbers an existing one. Rendering order (left-to-right
 // on screen) is derived from this same column, per zone side, below.
+//
+// `enabledZones` (see ZonesDialog) is treated the same way a shrunk grid
+// treats an out-of-range slot: a disabled zone contributes no entries to
+// `points`/`pointMap`/`pointAddress`/`pointsByZone` (so it's excluded from
+// normalizeStorage's active-points list and from group indicators), but
+// `zoneLayout` is still computed for it unconditionally — MainScreen simply
+// skips rendering a ZoneContainer for a disabled zone rather than relying on
+// an empty layout.
 export function buildZoneData(
   zonePointCounts: ZonePointCounts,
+  enabledZones: EnabledZones,
 ): ZoneRuntimeData {
   const zoneLayout = buildZoneLayout(zonePointCounts);
   const pointMap: Record<string, PointDefinition> = {};
@@ -345,6 +376,10 @@ export function buildZoneData(
   const pointAddress: Record<string, PointAddress> = {};
 
   for (const zone of ZONES) {
+    if (!enabledZones[zone.id]) {
+      pointsByZone[zone.id] = [];
+      continue;
+    }
     const layout = zoneLayout[zone.id];
     const zoneIsLeftOfMidline = isZoneLeftOfMidline(zone.id);
     const prefix = ZONE_ID_PREFIX[zone.id];

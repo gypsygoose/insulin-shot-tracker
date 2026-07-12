@@ -56,6 +56,12 @@ export interface ZoneGridConfig {
 // see CLAUDE.md's "Zones and points"), not per ZoneId.
 export type ZonePointCounts = Record<ZoneType, ZoneGridConfig>;
 
+// Whether each individual zone is shown on the body / usable for injections
+// (see ZonesDialog and CLAUDE.md's "Zones and points") — unlike
+// ZonePointCounts, this is per ZoneId, not per ZoneType, since left/right
+// sides of the same body part are toggled independently.
+export type EnabledZones = Record<ZoneId, boolean>;
+
 // Bundle returned by data/zones.ts's buildZoneData(zonePointCounts) — all of
 // this used to be static module-level consts computed once from a fixed
 // ZONE_LAYOUT; now it's recomputed whenever ZonePointCounts changes, so it's

@@ -57,6 +57,7 @@ export const en = {
     themeUpdatedPrefix: "Theme changed",
     languageUpdatedPrefix: "Language changed",
     zonePointCountsUpdated: "Zone point layout updated",
+    enabledZonesUpdated: "Active zones updated",
     pointMarked: "Point marked: {{address}}",
     markBlackoutSuffix_one: "\nPoint blocked by the system for {{count}} day",
     markBlackoutSuffix_few: "\nPoint blocked by the system for {{count}} days",
@@ -73,6 +74,7 @@ export const en = {
     autoLockRow: "Auto-lock interface",
     daysToWhiteRow: "Days until point recovers",
     zonePointsRow: "Zone point layout",
+    zonesRow: "Active zones",
     themeRow: "Theme",
     languageRow: "Language",
     exportRow: "Export data",
@@ -94,6 +96,10 @@ export const en = {
         "Choose how many rows and columns each zone group has. The zone stays centered around its own middle on both axes as it resizes.",
       rowsLabel: "Rows",
       colsLabel: "Columns",
+    },
+    zonesDialog: {
+      message:
+        "Choose which injection zones to use. A disabled zone is hidden from the body entirely; its history is kept and reappears if you re-enable it. At least one zone must stay enabled.",
     },
     themeDialog: {
       message: "The system theme follows your device's appearance setting.",
@@ -209,6 +215,8 @@ export const en = {
         "<bold>{{label}}</bold> — how many days until an injection point is considered fully free (white) again. Lowering the value compresses the color scheme into that timeframe.",
       zonePoints:
         "<bold>{{label}}</bold> — choose how many rows and columns each zone group (shoulders, belly, thighs) has. Shrinking a zone's grid hides its out-of-range points without losing their history; growing it back reveals that history again.",
+      zones:
+        "<bold>{{label}}</bold> — choose which individual zones (e.g. left/right shoulder) are shown on the body. Disabling a zone hides it without losing its history; re-enabling it reveals that history again.",
       theme:
         "<bold>{{label}}</bold> — choose the app's light, dark, or system appearance theme.",
       language: "<bold>{{label}}</bold> — choose the app's interface language.",

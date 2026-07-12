@@ -2,6 +2,7 @@ import { ExportedAppData, LanguageMode, ThemeMode } from "../../types";
 import { isValidEvent } from "./isValidEvent";
 import { isValidPointState } from "./isValidPointState";
 import { isValidZonePointCounts } from "./isValidZonePointCounts";
+import { isValidEnabledZones } from "./isValidEnabledZones";
 
 const THEME_MODES: ThemeMode[] = Object.values(ThemeMode);
 const LANGUAGE_MODES: LanguageMode[] = Object.values(LanguageMode);
@@ -59,6 +60,11 @@ export function isValidAppStorage(data: unknown): data is ExportedAppData {
   if (
     candidate.zonePointCounts !== undefined &&
     !isValidZonePointCounts(candidate.zonePointCounts)
+  )
+    return false;
+  if (
+    candidate.enabledZones !== undefined &&
+    !isValidEnabledZones(candidate.enabledZones)
   )
     return false;
   return true;

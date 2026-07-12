@@ -32,5 +32,8 @@ export function buildImportData(
   if (selection.settings[ExportSettingKey.ZonePointCounts]) {
     filtered.zonePointCounts = data.zonePointCounts;
   }
+  if (selection.settings[ExportSettingKey.EnabledZones]) {
+    filtered.enabledZones = data.enabledZones;
+  }
   return filtered;
 }

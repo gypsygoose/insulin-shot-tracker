@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { AppStorage, AppEvent, AppEventType, ExportedAppData, ExportSelection, ExportSettingKey, LanguageMode, StoredPointState, ThemeMode, ZoneGroup, ZonePointCounts, ZoneRuntimeData } from '../types';
+import { AppStorage, AppEvent, AppEventType, EnabledZones, ExportedAppData, ExportSelection, ExportSettingKey, LanguageMode, StoredPointState, ThemeMode, ZoneGroup, ZonePointCounts, ZoneRuntimeData } from '../types';
 import {
   StorageService,
   StoredAutoLock,
@@ -9,7 +9,7 @@ import {
   normalizeStorage,
 } from '../storage';
 import { PointService, PressResultType } from '../logic';
-import { buildZoneData, DEFAULT_ZONE_POINT_COUNTS } from '../data';
+import { buildZoneData, DEFAULT_ZONE_POINT_COUNTS, DEFAULT_ENABLED_ZONES } from '../data';
 import {
   SECOND_MS,
   DEFAULT_DAYS_TO_WHITE,
@@ -37,6 +37,7 @@ export interface AppState extends AppStorage {
   autoLockDeadline: number | null;
   daysToWhite: number;
   zonePointCounts: ZonePointCounts;
+  enabledZones: EnabledZones;
 }
 
 export interface AppActions {
@@ -54,6 +55,7 @@ export interface AppActions {
   updateAutoLockTimes(afterMarkSeconds: number, afterUnlockSeconds: number): void;
   setDaysToWhite(days: number): void;
   setZonePointCounts(next: ZonePointCounts): void;
+  setEnabledZones(next: EnabledZones): void;
   exportData(
     themeMode: ThemeMode,
     languageMode: LanguageMode,
@@ -88,30 +90,35 @@ export function useAppStore(
     autoLockDeadline: null,
     daysToWhite: DEFAULT_DAYS_TO_WHITE,
     zonePointCounts: DEFAULT_ZONE_POINT_COUNTS,
+    enabledZones: DEFAULT_ENABLED_ZONES,
   });
   const saveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onAutoLockFiredRef = useRef(onAutoLockFired);
   onAutoLockFiredRef.current = onAutoLockFired;
 
-  // Recomputed only when zonePointCounts changes, not on every render — see
-  // data/zones.ts's buildZoneData. Read through a ref (below) by the
-  // useCallback bodies further down so they can stay stable ([] deps)
+  // Recomputed only when zonePointCounts/enabledZones changes, not on every
+  // render — see data/zones.ts's buildZoneData. Read through a ref (below) by
+  // the useCallback bodies further down so they can stay stable ([] deps)
   // instead of needing zoneData as a dependency.
   const zoneData = useMemo(
-    () => buildZoneData(state.zonePointCounts),
-    [state.zonePointCounts],
+    () => buildZoneData(state.zonePointCounts, state.enabledZones),
+    [state.zonePointCounts, state.enabledZones],
   );
   const zoneDataRef = useRef(zoneData);
   zoneDataRef.current = zoneData;
 
-  // Load from storage on mount. zonePointCounts loads first since loadStorage
-  // needs the resulting active-points list to know which point ids to
-  // backfill defaults for; the rest loads together (rather than each in its
-  // own .then()) so the just-reopened-the-app auto-lock check below always
-  // sees the real persisted interfaceLocked value instead of racing against it.
+  // Load from storage on mount. zonePointCounts/enabledZones load first since
+  // loadStorage needs the resulting active-points list to know which point
+  // ids to backfill defaults for; the rest loads together (rather than each
+  // in its own .then()) so the just-reopened-the-app auto-lock check below
+  // always sees the real persisted interfaceLocked value instead of racing
+  // against it.
   useEffect(() => {
-    StorageService.loadZonePointCounts().then((zonePointCounts) => {
-      const activePoints = buildZoneData(zonePointCounts).points;
+    Promise.all([
+      StorageService.loadZonePointCounts(),
+      StorageService.loadEnabledZones(),
+    ]).then(([zonePointCounts, enabledZones]) => {
+      const activePoints = buildZoneData(zonePointCounts, enabledZones).points;
       Promise.all([
         StorageService.loadStorage(activePoints),
         StorageService.loadMirrored(),
@@ -150,6 +157,7 @@ export function useAppStore(
           autoLockDeadline: deadline,
           daysToWhite,
           zonePointCounts,
+          enabledZones,
           isLoaded: true,
         }));
       });
@@ -500,7 +508,7 @@ export function useAppStore(
   // "Zones and points").
   const setZonePointCounts = useCallback((next: ZonePointCounts) => {
     setState((prev) => {
-      const nextActivePoints = buildZoneData(next).points;
+      const nextActivePoints = buildZoneData(next, prev.enabledZones).points;
       const normalized = normalizeStorage(
         { pointStates: prev.pointStates, events: prev.events },
         nextActivePoints,
@@ -514,6 +522,28 @@ export function useAppStore(
       };
     });
     StorageService.saveZonePointCounts(next);
+  }, []);
+
+  // Same backfill-defaults treatment as setZonePointCounts — re-enabling a
+  // zone reveals its points (and their history) again, since a disabled
+  // zone's points are simply excluded from buildZoneData's active-points
+  // list (see CLAUDE.md's "Zones and points") rather than deleted.
+  const setEnabledZones = useCallback((next: EnabledZones) => {
+    setState((prev) => {
+      const nextActivePoints = buildZoneData(prev.zonePointCounts, next).points;
+      const normalized = normalizeStorage(
+        { pointStates: prev.pointStates, events: prev.events },
+        nextActivePoints,
+      );
+      scheduleSave(normalized);
+      return {
+        ...prev,
+        enabledZones: next,
+        pointStates: normalized.pointStates,
+        events: normalized.events,
+      };
+    });
+    StorageService.saveEnabledZones(next);
   }, []);
 
   // themeMode/languageMode are passed in rather than read from state —
@@ -559,6 +589,9 @@ export function useAppStore(
       if (selection.settings[ExportSettingKey.ZonePointCounts]) {
         data.zonePointCounts = state.zonePointCounts;
       }
+      if (selection.settings[ExportSettingKey.EnabledZones]) {
+        data.enabledZones = state.enabledZones;
+      }
       await StorageService.exportStorageToFile(data, dialogTitle);
     },
     [
@@ -570,6 +603,7 @@ export function useAppStore(
       state.autoLockAfterUnlockSeconds,
       state.daysToWhite,
       state.zonePointCounts,
+      state.enabledZones,
     ],
   );
 
@@ -612,10 +646,19 @@ export function useAppStore(
         next.daysToWhite = data.daysToWhite;
       }
 
-      // Same backfill-defaults treatment as setZonePointCounts, since an
-      // imported grid may bring previously out-of-range slots into range.
-      if (data.zonePointCounts !== undefined) {
-        const nextActivePoints = buildZoneData(data.zonePointCounts).points;
+      // Same backfill-defaults treatment as setZonePointCounts/
+      // setEnabledZones, since an imported grid or zone selection may bring
+      // previously out-of-range/disabled slots into range. Handled together
+      // (rather than as two independent ifs) so a file carrying only one of
+      // the two still recomputes active points against the other's current
+      // value instead of stale data.
+      if (data.zonePointCounts !== undefined || data.enabledZones !== undefined) {
+        const nextZonePointCounts = data.zonePointCounts ?? prev.zonePointCounts;
+        const nextEnabledZones = data.enabledZones ?? prev.enabledZones;
+        const nextActivePoints = buildZoneData(
+          nextZonePointCounts,
+          nextEnabledZones,
+        ).points;
         const normalized = normalizeStorage(
           {
             pointStates: next.pointStates,
@@ -625,8 +668,14 @@ export function useAppStore(
         );
         next.pointStates = normalized.pointStates;
         next.events = normalized.events;
-        next.zonePointCounts = data.zonePointCounts;
-        StorageService.saveZonePointCounts(data.zonePointCounts);
+        if (data.zonePointCounts !== undefined) {
+          next.zonePointCounts = data.zonePointCounts;
+          StorageService.saveZonePointCounts(data.zonePointCounts);
+        }
+        if (data.enabledZones !== undefined) {
+          next.enabledZones = data.enabledZones;
+          StorageService.saveEnabledZones(data.enabledZones);
+        }
       }
 
       return next;
@@ -653,6 +702,7 @@ export function useAppStore(
       updateAutoLockTimes,
       setDaysToWhite,
       setZonePointCounts,
+      setEnabledZones,
       exportData,
       pickImportFile: () => StorageService.pickImportFile(zoneDataRef.current.points),
       applyImport,

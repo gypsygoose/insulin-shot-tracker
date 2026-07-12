@@ -203,7 +203,7 @@ export function MainScreen() {
             </Text>
           </View>
 
-          {ZONES.map((zone) => (
+          {ZONES.filter((zone) => state.enabledZones[zone.id]).map((zone) => (
             <ZoneContainer
               key={zone.id}
               zoneId={zone.id}
@@ -256,6 +256,8 @@ export function MainScreen() {
         onSetDaysToWhite={actions.setDaysToWhite}
         zonePointCounts={state.zonePointCounts}
         onSetZonePointCounts={actions.setZonePointCounts}
+        enabledZones={state.enabledZones}
+        onSetEnabledZones={actions.setEnabledZones}
         themeMode={themeMode}
         onSetThemeMode={onSetThemeMode}
         languageMode={languageMode}

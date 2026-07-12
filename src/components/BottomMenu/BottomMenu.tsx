@@ -8,6 +8,7 @@ import { MenuSheet, LANGUAGE_MODE_KEY, THEME_MODE_KEY } from "../MenuSheet";
 import { AutoLockDialog } from "../AutoLockDialog";
 import { DaysToWhiteDialog } from "../DaysToWhiteDialog";
 import { ZonePointsDialog } from "../ZonePointsDialog";
+import { ZonesDialog } from "../ZonesDialog";
 import { ThemeDialog } from "../ThemeDialog";
 import { LanguageDialog } from "../LanguageDialog";
 import { ExportOptionsDialog } from "../ExportOptionsDialog";
@@ -21,6 +22,7 @@ import {
 } from "../icons";
 import {
   AutoLockDialogMode,
+  EnabledZones,
   ExportedAppData,
   ExportSelection,
   LanguageMode,
@@ -56,6 +58,8 @@ interface Props {
   onSetDaysToWhite: (days: number) => void;
   zonePointCounts: ZonePointCounts;
   onSetZonePointCounts: (next: ZonePointCounts) => void;
+  enabledZones: EnabledZones;
+  onSetEnabledZones: (next: EnabledZones) => void;
   themeMode: ThemeMode;
   onSetThemeMode: (mode: ThemeMode) => void;
   languageMode: LanguageMode;
@@ -84,6 +88,8 @@ export function BottomMenu({
   onSetDaysToWhite,
   zonePointCounts,
   onSetZonePointCounts,
+  enabledZones,
+  onSetEnabledZones,
   themeMode,
   onSetThemeMode,
   languageMode,
@@ -103,6 +109,7 @@ export function BottomMenu({
     useState<AutoLockDialogMode | null>(null);
   const [showDaysToWhiteDialog, setShowDaysToWhiteDialog] = useState(false);
   const [showZonePointsDialog, setShowZonePointsDialog] = useState(false);
+  const [showZonesDialog, setShowZonesDialog] = useState(false);
   const [showThemeDialog, setShowThemeDialog] = useState(false);
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
   const [showExportOptions, setShowExportOptions] = useState(false);
@@ -133,6 +140,11 @@ export function BottomMenu({
   const handleEditZonePointCounts = () => {
     setShowMenu(false);
     setShowZonePointsDialog(true);
+  };
+
+  const handleEditZones = () => {
+    setShowMenu(false);
+    setShowZonesDialog(true);
   };
 
   const handleEditTheme = () => {
@@ -184,6 +196,7 @@ export function BottomMenu({
         daysToWhite={daysToWhite}
         onEditDaysToWhite={handleEditDaysToWhite}
         onEditZonePointCounts={handleEditZonePointCounts}
+        onEditZones={handleEditZones}
         themeMode={themeMode}
         onEditTheme={handleEditTheme}
         languageMode={languageMode}
@@ -244,6 +257,17 @@ export function BottomMenu({
           onNotify(t("toast.zonePointCountsUpdated"), ToastStatus.Success);
         }}
         onCancel={() => setShowZonePointsDialog(false)}
+      />
+
+      <ZonesDialog
+        visible={showZonesDialog}
+        initialEnabledZones={enabledZones}
+        onConfirm={(next) => {
+          setShowZonesDialog(false);
+          onSetEnabledZones(next);
+          onNotify(t("toast.enabledZonesUpdated"), ToastStatus.Success);
+        }}
+        onCancel={() => setShowZonesDialog(false)}
       />
 
       <ThemeDialog

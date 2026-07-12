@@ -196,6 +196,13 @@ export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
         </Text>
         <Text style={hintStyle}>
           <Trans
+            i18nKey="help.menuItems.zones"
+            values={{ label: t("menu.zonesRow") }}
+            components={boldComponents}
+          />
+        </Text>
+        <Text style={hintStyle}>
+          <Trans
             i18nKey="help.menuItems.theme"
             values={{ label: t("menu.themeRow") }}
             components={boldComponents}

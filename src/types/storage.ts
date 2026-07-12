@@ -2,7 +2,7 @@ import { AppEvent } from './event';
 import { StoredPointState } from './point';
 import { ThemeMode } from './theme';
 import { LanguageMode } from './language';
-import { ZonePointCounts } from './zone';
+import { EnabledZones, ZonePointCounts } from './zone';
 
 // Full app storage
 export interface AppStorage {
@@ -28,6 +28,7 @@ export interface ExportedAppData {
   themeMode?: ThemeMode;
   languageMode?: LanguageMode;
   zonePointCounts?: ZonePointCounts;
+  enabledZones?: EnabledZones;
 }
 
 // Which categories ExportOptionsDialog writes to the export file. The
@@ -44,6 +45,7 @@ export enum ExportSettingKey {
   Theme = 'theme',
   Language = 'language',
   ZonePointCounts = 'zone-point-counts',
+  EnabledZones = 'enabled-zones',
 }
 
 export interface ExportSelection {

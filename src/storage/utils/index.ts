@@ -7,4 +7,5 @@ export {
 } from "./defaultAutoLock";
 export { clampDaysToWhite } from "./clampDaysToWhite";
 export { clampZonePointCounts } from "./clampZonePointCounts";
+export { clampEnabledZones } from "./clampEnabledZones";
 export { isValidAppStorage } from "./isValidAppStorage";

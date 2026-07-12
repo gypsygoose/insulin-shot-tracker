@@ -4,6 +4,7 @@ import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import {
   AppStorage,
+  EnabledZones,
   ExportedAppData,
   LanguageMode,
   PointDefinition,
@@ -11,7 +12,7 @@ import {
   ZonePointCounts,
 } from "../types";
 import { DEFAULT_DAYS_TO_WHITE } from "../constants";
-import { DEFAULT_ZONE_POINT_COUNTS } from "../data";
+import { DEFAULT_ZONE_POINT_COUNTS, DEFAULT_ENABLED_ZONES } from "../data";
 import {
   defaultStorage,
   normalizeStorage,
@@ -20,6 +21,7 @@ import {
   DEFAULT_AUTO_LOCK_AFTER_UNLOCK_SECONDS,
   clampDaysToWhite,
   clampZonePointCounts,
+  clampEnabledZones,
   isValidAppStorage,
 } from "./utils";
 import {
@@ -31,6 +33,7 @@ import {
   THEME_MODE_KEY,
   LANGUAGE_MODE_KEY,
   ZONE_POINT_COUNTS_KEY,
+  ENABLED_ZONES_KEY,
   STORED_TRUE,
   STORED_FALSE,
   JSON_MIME_TYPE,
@@ -169,6 +172,23 @@ export class StorageService {
     );
   }
 
+  static async loadEnabledZones(): Promise<EnabledZones> {
+    try {
+      const raw = await AsyncStorage.getItem(ENABLED_ZONES_KEY);
+      if (!raw) return DEFAULT_ENABLED_ZONES;
+      return clampEnabledZones(JSON.parse(raw));
+    } catch {
+      return DEFAULT_ENABLED_ZONES;
+    }
+  }
+
+  static async saveEnabledZones(data: EnabledZones): Promise<void> {
+    await AsyncStorage.setItem(
+      ENABLED_ZONES_KEY,
+      JSON.stringify(clampEnabledZones(data)),
+    );
+  }
+
   // ---------------------------------------------------------------------
   // Export / import full app state to/from a JSON file
   // ---------------------------------------------------------------------
@@ -231,6 +251,9 @@ export class StorageService {
       }
       if (data.zonePointCounts !== undefined) {
         data.zonePointCounts = clampZonePointCounts(data.zonePointCounts);
+      }
+      if (data.enabledZones !== undefined) {
+        data.enabledZones = clampEnabledZones(data.enabledZones);
       }
       return { type: ImportResultType.Success, data };
     } catch {

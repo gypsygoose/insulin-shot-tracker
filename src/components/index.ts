@@ -13,5 +13,6 @@ export { MenuSheet, THEME_MODE_KEY, LANGUAGE_MODE_KEY } from "./MenuSheet";
 export { PointContextMenu } from "./PointContextMenu";
 export { ZoneContainer } from "./ZoneContainer";
 export { ZonePointsDialog } from "./ZonePointsDialog";
+export { ZonesDialog } from "./ZonesDialog";
 export * from "./common";
 export * from "./icons";
