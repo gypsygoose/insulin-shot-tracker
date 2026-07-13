@@ -1,2 +1,2 @@
-export { MenuSheet } from "./MenuSheet";
+export { SettingsSheet } from "./SettingsSheet";
 export { THEME_MODE_KEY, LANGUAGE_MODE_KEY } from "./constants";

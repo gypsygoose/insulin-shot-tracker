@@ -78,6 +78,7 @@ export const de: AppLocale = {
   },
   menu: {
     title: "Menü",
+    settingsRow: "Einstellungen",
     mirrorRow: "Anzeige spiegeln",
     autoLockRow: "Oberfläche automatisch sperren",
     daysToWhiteRow: "Tage bis zur Erholung des Punkts",
@@ -196,6 +197,7 @@ export const de: AppLocale = {
     sectionControls: "Bedienung",
     sectionBottomBar: "Untere Leiste",
     sectionMenuItems: "Menüpunkte",
+    sectionSettingsItems: "Einstellungspunkte",
     zones: {
       shoulder: {
         label: "Schultern",
@@ -238,6 +240,7 @@ export const de: AppLocale = {
       lock: "<bold>Sperre</bold> — die Oberfläche sperren oder entsperren, um versehentliches Antippen zu vermeiden.",
     },
     menuItems: {
+      settings: "<bold>{{label}}</bold> — den Einstellungsbildschirm der App öffnen.",
       mirror: "<bold>{{label}}</bold> — die Körpersilhouette horizontal spiegeln.",
       autoLock:
         "<bold>{{label}}</bold> — die Sperre automatisch nach einer festgelegten Zeit nach dem Markieren einer Injektion und nach manueller Entsperrung aktivieren. Antippen der Zeile öffnet die Verzögerungseinstellungen.",

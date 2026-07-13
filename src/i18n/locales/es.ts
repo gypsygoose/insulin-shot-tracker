@@ -82,6 +82,7 @@ export const es: AppLocale = {
   },
   menu: {
     title: "Menú",
+    settingsRow: "Ajustes",
     mirrorRow: "Reflejar vista",
     autoLockRow: "Bloqueo automático de la interfaz",
     daysToWhiteRow: "Días hasta que el punto se recupera",
@@ -200,6 +201,7 @@ export const es: AppLocale = {
     sectionControls: "Controles",
     sectionBottomBar: "Barra inferior",
     sectionMenuItems: "Elementos del menú",
+    sectionSettingsItems: "Elementos de ajustes",
     zones: {
       shoulder: {
         label: "Hombros",
@@ -242,6 +244,7 @@ export const es: AppLocale = {
       lock: "<bold>Bloqueo</bold> — bloquear o desbloquear la interfaz para evitar toques accidentales.",
     },
     menuItems: {
+      settings: "<bold>{{label}}</bold> — abrir la pantalla de ajustes de la app.",
       mirror: "<bold>{{label}}</bold> — voltear la silueta del cuerpo horizontalmente.",
       autoLock:
         "<bold>{{label}}</bold> — activar automáticamente el bloqueo tras un tiempo determinado después de marcar una inyección y tras un desbloqueo manual. Tocar la fila abre los ajustes de retardo.",

@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next";
 import { i18next } from "../../i18n";
 import { ConfirmDialog } from "../common";
 import { HelpSheet } from "../HelpSheet";
-import { MenuSheet, LANGUAGE_MODE_KEY, THEME_MODE_KEY } from "../MenuSheet";
+import { MenuSheet } from "../MenuSheet";
+import { SettingsSheet, LANGUAGE_MODE_KEY, THEME_MODE_KEY } from "../SettingsSheet";
 import { AutoLockDialog } from "../AutoLockDialog";
 import { DaysToWhiteDialog } from "../DaysToWhiteDialog";
 import { DaysToAvailableDialog } from "../DaysToAvailableDialog";
@@ -112,6 +113,7 @@ export function BottomMenu({
   const [showClearOptions, setShowClearOptions] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [autoLockDialogIntent, setAutoLockDialogIntent] =
     useState<AutoLockDialogMode | null>(null);
   const [showDaysToWhiteDialog, setShowDaysToWhiteDialog] = useState(false);
@@ -128,7 +130,7 @@ export function BottomMenu({
 
   const handleToggleAutoLock = (value: boolean) => {
     if (value) {
-      setShowMenu(false);
+      setShowSettings(false);
       setAutoLockDialogIntent(AutoLockDialogMode.Enable);
     } else {
       onDisableAutoLock();
@@ -137,37 +139,37 @@ export function BottomMenu({
   };
 
   const handleEditAutoLockSettings = () => {
-    setShowMenu(false);
+    setShowSettings(false);
     setAutoLockDialogIntent(AutoLockDialogMode.Edit);
   };
 
   const handleEditDaysToWhite = () => {
-    setShowMenu(false);
+    setShowSettings(false);
     setShowDaysToWhiteDialog(true);
   };
 
   const handleEditDaysToAvailable = () => {
-    setShowMenu(false);
+    setShowSettings(false);
     setShowDaysToAvailableDialog(true);
   };
 
   const handleEditZonePointCounts = () => {
-    setShowMenu(false);
+    setShowSettings(false);
     setShowZonePointsDialog(true);
   };
 
   const handleEditZones = () => {
-    setShowMenu(false);
+    setShowSettings(false);
     setShowZonesDialog(true);
   };
 
   const handleEditTheme = () => {
-    setShowMenu(false);
+    setShowSettings(false);
     setShowThemeDialog(true);
   };
 
   const handleEditLanguage = () => {
-    setShowMenu(false);
+    setShowSettings(false);
     setShowLanguageDialog(true);
   };
 
@@ -194,6 +196,24 @@ export function BottomMenu({
       <MenuSheet
         visible={showMenu}
         onClose={() => setShowMenu(false)}
+        onOpenSettings={() => {
+          setShowMenu(false);
+          setShowSettings(true);
+        }}
+        onImport={handleImport}
+        onExport={() => {
+          setShowMenu(false);
+          setShowExportOptions(true);
+        }}
+        onClear={() => {
+          setShowMenu(false);
+          setShowClearOptions(true);
+        }}
+      />
+
+      <SettingsSheet
+        visible={showSettings}
+        onClose={() => setShowSettings(false)}
         mirrored={mirrored}
         onToggleMirrored={(value) => {
           onToggleMirrored(value);
@@ -217,15 +237,6 @@ export function BottomMenu({
         onEditTheme={handleEditTheme}
         languageMode={languageMode}
         onEditLanguage={handleEditLanguage}
-        onImport={handleImport}
-        onExport={() => {
-          setShowMenu(false);
-          setShowExportOptions(true);
-        }}
-        onClear={() => {
-          setShowMenu(false);
-          setShowClearOptions(true);
-        }}
       />
 
       <AutoLockDialog
@@ -377,6 +388,7 @@ export function BottomMenu({
           onPress={() => {
             setShowHelp(false);
             setShowMenu(false);
+            setShowSettings(false);
             setShowUndo(true);
           }}
           disabled={!canUndo}
@@ -389,6 +401,7 @@ export function BottomMenu({
           style={styles.btn}
           onPress={() => {
             setShowHelp(false);
+            setShowSettings(false);
             setShowMenu((v) => !v);
           }}
           activeOpacity={0.6}
@@ -400,6 +413,7 @@ export function BottomMenu({
           style={styles.btn}
           onPress={() => {
             setShowMenu(false);
+            setShowSettings(false);
             setShowHelp((v) => !v);
           }}
           activeOpacity={0.6}
@@ -412,6 +426,7 @@ export function BottomMenu({
           onPress={() => {
             setShowHelp(false);
             setShowMenu(false);
+            setShowSettings(false);
             onToggleInterfaceLocked();
           }}
           activeOpacity={0.6}

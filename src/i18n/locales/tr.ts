@@ -82,6 +82,7 @@ export const tr: AppLocale = {
   },
   menu: {
     title: "Menü",
+    settingsRow: "Ayarlar",
     mirrorRow: "Görünümü aynala",
     autoLockRow: "Arayüzü otomatik kilitle",
     daysToWhiteRow: "Noktanın iyileşmesine kalan gün sayısı",
@@ -200,6 +201,7 @@ export const tr: AppLocale = {
     sectionControls: "Kontroller",
     sectionBottomBar: "Alt çubuk",
     sectionMenuItems: "Menü öğeleri",
+    sectionSettingsItems: "Ayarlar öğeleri",
     zones: {
       shoulder: {
         label: "Omuzlar",
@@ -242,6 +244,7 @@ export const tr: AppLocale = {
       lock: "<bold>Kilit</bold> — yanlışlıkla dokunmaları önlemek için arayüzü kilitler veya kilidini açar.",
     },
     menuItems: {
+      settings: "<bold>{{label}}</bold> — uygulamanın ayarlar ekranını açar.",
       mirror: "<bold>{{label}}</bold> — vücut silüetini yatay olarak çevirir.",
       autoLock:
         "<bold>{{label}}</bold> — bir enjeksiyon işaretlendikten belirli bir süre sonra ve elle kilit açıldıktan sonra kilitlemeyi otomatik olarak etkinleştirir. Satıra dokunmak gecikme ayarlarını açar.",

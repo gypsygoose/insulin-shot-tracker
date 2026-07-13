@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Dialog } from "./common";
 import { useTheme } from "../theme";
 import { ThemeMode } from "../types";
-import { THEME_MODE_KEY } from "./MenuSheet";
+import { THEME_MODE_KEY } from "./SettingsSheet";
 
 const THEME_MODE_OPTIONS: ThemeMode[] = [
   ThemeMode.System,

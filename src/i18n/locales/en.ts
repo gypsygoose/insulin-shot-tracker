@@ -78,6 +78,7 @@ export const en = {
   },
   menu: {
     title: "Menu",
+    settingsRow: "Settings",
     mirrorRow: "Mirror display",
     autoLockRow: "Auto-lock interface",
     daysToWhiteRow: "Days until point recovers",
@@ -196,6 +197,7 @@ export const en = {
     sectionControls: "Controls",
     sectionBottomBar: "Bottom bar",
     sectionMenuItems: "Menu items",
+    sectionSettingsItems: "Settings items",
     zones: {
       shoulder: {
         label: "Shoulders",
@@ -238,6 +240,7 @@ export const en = {
       lock: "<bold>Lock</bold> — lock or unlock the interface to avoid accidental taps.",
     },
     menuItems: {
+      settings: "<bold>{{label}}</bold> — open the app's settings screen.",
       mirror: "<bold>{{label}}</bold> — flip the body silhouette horizontally.",
       autoLock:
         "<bold>{{label}}</bold> — automatically enable locking after a set time following an injection mark, and after a manual unlock. Tapping the row opens the delay settings.",

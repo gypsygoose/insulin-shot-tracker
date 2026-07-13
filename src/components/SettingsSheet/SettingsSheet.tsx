@@ -26,12 +26,9 @@ interface Props {
   onEditTheme: () => void;
   languageMode: LanguageMode;
   onEditLanguage: () => void;
-  onImport: () => void;
-  onExport: () => void;
-  onClear: () => void;
 }
 
-export function MenuSheet({
+export function SettingsSheet({
   visible,
   onClose,
   mirrored,
@@ -51,15 +48,12 @@ export function MenuSheet({
   onEditTheme,
   languageMode,
   onEditLanguage,
-  onImport,
-  onExport,
-  onClear,
 }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title={t("menu.title")}>
+    <BottomSheet visible={visible} onClose={onClose} title={t("menu.settingsRow")}>
       <View style={styles.row}>
         <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
           {t("menu.mirrorRow")}
@@ -159,36 +153,6 @@ export function MenuSheet({
         </Text>
         <Text style={[styles.rowValue, { color: colors.mutedText }]}>
           {t(LANGUAGE_MODE_KEY[languageMode])}
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.row}
-        onPress={onExport}
-        activeOpacity={0.7}
-      >
-        <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
-          {t("menu.exportRow")}
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.row}
-        onPress={onImport}
-        activeOpacity={0.7}
-      >
-        <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
-          {t("menu.importRow")}
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.row}
-        onPress={onClear}
-        activeOpacity={0.7}
-      >
-        <Text style={[styles.rowLabel, { color: colors.destructive }]}>
-          {t("common.clear")}
         </Text>
       </TouchableOpacity>
     </BottomSheet>

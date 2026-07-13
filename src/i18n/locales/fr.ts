@@ -82,6 +82,7 @@ export const fr: AppLocale = {
   },
   menu: {
     title: "Menu",
+    settingsRow: "Paramètres",
     mirrorRow: "Affichage en miroir",
     autoLockRow: "Verrouillage automatique de l'interface",
     daysToWhiteRow: "Jours avant récupération du point",
@@ -200,6 +201,7 @@ export const fr: AppLocale = {
     sectionControls: "Contrôles",
     sectionBottomBar: "Barre du bas",
     sectionMenuItems: "Éléments du menu",
+    sectionSettingsItems: "Éléments des paramètres",
     zones: {
       shoulder: {
         label: "Épaules",
@@ -242,6 +244,7 @@ export const fr: AppLocale = {
       lock: "<bold>Verrou</bold> — verrouiller ou déverrouiller l'interface pour éviter les appuis accidentels.",
     },
     menuItems: {
+      settings: "<bold>{{label}}</bold> — ouvrir l'écran des paramètres de l'application.",
       mirror: "<bold>{{label}}</bold> — retourner horizontalement la silhouette du corps.",
       autoLock:
         "<bold>{{label}}</bold> — activer automatiquement le verrouillage après un délai défini suivant le marquage d'une injection, et après un déverrouillage manuel. Appuyer sur la ligne ouvre les réglages de délai.",

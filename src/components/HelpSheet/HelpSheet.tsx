@@ -160,6 +160,36 @@ export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
         <Text style={sectionTitleStyle}>{t("help.sectionMenuItems")}</Text>
         <Text style={hintStyle}>
           <Trans
+            i18nKey="help.menuItems.settings"
+            values={{ label: t("menu.settingsRow") }}
+            components={boldComponents}
+          />
+        </Text>
+        <Text style={hintStyle}>
+          <Trans
+            i18nKey="help.menuItems.export"
+            values={{ label: t("menu.exportRow") }}
+            components={boldComponents}
+          />
+        </Text>
+        <Text style={hintStyle}>
+          <Trans
+            i18nKey="help.menuItems.import"
+            values={{ label: t("menu.importRow") }}
+            components={boldComponents}
+          />
+        </Text>
+        <Text style={hintStyle}>
+          <Trans
+            i18nKey="help.menuItems.clear"
+            values={{ label: t("common.clear") }}
+            components={boldComponents}
+          />
+        </Text>
+
+        <Text style={sectionTitleStyle}>{t("help.sectionSettingsItems")}</Text>
+        <Text style={hintStyle}>
+          <Trans
             i18nKey="help.menuItems.mirror"
             values={{ label: t("menu.mirrorRow") }}
             components={boldComponents}
@@ -211,27 +241,6 @@ export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
           <Trans
             i18nKey="help.menuItems.language"
             values={{ label: t("menu.languageRow") }}
-            components={boldComponents}
-          />
-        </Text>
-        <Text style={hintStyle}>
-          <Trans
-            i18nKey="help.menuItems.export"
-            values={{ label: t("menu.exportRow") }}
-            components={boldComponents}
-          />
-        </Text>
-        <Text style={hintStyle}>
-          <Trans
-            i18nKey="help.menuItems.import"
-            values={{ label: t("menu.importRow") }}
-            components={boldComponents}
-          />
-        </Text>
-        <Text style={hintStyle}>
-          <Trans
-            i18nKey="help.menuItems.clear"
-            values={{ label: t("common.clear") }}
             components={boldComponents}
           />
         </Text>

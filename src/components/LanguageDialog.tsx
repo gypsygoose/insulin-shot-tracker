@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Dialog } from "./common";
 import { useTheme } from "../theme";
 import { LanguageMode } from "../types";
-import { LANGUAGE_MODE_KEY } from "./MenuSheet";
+import { LANGUAGE_MODE_KEY } from "./SettingsSheet";
 
 const LANGUAGE_MODE_OPTIONS: LanguageMode[] = [
   LanguageMode.System,

@@ -8,8 +8,8 @@ Tap a point on the body diagram to log an injection at that spot. The point's co
 
 ## Features
 
-- Interactive body diagram with 30 injection points across 6 zones (shoulders, belly, thighs) by default — the row/column grid is configurable per zone type from the menu (up to 3×2 for shoulders, 4×4 for belly, 4×3 for thighs), without losing injection history for points that stay in range
-- Individual zones (e.g. left/right shoulder) can be hidden from the body diagram entirely from the menu, without losing their injection history — at least one zone always stays enabled
+- Interactive body diagram with 30 injection points across 6 zones (shoulders, belly, thighs) by default — the row/column grid is configurable per zone type from the menu's Settings screen (up to 3×2 for shoulders, 4×4 for belly, 4×3 for thighs), without losing injection history for points that stay in range
+- Individual zones (e.g. left/right shoulder) can be hidden from the body diagram entirely from the menu's Settings screen, without losing their injection history — at least one zone always stays enabled
 - Long-press a point to see its body-relative address (row from top, position in the row from the body's center) alongside its history and actions; a toast with the same address confirms every marked injection, calling out a triggered blackout or a backdated mark's date/time when relevant
 - Status toasts (info/warning/success/error, each with its own color and icon) confirm every action — marking, blocking, clearing, undo, and import/export — and flag anything that needs attention, like a site getting system-blacked-out or a failed import
 - Color-coded rotation cycle (maroon → red → orange → yellow → green → white) based on local calendar days since last injection
@@ -17,8 +17,8 @@ Tap a point on the body diagram to log an injection at that spot. The point's co
 - Optional "days to available" delay (0–8 days, capped at "days to white") that disables re-marking a point entirely until it's elapsed — a disabled point shows a diagonal strikethrough and its remaining wait, both on the body diagram and in its long-press menu
 - Automatic "blackout" cooldown when a site is reused too early, with duration based on how recently it was used
 - Manual site lock (long-press) to mark a spot as temporarily unavailable
-- Light, dark, or system-matched theme, switchable from the menu (defaults to following the OS appearance)
-- Russian, English, Spanish, German, French, Turkish, and Brazilian Portuguese UI, switchable from the menu (defaults to following the device language)
+- Light, dark, or system-matched theme, switchable from the menu's Settings screen (defaults to following the OS appearance)
+- Russian, English, Spanish, German, French, Turkish, and Brazilian Portuguese UI, switchable from the menu's Settings screen (defaults to following the device language)
 - Undo, injection history, and selective import/export/clear of your data (choose which of active points / manually blocked points / individual app settings to include on export; on import, pick which of the categories actually present in the file to apply; on clear, pick which of those same categories to permanently reset to their defaults) — all stored locally on-device, no account or backend required
 
 ## Getting started
@@ -60,7 +60,7 @@ See [CLAUDE.md](CLAUDE.md) for full architecture notes, the point color/rotation
 ## Notes
 
 - All data is stored locally on-device (AsyncStorage) — there is no backend or cloud sync.
-- UI is available in Russian, English, Spanish, German, French, Turkish, and Brazilian Portuguese (see the "Язык"/"Language" menu row); more languages may be added later.
+- UI is available in Russian, English, Spanish, German, French, Turkish, and Brazilian Portuguese (see the "Язык"/"Language" row on the Settings screen, opened from the menu); more languages may be added later.
 - This app supports injection-site rotation tracking and is not a substitute for medical advice.
 
 ## License

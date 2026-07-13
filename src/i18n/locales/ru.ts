@@ -77,6 +77,7 @@ export const ru: AppLocale = {
   },
   menu: {
     title: "Меню",
+    settingsRow: "Настройки",
     mirrorRow: "Зеркальное отображение",
     autoLockRow: "Автоблокировка интерфейса",
     daysToWhiteRow: "Дней до восстановления точки",
@@ -196,6 +197,7 @@ export const ru: AppLocale = {
     sectionControls: "Управление",
     sectionBottomBar: "Нижняя панель",
     sectionMenuItems: "Пункты меню",
+    sectionSettingsItems: "Пункты настроек",
     zones: {
       shoulder: {
         label: "Плечи",
@@ -238,6 +240,7 @@ export const ru: AppLocale = {
       lock: "<bold>Замок</bold> — заблокировать или разблокировать интерфейс, чтобы избежать случайных нажатий.",
     },
     menuItems: {
+      settings: "<bold>{{label}}</bold> — открыть экран настроек приложения.",
       mirror: "<bold>{{label}}</bold> — отразить силуэт тела по горизонтали.",
       autoLock:
         "<bold>{{label}}</bold> — автоматически включать блокировку через заданное время после отметки укола и после ручной разблокировки. Нажатие на строку открывает настройку задержек.",
