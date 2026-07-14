@@ -41,6 +41,7 @@ export function PointContextMenu({
   const { t, i18n } = useTranslation();
   const isGray = color === PointColor.Gray;
   const isBlack = color === PointColor.Black;
+  const isMarked = color === PointColor.Marked;
   const isUnavailable = daysUntilAvailable !== undefined;
   const blackoutEndAt = pointState
     ? PointService.getBlackoutEndAt(pointState)
@@ -84,7 +85,7 @@ export function PointContextMenu({
       key: "mark",
       label: t("common.mark"),
       onPress: onMark,
-      disabled: isUnavailable,
+      disabled: isUnavailable || isMarked,
     });
   }
   items.push({

@@ -7,12 +7,13 @@ const SETTING_AVAILABLE: Record<
 > = {
   [ExportSettingKey.Mirrored]: (data) => data.mirrored !== undefined,
   [ExportSettingKey.AutoLock]: (data) => data.autoLockEnabled !== undefined,
+  [ExportSettingKey.EnabledZones]: (data) => data.enabledZones !== undefined,
+  [ExportSettingKey.ZonePointCounts]: (data) => data.zonePointCounts !== undefined,
+  [ExportSettingKey.PointRestoreMode]: (data) => data.pointRestoreMode !== undefined,
   [ExportSettingKey.DaysToWhite]: (data) => data.daysToWhite !== undefined,
   [ExportSettingKey.DaysToAvailable]: (data) => data.daysToAvailable !== undefined,
-  [ExportSettingKey.Theme]: (data) => data.themeMode !== undefined,
   [ExportSettingKey.Language]: (data) => data.languageMode !== undefined,
-  [ExportSettingKey.ZonePointCounts]: (data) => data.zonePointCounts !== undefined,
-  [ExportSettingKey.EnabledZones]: (data) => data.enabledZones !== undefined,
+  [ExportSettingKey.Theme]: (data) => data.themeMode !== undefined,
 };
 
 export function availableSettings(

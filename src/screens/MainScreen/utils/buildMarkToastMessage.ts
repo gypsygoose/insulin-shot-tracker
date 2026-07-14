@@ -1,5 +1,5 @@
 import { TFunction } from "i18next";
-import { PointAddress, PointDefinition, StoredPointState, ToastStatus } from "../../../types";
+import { PointAddress, PointDefinition, PointRestoreMode, StoredPointState, ToastStatus } from "../../../types";
 import { PointService, PressResultType } from "../../../logic";
 import { formatDateTime } from "../../../utils";
 import { MARK_BACKDATED_THRESHOLD_MS } from "../../../constants";
@@ -14,7 +14,8 @@ interface MarkToastMessage {
 // dialog), confirming which point it was via its body-relative address, plus
 // the marked time if it's backdated and a note if the mark triggered a
 // system blackout (site reused too early) — which also bumps the toast's
-// status from Success to Warn.
+// status from Success to Warn. Never happens in Manual point restore mode,
+// since onPress there only ever returns Injection or Blocked.
 export function buildMarkToastMessage(
   t: TFunction,
   locale: string,
@@ -24,6 +25,7 @@ export function buildMarkToastMessage(
   daysToWhite: number,
   pointMap: Record<string, PointDefinition>,
   pointAddress: Record<string, PointAddress>,
+  pointRestoreMode?: PointRestoreMode,
 ): MarkToastMessage | null {
   const addressSuffix = buildPointAddressSuffix(t, pointId, pointMap, pointAddress);
   if (!addressSuffix) return null;
@@ -31,7 +33,13 @@ export function buildMarkToastMessage(
   let message = t("toast.pointMarked", { address: addressSuffix });
   let status = ToastStatus.Success;
 
-  const result = PointService.onPress(pointState, timestamp, daysToWhite);
+  const result = PointService.onPress(
+    pointState,
+    timestamp,
+    daysToWhite,
+    undefined,
+    pointRestoreMode,
+  );
   if (result.type === PressResultType.Blackout) {
     const days = result.newState.blackoutDurationDays!;
     message += t("toast.markBlackoutSuffix", { count: days });

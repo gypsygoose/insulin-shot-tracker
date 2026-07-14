@@ -137,12 +137,12 @@ export const ZONE_MAX_GRID: ZonePointCounts = {
 // DEFAULT_ZONE_POINT_COUNTS the computed ZoneLayout below reproduces today's
 // exact numbers.
 const ZONE_ANCHOR: Record<ZoneId, { centerX: number; centerY: number }> = {
-  [ZoneId.ShoulderRight]: { centerX: 0.08 + 0.12 / 2, centerY: 0.15 + 0.2 / 2 },
-  [ZoneId.ShoulderLeft]: { centerX: 0.815 + 0.12 / 2, centerY: 0.15 + 0.2 / 2 },
-  [ZoneId.BellyRight]: { centerX: 0.215 + 0.28 / 2, centerY: 0.29 + 0.2 / 2 },
-  [ZoneId.BellyLeft]: { centerX: 0.52 + 0.28 / 2, centerY: 0.29 + 0.2 / 2 },
-  [ZoneId.ThighRight]: { centerX: 0.21 + 0.21 / 2, centerY: 0.65 + 0.2 / 2 },
-  [ZoneId.ThighLeft]: { centerX: 0.605 + 0.2 / 2, centerY: 0.65 + 0.2 / 2 },
+  [ZoneId.ShoulderRight]: { centerX: 0.07 + 0.12 / 2, centerY: 0.15 + 0.2 / 2 },
+  [ZoneId.ShoulderLeft]: { centerX: 0.805 + 0.12 / 2, centerY: 0.15 + 0.2 / 2 },
+  [ZoneId.BellyRight]: { centerX: 0.205 + 0.28 / 2, centerY: 0.29 + 0.2 / 2 },
+  [ZoneId.BellyLeft]: { centerX: 0.51 + 0.28 / 2, centerY: 0.29 + 0.2 / 2 },
+  [ZoneId.ThighRight]: { centerX: 0.2 + 0.21 / 2, centerY: 0.65 + 0.2 / 2 },
+  [ZoneId.ThighLeft]: { centerX: 0.595 + 0.2 / 2, centerY: 0.65 + 0.2 / 2 },
 };
 
 // Per-point cell size, per zone (fraction of the body image) — original
@@ -239,8 +239,9 @@ function shouldWidenBellyGap(zonePointCounts: ZonePointCounts): boolean {
 // ZONE_ANCHOR centerX values (0.355, 0.66), which is 0.5075, not exactly
 // BODY_MIDLINE_X (0.5). BODY_MIDLINE_X is a generic 0.5 used only to classify
 // which side of the body a zone falls on (isZoneLeftOfMidline); the belly
-// zones' actual illustrated center (relative to the navel in body.png) is
-// offset from that by design, per the original Figma rectangles. Deriving it
+// zones' actual illustrated center (relative to the navel in the body
+// illustration) is offset from that by design, per the original Figma
+// rectangles. Deriving it
 // here instead of widening symmetrically around BODY_MIDLINE_X keeps the
 // widened gap visually centered exactly where the fixed-width belly zones
 // already are, instead of drifting off the navel.

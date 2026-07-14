@@ -85,6 +85,11 @@ export const fr: AppLocale = {
     settingsRow: "Paramètres",
     mirrorRow: "Affichage en miroir",
     autoLockRow: "Verrouillage automatique de l'interface",
+    pointRestoreModeRow: "Mode de récupération des points",
+    pointRestoreMode: {
+      auto: "Automatique",
+      manual: "Manuel",
+    },
     daysToWhiteRow: "Jours avant récupération du point",
     daysToAvailableRow: "Jours avant que le point soit à nouveau disponible",
     zonePointsRow: "Disposition des points de zone",
@@ -107,8 +112,12 @@ export const fr: AppLocale = {
     },
     daysToAvailableDialog: {
       message:
-        "Nombre de jours après la dernière marque pendant lesquels un point reste désactivé pour un nouveau marquage, en plus du cycle de couleurs. Ne peut pas dépasser « Jours avant récupération du point ». À 0 (par défaut), un point peut être marqué à nouveau à tout moment, comme avant l'existence de ce paramètre.",
+        "Nombre de jours après la dernière marque pendant lesquels un point reste désactivé pour un nouveau marquage, en plus du cycle de couleurs. Ne peut pas dépasser « Jours avant récupération du point ». À 0 (par défaut), un point peut être marqué à nouveau à tout moment.",
       fieldLabel: "Jours",
+    },
+    pointRestoreModeDialog: {
+      message:
+        "En mode Automatique, la couleur d'un point évolue avec le temps. En mode Manuel, un point devient noir et reste désactivé pour un nouveau marquage dès qu'il est utilisé — effacez-le pour pouvoir le marquer à nouveau.",
     },
     zonePointsDialog: {
       message:
@@ -248,6 +257,8 @@ export const fr: AppLocale = {
       mirror: "<bold>{{label}}</bold> — retourner horizontalement la silhouette du corps.",
       autoLock:
         "<bold>{{label}}</bold> — activer automatiquement le verrouillage après un délai défini suivant le marquage d'une injection, et après un déverrouillage manuel. Appuyer sur la ligne ouvre les réglages de délai.",
+      pointRestoreMode:
+        "<bold>{{label}}</bold> — choisissez comment les points d'injection récupèrent. En mode automatique, la couleur du point change avec le temps. En mode manuel, un point devient noir et reste désactivé pour un nouveau marquage dès qu'il est utilisé — il faut l'effacer manuellement pour le marquer à nouveau. Activer le mode manuel désactive les réglages « jours avant récupération » et « jours avant disponibilité ».",
       daysToWhite:
         "<bold>{{label}}</bold> — nombre de jours avant qu'un point d'injection soit à nouveau considéré comme totalement libre (blanc). Diminuer la valeur comprime le code couleur sur cette période.",
       daysToAvailable:
@@ -273,9 +284,11 @@ export const fr: AppLocale = {
       white_few: "Libre (inutilisé depuis {{count}}+ jours)",
       white_many: "Libre (inutilisé depuis {{count}}+ jours)",
       white_other: "Libre (inutilisé depuis {{count}}+ jours)",
+      whiteManual: "Libre",
       maroon: "À l'instant (jour 0)",
       black: "Bloqué par le système en raison d'une utilisation fréquente",
       gray: "Bloqué manuellement (blessure/bleu)",
+      marked: "Marqué — désactivé jusqu'à l'effacement (mode manuel)",
     },
   },
 };

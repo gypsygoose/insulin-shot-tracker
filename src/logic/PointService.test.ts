@@ -1,7 +1,7 @@
 import { PointService } from './PointService';
 import { ColorLabelType, PressResultType } from './types';
 import { DAY_MS } from './constants';
-import { PointColor, StoredPointState } from '../types';
+import { PointColor, PointRestoreMode, StoredPointState } from '../types';
 
 const DAY = DAY_MS;
 const NOW = 1000000000000; // fixed reference timestamp
@@ -515,5 +515,119 @@ describe('onPress — respects daysToAvailable', () => {
   test('default daysToAvailable (0) never blocks — unchanged behavior', () => {
     const s = { ...fresh, lastInjectionAt: NOW };
     expect(PointService.onPress(s, NOW).type).toBe(PressResultType.Blackout);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Point restore mode — Manual
+// ---------------------------------------------------------------------------
+
+describe('computePointColor — manual restore mode', () => {
+  test('white when never used', () => {
+    expect(
+      PointService.computePointColor(fresh, NOW, 8, PointRestoreMode.Manual),
+    ).toBe(PointColor.White);
+  });
+
+  test('marked once used, regardless of how long ago', () => {
+    const justNow = { ...fresh, lastInjectionAt: NOW };
+    const longAgo = { ...fresh, lastInjectionAt: NOW - 30 * DAY };
+    expect(
+      PointService.computePointColor(justNow, NOW, 8, PointRestoreMode.Manual),
+    ).toBe(PointColor.Marked);
+    expect(
+      PointService.computePointColor(longAgo, NOW, 8, PointRestoreMode.Manual),
+    ).toBe(PointColor.Marked);
+  });
+
+  test('gray (manual block) still overrides marked', () => {
+    const s = {
+      ...fresh,
+      lastInjectionAt: NOW,
+      isManuallyBlocked: true,
+    };
+    expect(
+      PointService.computePointColor(s, NOW, 8, PointRestoreMode.Manual),
+    ).toBe(PointColor.Gray);
+  });
+
+  test('a stale blackout is ignored entirely in manual mode', () => {
+    const s: StoredPointState = {
+      ...fresh,
+      lastInjectionAt: NOW,
+      blackoutStartedAt: NOW,
+      blackoutDurationDays: 4,
+    };
+    expect(
+      PointService.computePointColor(s, NOW, 8, PointRestoreMode.Manual),
+    ).toBe(PointColor.Marked);
+  });
+});
+
+describe('daysUntilAvailable — manual restore mode', () => {
+  test('always undefined, regardless of daysToAvailable or color', () => {
+    expect(
+      PointService.daysUntilAvailable(fresh, NOW, 8, 5, PointRestoreMode.Manual),
+    ).toBeUndefined();
+    const marked = { ...fresh, lastInjectionAt: NOW };
+    expect(
+      PointService.daysUntilAvailable(marked, NOW, 8, 5, PointRestoreMode.Manual),
+    ).toBeUndefined();
+  });
+});
+
+describe('onPress — manual restore mode', () => {
+  test('marks a fresh (white) point', () => {
+    const result = PointService.onPress(
+      fresh,
+      NOW,
+      8,
+      0,
+      PointRestoreMode.Manual,
+    );
+    expect(result.type).toBe(PressResultType.Injection);
+    if (result.type === PressResultType.Injection) {
+      expect(result.newState.lastInjectionAt).toBe(NOW);
+    }
+  });
+
+  test('blocked once already marked — cannot press again', () => {
+    const s = { ...fresh, lastInjectionAt: NOW - 30 * DAY };
+    const result = PointService.onPress(s, NOW, 8, 0, PointRestoreMode.Manual);
+    expect(result.type).toBe(PressResultType.Blocked);
+  });
+
+  test('blocked when manually (gray) blocked', () => {
+    const s = { ...fresh, isManuallyBlocked: true };
+    const result = PointService.onPress(s, NOW, 8, 0, PointRestoreMode.Manual);
+    expect(result.type).toBe(PressResultType.Blocked);
+  });
+
+  test('never produces a blackout outcome', () => {
+    const s = { ...fresh, lastInjectionAt: NOW };
+    const result = PointService.onPress(s, NOW, 8, 0, PointRestoreMode.Manual);
+    expect(result.type).not.toBe(PressResultType.Blackout);
+  });
+});
+
+describe('colorLabel — marked', () => {
+  test('returns a Marked descriptor', () => {
+    expect(PointService.colorLabel(PointColor.Marked, 8)).toEqual({
+      type: ColorLabelType.Marked,
+    });
+  });
+});
+
+describe('colorLabel — manual restore mode', () => {
+  test('returns a WhiteManual descriptor for White, with no count', () => {
+    expect(
+      PointService.colorLabel(PointColor.White, 8, PointRestoreMode.Manual),
+    ).toEqual({ type: ColorLabelType.WhiteManual });
+  });
+
+  test('Auto mode is unaffected', () => {
+    expect(
+      PointService.colorLabel(PointColor.White, 8, PointRestoreMode.Auto),
+    ).toEqual({ type: ColorLabelType.White, count: 8 });
   });
 });

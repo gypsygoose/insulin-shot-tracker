@@ -12,6 +12,12 @@ export enum PointColor {
   Green = 'green',
   Black = 'black',
   Gray = 'gray',
+  // Point restore mode: Manual — a point's own permanent "used" color, once
+  // it's ever been marked. Deliberately distinct from Black (system
+  // blackout, only ever set in Auto mode) even though both render as the
+  // same near-black hex — see PointService.computePointColor/onPress and
+  // CLAUDE.md's "Point restore mode" section.
+  Marked = 'marked',
 }
 
 export interface PointDefinition {

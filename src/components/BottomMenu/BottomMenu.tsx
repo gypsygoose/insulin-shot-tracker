@@ -5,7 +5,12 @@ import { i18next } from "../../i18n";
 import { ConfirmDialog } from "../common";
 import { HelpSheet } from "../HelpSheet";
 import { MenuSheet } from "../MenuSheet";
-import { SettingsSheet, LANGUAGE_MODE_KEY, THEME_MODE_KEY } from "../SettingsSheet";
+import {
+  SettingsSheet,
+  LANGUAGE_MODE_KEY,
+  POINT_RESTORE_MODE_KEY,
+  THEME_MODE_KEY,
+} from "../SettingsSheet";
 import { AutoLockDialog } from "../AutoLockDialog";
 import { DaysToWhiteDialog } from "../DaysToWhiteDialog";
 import { DaysToAvailableDialog } from "../DaysToAvailableDialog";
@@ -13,6 +18,7 @@ import { ZonePointsDialog } from "../ZonePointsDialog";
 import { ZonesDialog } from "../ZonesDialog";
 import { ThemeDialog } from "../ThemeDialog";
 import { LanguageDialog } from "../LanguageDialog";
+import { PointRestoreModeDialog } from "../PointRestoreModeDialog";
 import { ClearOptionsDialog } from "../ClearOptionsDialog";
 import { ExportOptionsDialog } from "../ExportOptionsDialog";
 import { ImportOptionsDialog } from "../ImportOptionsDialog";
@@ -30,6 +36,7 @@ import {
   ExportSelection,
   ExportSettingKey,
   LanguageMode,
+  PointRestoreMode,
   ThemeMode,
   ToastStatus,
   ZonePointCounts,
@@ -62,6 +69,8 @@ interface Props {
   onSetDaysToWhite: (days: number) => void;
   daysToAvailable: number;
   onSetDaysToAvailable: (days: number) => void;
+  pointRestoreMode: PointRestoreMode;
+  onSetPointRestoreMode: (mode: PointRestoreMode) => void;
   zonePointCounts: ZonePointCounts;
   onSetZonePointCounts: (next: ZonePointCounts) => void;
   enabledZones: EnabledZones;
@@ -94,6 +103,8 @@ export function BottomMenu({
   onSetDaysToWhite,
   daysToAvailable,
   onSetDaysToAvailable,
+  pointRestoreMode,
+  onSetPointRestoreMode,
   zonePointCounts,
   onSetZonePointCounts,
   enabledZones,
@@ -121,6 +132,8 @@ export function BottomMenu({
     useState(false);
   const [showZonePointsDialog, setShowZonePointsDialog] = useState(false);
   const [showZonesDialog, setShowZonesDialog] = useState(false);
+  const [showPointRestoreModeDialog, setShowPointRestoreModeDialog] =
+    useState(false);
   const [showThemeDialog, setShowThemeDialog] = useState(false);
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
   const [showExportOptions, setShowExportOptions] = useState(false);
@@ -141,6 +154,11 @@ export function BottomMenu({
   const handleEditAutoLockSettings = () => {
     setShowSettings(false);
     setAutoLockDialogIntent(AutoLockDialogMode.Edit);
+  };
+
+  const handleEditPointRestoreMode = () => {
+    setShowSettings(false);
+    setShowPointRestoreModeDialog(true);
   };
 
   const handleEditDaysToWhite = () => {
@@ -192,6 +210,7 @@ export function BottomMenu({
         visible={showHelp}
         onClose={() => setShowHelp(false)}
         daysToWhite={daysToWhite}
+        pointRestoreMode={pointRestoreMode}
       />
       <MenuSheet
         visible={showMenu}
@@ -227,6 +246,8 @@ export function BottomMenu({
         autoLockAfterUnlockSeconds={autoLockAfterUnlockSeconds}
         onToggleAutoLocked={handleToggleAutoLock}
         onEditAutoLockSettings={handleEditAutoLockSettings}
+        pointRestoreMode={pointRestoreMode}
+        onEditPointRestoreMode={handleEditPointRestoreMode}
         daysToWhite={daysToWhite}
         onEditDaysToWhite={handleEditDaysToWhite}
         daysToAvailable={daysToAvailable}
@@ -315,6 +336,23 @@ export function BottomMenu({
         onCancel={() => setShowZonesDialog(false)}
       />
 
+      <PointRestoreModeDialog
+        visible={showPointRestoreModeDialog}
+        initialPointRestoreMode={pointRestoreMode}
+        onConfirm={(mode) => {
+          setShowPointRestoreModeDialog(false);
+          onSetPointRestoreMode(mode);
+          onNotify(
+            t("toast.labeledValue", {
+              label: t("menu.pointRestoreModeRow"),
+              value: t(POINT_RESTORE_MODE_KEY[mode]),
+            }),
+            ToastStatus.Success,
+          );
+        }}
+        onCancel={() => setShowPointRestoreModeDialog(false)}
+      />
+
       <ThemeDialog
         visible={showThemeDialog}
         initialThemeMode={themeMode}
@@ -369,11 +407,11 @@ export function BottomMenu({
         onConfirm={(selection) => {
           setShowClearOptions(false);
           onClear(selection);
-          if (selection.settings[ExportSettingKey.Theme]) {
-            onSetThemeMode(ThemeMode.System);
-          }
           if (selection.settings[ExportSettingKey.Language]) {
             onSetLanguageMode(LanguageMode.System);
+          }
+          if (selection.settings[ExportSettingKey.Theme]) {
+            onSetThemeMode(ThemeMode.System);
           }
           onNotify(t("toast.clearSuccess"), ToastStatus.Success);
         }}
@@ -381,7 +419,13 @@ export function BottomMenu({
       />
 
       <View
-        style={[styles.bar, { backgroundColor: colors.background, borderTopColor: colors.divider }]}
+        style={[
+          styles.bar,
+          {
+            backgroundColor: colors.background,
+            borderTopColor: colors.divider,
+          },
+        ]}
       >
         <TouchableOpacity
           style={[styles.btn, !canUndo && styles.btnDisabled]}

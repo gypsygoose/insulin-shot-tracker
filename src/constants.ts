@@ -75,6 +75,3 @@ export const TOAST_INFO_BACKGROUND_COLOR = "#152238";
 export const TOAST_WARN_BACKGROUND_COLOR = "#2E230D";
 export const TOAST_SUCCESS_BACKGROUND_COLOR = "#122B1D";
 export const TOAST_ERROR_BACKGROUND_COLOR = "#301414";
-
-// Figma body image aspect ratio: 393.46 wide × 621.91 tall
-export const IMG_ASPECT = 393.46 / 621.91;

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { AppStorage, AppEvent, AppEventType, EnabledZones, ExportedAppData, ExportMarksKey, ExportSelection, ExportSettingKey, LanguageMode, StoredPointState, ThemeMode, ZoneGroup, ZonePointCounts, ZoneRuntimeData } from '../types';
+import { AppStorage, AppEvent, AppEventType, EnabledZones, ExportedAppData, ExportMarksKey, ExportSelection, ExportSettingKey, LanguageMode, PointRestoreMode, StoredPointState, ThemeMode, ZoneGroup, ZonePointCounts, ZoneRuntimeData } from '../types';
 import {
   StorageService,
   StoredAutoLock,
@@ -17,6 +17,7 @@ import {
   MAX_DAYS_TO_WHITE,
   DEFAULT_DAYS_TO_AVAILABLE,
   MIN_DAYS_TO_AVAILABLE,
+  DEFAULT_POINT_RESTORE_MODE,
 } from '../constants';
 import {
   uuid,
@@ -46,6 +47,7 @@ export interface AppState extends AppStorage {
   autoLockDeadline: number | null;
   daysToWhite: number;
   daysToAvailable: number;
+  pointRestoreMode: PointRestoreMode;
   zonePointCounts: ZonePointCounts;
   enabledZones: EnabledZones;
 }
@@ -65,6 +67,7 @@ export interface AppActions {
   updateAutoLockTimes(afterMarkSeconds: number, afterUnlockSeconds: number): void;
   setDaysToWhite(days: number): void;
   setDaysToAvailable(days: number): void;
+  setPointRestoreMode(mode: PointRestoreMode): void;
   setZonePointCounts(next: ZonePointCounts): void;
   setEnabledZones(next: EnabledZones): void;
   exportData(
@@ -101,6 +104,7 @@ export function useAppStore(
     autoLockDeadline: null,
     daysToWhite: DEFAULT_DAYS_TO_WHITE,
     daysToAvailable: DEFAULT_DAYS_TO_AVAILABLE,
+    pointRestoreMode: DEFAULT_POINT_RESTORE_MODE,
     zonePointCounts: DEFAULT_ZONE_POINT_COUNTS,
     enabledZones: DEFAULT_ENABLED_ZONES,
   });
@@ -138,7 +142,8 @@ export function useAppStore(
         StorageService.loadAutoLock(),
         StorageService.loadDaysToWhite(),
         StorageService.loadDaysToAvailable(),
-      ]).then(([stored, mirrored, storedInterfaceLocked, autoLock, daysToWhite, daysToAvailable]) => {
+        StorageService.loadPointRestoreMode(),
+      ]).then(([stored, mirrored, storedInterfaceLocked, autoLock, daysToWhite, daysToAvailable, pointRestoreMode]) => {
         const now = Date.now();
         let interfaceLocked = storedInterfaceLocked;
         let deadline = autoLock.deadline;
@@ -170,6 +175,7 @@ export function useAppStore(
           autoLockDeadline: deadline,
           daysToWhite,
           daysToAvailable,
+          pointRestoreMode,
           zonePointCounts,
           enabledZones,
           isLoaded: true,
@@ -241,6 +247,7 @@ export function useAppStore(
         now,
         prev.daysToWhite,
         prev.daysToAvailable,
+        prev.pointRestoreMode,
       );
       if (
         result.type === PressResultType.Blocked ||
@@ -362,6 +369,7 @@ export function useAppStore(
         timestamp,
         prev.daysToWhite,
         prev.daysToAvailable,
+        prev.pointRestoreMode,
       );
       if (
         result.type === PressResultType.Blocked ||
@@ -492,16 +500,6 @@ export function useAppStore(
         });
       }
 
-      if (selection.settings[ExportSettingKey.DaysToWhite]) {
-        next.daysToWhite = DEFAULT_DAYS_TO_WHITE;
-        StorageService.saveDaysToWhite(DEFAULT_DAYS_TO_WHITE);
-      }
-
-      if (selection.settings[ExportSettingKey.DaysToAvailable]) {
-        next.daysToAvailable = DEFAULT_DAYS_TO_AVAILABLE;
-        StorageService.saveDaysToAvailable(DEFAULT_DAYS_TO_AVAILABLE);
-      }
-
       // Same combined-backfill treatment as applyImport/setZonePointCounts/
       // setEnabledZones, since resetting either the grid or the zone
       // selection may bring previously out-of-range/disabled slots into
@@ -540,6 +538,21 @@ export function useAppStore(
           next.enabledZones = DEFAULT_ENABLED_ZONES;
           StorageService.saveEnabledZones(DEFAULT_ENABLED_ZONES);
         }
+      }
+
+      if (selection.settings[ExportSettingKey.PointRestoreMode]) {
+        next.pointRestoreMode = DEFAULT_POINT_RESTORE_MODE;
+        StorageService.savePointRestoreMode(DEFAULT_POINT_RESTORE_MODE);
+      }
+
+      if (selection.settings[ExportSettingKey.DaysToWhite]) {
+        next.daysToWhite = DEFAULT_DAYS_TO_WHITE;
+        StorageService.saveDaysToWhite(DEFAULT_DAYS_TO_WHITE);
+      }
+
+      if (selection.settings[ExportSettingKey.DaysToAvailable]) {
+        next.daysToAvailable = DEFAULT_DAYS_TO_AVAILABLE;
+        StorageService.saveDaysToAvailable(DEFAULT_DAYS_TO_AVAILABLE);
       }
 
       return next;
@@ -651,6 +664,11 @@ export function useAppStore(
     StorageService.saveDaysToAvailable(clamped);
   }, []);
 
+  const setPointRestoreMode = useCallback((mode: PointRestoreMode) => {
+    setState((prev) => ({ ...prev, pointRestoreMode: mode }));
+    StorageService.savePointRestoreMode(mode);
+  }, []);
+
   // Backfills default states for any slot newly brought into range by the
   // grid change (normalizeStorage), while leaving every other point's
   // history — including slots now outside the grid — untouched, so shrinking
@@ -738,23 +756,26 @@ export function useAppStore(
         data.autoLockAfterMarkSeconds = state.autoLockAfterMarkSeconds;
         data.autoLockAfterUnlockSeconds = state.autoLockAfterUnlockSeconds;
       }
+      if (selection.settings[ExportSettingKey.EnabledZones]) {
+        data.enabledZones = state.enabledZones;
+      }
+      if (selection.settings[ExportSettingKey.ZonePointCounts]) {
+        data.zonePointCounts = state.zonePointCounts;
+      }
+      if (selection.settings[ExportSettingKey.PointRestoreMode]) {
+        data.pointRestoreMode = state.pointRestoreMode;
+      }
       if (selection.settings[ExportSettingKey.DaysToWhite]) {
         data.daysToWhite = state.daysToWhite;
       }
       if (selection.settings[ExportSettingKey.DaysToAvailable]) {
         data.daysToAvailable = state.daysToAvailable;
       }
-      if (selection.settings[ExportSettingKey.Theme]) {
-        data.themeMode = themeMode;
-      }
       if (selection.settings[ExportSettingKey.Language]) {
         data.languageMode = languageMode;
       }
-      if (selection.settings[ExportSettingKey.ZonePointCounts]) {
-        data.zonePointCounts = state.zonePointCounts;
-      }
-      if (selection.settings[ExportSettingKey.EnabledZones]) {
-        data.enabledZones = state.enabledZones;
+      if (selection.settings[ExportSettingKey.Theme]) {
+        data.themeMode = themeMode;
       }
       await StorageService.exportStorageToFile(data, dialogTitle);
     },
@@ -767,6 +788,7 @@ export function useAppStore(
       state.autoLockAfterUnlockSeconds,
       state.daysToWhite,
       state.daysToAvailable,
+      state.pointRestoreMode,
       state.zonePointCounts,
       state.enabledZones,
     ],
@@ -806,16 +828,6 @@ export function useAppStore(
         next.autoLockDeadline = deadline;
       }
 
-      if (data.daysToWhite !== undefined) {
-        StorageService.saveDaysToWhite(data.daysToWhite);
-        next.daysToWhite = data.daysToWhite;
-      }
-
-      if (data.daysToAvailable !== undefined) {
-        StorageService.saveDaysToAvailable(data.daysToAvailable);
-        next.daysToAvailable = data.daysToAvailable;
-      }
-
       // Same backfill-defaults treatment as setZonePointCounts/
       // setEnabledZones, since an imported grid or zone selection may bring
       // previously out-of-range/disabled slots into range. Handled together
@@ -848,6 +860,21 @@ export function useAppStore(
         }
       }
 
+      if (data.pointRestoreMode !== undefined) {
+        StorageService.savePointRestoreMode(data.pointRestoreMode);
+        next.pointRestoreMode = data.pointRestoreMode;
+      }
+
+      if (data.daysToWhite !== undefined) {
+        StorageService.saveDaysToWhite(data.daysToWhite);
+        next.daysToWhite = data.daysToWhite;
+      }
+
+      if (data.daysToAvailable !== undefined) {
+        StorageService.saveDaysToAvailable(data.daysToAvailable);
+        next.daysToAvailable = data.daysToAvailable;
+      }
+
       return next;
     });
     StorageService.importStorage(data);
@@ -872,6 +899,7 @@ export function useAppStore(
       updateAutoLockTimes,
       setDaysToWhite,
       setDaysToAvailable,
+      setPointRestoreMode,
       setZonePointCounts,
       setEnabledZones,
       exportData,

@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   Text,
-  Image,
   ActivityIndicator,
   StatusBar,
 } from "react-native";
@@ -17,6 +16,7 @@ import {
   ConfirmDialog,
   ToastEntry,
   ToastStack,
+  BodyIllustration,
 } from "../../components";
 import { useAppStore } from "../../hooks";
 import { useTheme } from "../../theme";
@@ -26,7 +26,6 @@ import { ZONES, ZONE_MAP, ZONE_LABEL_KEY } from "../../data";
 import { PointColor, ThemeMode, ToastStatus, ZoneGroup } from "../../types";
 import {
   APP_NAME,
-  IMG_ASPECT,
   INTERFACE_LOCKED_TOAST_DURATION_MS,
   MAX_STACKED_TOASTS,
   TOAST_DURATION_MS,
@@ -87,9 +86,14 @@ export function MainScreen() {
         state.pointStates[id],
         state.now,
         state.daysToWhite,
+        state.pointRestoreMode,
       );
 
-      if (color === PointColor.Gray || color === PointColor.Black) {
+      if (
+        color === PointColor.Gray ||
+        color === PointColor.Black ||
+        color === PointColor.Marked
+      ) {
         showToast(t("toast.blocked"), ToastStatus.Info, TOAST_DURATION_MS);
         return;
       }
@@ -108,6 +112,7 @@ export function MainScreen() {
         state.now,
         state.daysToWhite,
         state.daysToAvailable,
+        state.pointRestoreMode,
       );
       if (daysUntilAvailable !== undefined) {
         showToast(
@@ -129,6 +134,7 @@ export function MainScreen() {
         state.daysToWhite,
         state.zoneData.pointMap,
         state.zoneData.pointAddress,
+        state.pointRestoreMode,
       );
       if (toast) showToast(toast.message, toast.status, TOAST_DURATION_MS);
     },
@@ -138,6 +144,7 @@ export function MainScreen() {
       state.now,
       state.daysToWhite,
       state.daysToAvailable,
+      state.pointRestoreMode,
       state.interfaceLocked,
       state.zoneData,
       showToast,
@@ -159,6 +166,7 @@ export function MainScreen() {
         menuPointState,
         state.now,
         state.daysToWhite,
+        state.pointRestoreMode,
       )
     : undefined;
   const menuDaysUntilAvailable = menuPointState
@@ -167,6 +175,7 @@ export function MainScreen() {
         state.now,
         state.daysToWhite,
         state.daysToAvailable,
+        state.pointRestoreMode,
       )
     : undefined;
   const menuPointAddress = menuPointId
@@ -207,57 +216,53 @@ export function MainScreen() {
       {/* Body image + points overlay */}
       <View style={styles.bodyWrap}>
         <View style={styles.imageContainer}>
-          <Image
-            source={require("../../../assets/images/body.png")}
-            style={[styles.image, StyleSheet.absoluteFill]}
-            resizeMode="contain"
-          />
-
-          <View
-            style={[
-              styles.sideLabels,
-              state.mirrored && styles.sideLabelsMirrored,
-            ]}
-          >
-            <Text style={[styles.sideLabel, { color: colors.sectionLabel }]}>
-              {t("mainScreen.rightSideLabel")}
-            </Text>
-            <Text style={[styles.sideLabel, { color: colors.sectionLabel }]}>
-              {t("mainScreen.leftSideLabel")}
-            </Text>
-          </View>
-
-          {ZONES.filter((zone) => state.enabledZones[zone.id]).map((zone) => (
-            <ZoneContainer
-              key={zone.id}
-              zoneId={zone.id}
-              mirrored={state.mirrored}
-              zoneLayout={state.zoneData.zoneLayout}
-              pointsByZone={state.zoneData.pointsByZone}
-              getColor={(pointId) =>
-                PointService.computePointColor(
-                  state.pointStates[pointId],
-                  state.now,
-                  state.daysToWhite,
-                )
-              }
-              isCheckmarked={(pointId) =>
-                state.lastInGroup[ZoneGroup.Thighs] === pointId ||
-                state.lastInGroup[ZoneGroup.ShouldersAndBelly] === pointId
-              }
-              isUnavailable={(pointId) =>
-                PointService.daysUntilAvailable(
-                  state.pointStates[pointId],
-                  state.now,
-                  state.daysToWhite,
-                  state.daysToAvailable,
-                ) !== undefined
-              }
-              onPress={handlePress}
-              onLongPress={handleLongPress}
-            />
-          ))}
+          <BodyIllustration style={[styles.image]} />
         </View>
+
+        <View
+          style={[
+            styles.sideLabels,
+            state.mirrored && styles.sideLabelsMirrored,
+          ]}
+        >
+          <Text style={[styles.sideLabel, { color: colors.sectionLabel }]}>
+            {t("mainScreen.rightSideLabel")}
+          </Text>
+          <Text style={[styles.sideLabel, { color: colors.sectionLabel }]}>
+            {t("mainScreen.leftSideLabel")}
+          </Text>
+        </View>
+
+        {ZONES.filter((zone) => state.enabledZones[zone.id]).map((zone) => (
+          <ZoneContainer
+            key={zone.id}
+            zoneId={zone.id}
+            mirrored={state.mirrored}
+            zoneLayout={state.zoneData.zoneLayout}
+            pointsByZone={state.zoneData.pointsByZone}
+            getColor={(pointId) =>
+              PointService.computePointColor(
+                state.pointStates[pointId],
+                state.now,
+                state.daysToWhite,
+              )
+            }
+            isCheckmarked={(pointId) =>
+              state.lastInGroup[ZoneGroup.Thighs] === pointId ||
+              state.lastInGroup[ZoneGroup.ShouldersAndBelly] === pointId
+            }
+            isUnavailable={(pointId) =>
+              PointService.daysUntilAvailable(
+                state.pointStates[pointId],
+                state.now,
+                state.daysToWhite,
+                state.daysToAvailable,
+              ) !== undefined
+            }
+            onPress={handlePress}
+            onLongPress={handleLongPress}
+          />
+        ))}
       </View>
 
       {/* Bottom menu */}
@@ -288,6 +293,8 @@ export function MainScreen() {
         onSetDaysToWhite={actions.setDaysToWhite}
         daysToAvailable={state.daysToAvailable}
         onSetDaysToAvailable={actions.setDaysToAvailable}
+        pointRestoreMode={state.pointRestoreMode}
+        onSetPointRestoreMode={actions.setPointRestoreMode}
         zonePointCounts={state.zonePointCounts}
         onSetZonePointCounts={actions.setZonePointCounts}
         enabledZones={state.enabledZones}
@@ -328,7 +335,12 @@ export function MainScreen() {
         onBlock={() => {
           if (menuPointId) {
             actions.blockPoint(menuPointId);
-            const addressSuffix = buildPointAddressSuffix(t, menuPointId, state.zoneData.pointMap, state.zoneData.pointAddress);
+            const addressSuffix = buildPointAddressSuffix(
+              t,
+              menuPointId,
+              state.zoneData.pointMap,
+              state.zoneData.pointAddress,
+            );
             if (addressSuffix) {
               showToast(
                 t("toast.labeledValue", {
@@ -344,7 +356,12 @@ export function MainScreen() {
         onUnblock={() => {
           if (menuPointId) {
             actions.unblockPoint(menuPointId);
-            const addressSuffix = buildPointAddressSuffix(t, menuPointId, state.zoneData.pointMap, state.zoneData.pointAddress);
+            const addressSuffix = buildPointAddressSuffix(
+              t,
+              menuPointId,
+              state.zoneData.pointMap,
+              state.zoneData.pointAddress,
+            );
             if (addressSuffix) {
               showToast(
                 t("toast.labeledValue", {
@@ -386,6 +403,7 @@ export function MainScreen() {
               state.daysToWhite,
               state.zoneData.pointMap,
               state.zoneData.pointAddress,
+              state.pointRestoreMode,
             );
             actions.markPointAt(markPointId, timestamp);
             if (toast) showToast(toast.message, toast.status);
@@ -403,7 +421,12 @@ export function MainScreen() {
         onConfirm={() => {
           if (clearPointId) {
             actions.clearPoint(clearPointId);
-            const addressSuffix = buildPointAddressSuffix(t, clearPointId, state.zoneData.pointMap, state.zoneData.pointAddress);
+            const addressSuffix = buildPointAddressSuffix(
+              t,
+              clearPointId,
+              state.zoneData.pointMap,
+              state.zoneData.pointAddress,
+            );
             if (addressSuffix) {
               showToast(
                 t("toast.labeledValue", {
@@ -449,13 +472,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
+    maxWidth: "100%",
+    alignSelf: "center",
   },
   imageContainer: {
-    position: "relative",
-    flex: 1,
-    maxWidth: "100%",
-    aspectRatio: IMG_ASPECT,
-    alignSelf: "center",
+    width: "100%",
+    height: "100%",
+    paddingHorizontal: 20,
   },
   image: {
     width: "100%",
@@ -465,6 +489,8 @@ const styles = StyleSheet.create({
   },
   sideLabels: {
     position: "absolute",
+    top: 0,
+    left: 0,
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 24,

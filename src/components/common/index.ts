@@ -1,4 +1,5 @@
 export { Accordion } from "./Accordion";
+export { BodyIllustration } from "./BodyIllustration";
 export { Checkbox } from "./Checkbox";
 export { ConfirmDialog } from "./ConfirmDialog";
 export { ContextMenu } from "./ContextMenu";

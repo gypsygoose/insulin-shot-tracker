@@ -6,3 +6,4 @@ export * from './theme';
 export * from './language';
 export * from './toast';
 export * from './autoLock';
+export * from './pointRestoreMode';

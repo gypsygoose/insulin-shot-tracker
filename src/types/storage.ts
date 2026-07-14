@@ -3,6 +3,7 @@ import { StoredPointState } from './point';
 import { ThemeMode } from './theme';
 import { LanguageMode } from './language';
 import { EnabledZones, ZonePointCounts } from './zone';
+import { PointRestoreMode } from './pointRestoreMode';
 
 // Full app storage
 export interface AppStorage {
@@ -30,6 +31,7 @@ export interface ExportedAppData {
   languageMode?: LanguageMode;
   zonePointCounts?: ZonePointCounts;
   enabledZones?: EnabledZones;
+  pointRestoreMode?: PointRestoreMode;
 }
 
 // Which categories ExportOptionsDialog writes to the export file. The
@@ -42,12 +44,13 @@ export interface ExportedAppData {
 export enum ExportSettingKey {
   Mirrored = 'mirrored',
   AutoLock = 'auto-lock',
+  EnabledZones = 'enabled-zones',
+  ZonePointCounts = 'zone-point-counts',
+  PointRestoreMode = 'point-restore-mode',
   DaysToWhite = 'days-to-white',
   DaysToAvailable = 'days-to-available',
-  Theme = 'theme',
   Language = 'language',
-  ZonePointCounts = 'zone-point-counts',
-  EnabledZones = 'enabled-zones',
+  Theme = 'theme',
 }
 
 // Which sub-category of injection point marks ExportOptionsDialog writes to

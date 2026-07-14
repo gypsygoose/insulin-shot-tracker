@@ -81,6 +81,11 @@ export const de: AppLocale = {
     settingsRow: "Einstellungen",
     mirrorRow: "Anzeige spiegeln",
     autoLockRow: "Oberfläche automatisch sperren",
+    pointRestoreModeRow: "Wiederherstellungsmodus der Punkte",
+    pointRestoreMode: {
+      auto: "Automatisch",
+      manual: "Manuell",
+    },
     daysToWhiteRow: "Tage bis zur Erholung des Punkts",
     daysToAvailableRow: "Tage bis der Punkt wieder verfügbar ist",
     zonePointsRow: "Punktraster der Zonen",
@@ -103,8 +108,12 @@ export const de: AppLocale = {
     },
     daysToAvailableDialog: {
       message:
-        "Wie viele Tage nach der letzten Markierung ein Punkt zusätzlich zum Farbzyklus für eine erneute Markierung gesperrt bleibt. Darf den Wert von „Tage bis zur Erholung des Punkts“ nicht überschreiten. Bei 0 (Standard) kann ein Punkt jederzeit erneut markiert werden, genau wie vor Einführung dieser Einstellung.",
+        "Wie viele Tage nach der letzten Markierung ein Punkt zusätzlich zum Farbzyklus für eine erneute Markierung gesperrt bleibt. Darf den Wert von „Tage bis zur Erholung des Punkts“ nicht überschreiten. Bei 0 (Standard) kann ein Punkt jederzeit erneut markiert werden.",
       fieldLabel: "Tage",
+    },
+    pointRestoreModeDialog: {
+      message:
+        "Im Modus „Automatisch“ wechselt die Farbe eines Punkts mit der Zeit. Im Modus „Manuell“ wird ein Punkt in dem Moment, in dem er verwendet wird, schwarz und bleibt für eine erneute Markierung gesperrt – lösche ihn, um ihn wieder markieren zu können.",
     },
     zonePointsDialog: {
       message:
@@ -244,6 +253,8 @@ export const de: AppLocale = {
       mirror: "<bold>{{label}}</bold> — die Körpersilhouette horizontal spiegeln.",
       autoLock:
         "<bold>{{label}}</bold> — die Sperre automatisch nach einer festgelegten Zeit nach dem Markieren einer Injektion und nach manueller Entsperrung aktivieren. Antippen der Zeile öffnet die Verzögerungseinstellungen.",
+      pointRestoreMode:
+        "<bold>{{label}}</bold> — legt fest, wie sich Injektionspunkte erholen. Im automatischen Modus ändert sich die Farbe des Punkts mit der Zeit. Im manuellen Modus wird ein Punkt schwarz und bleibt für erneutes Markieren gesperrt, sobald er benutzt wurde — zum erneuten Markieren muss er manuell gelöscht werden. Das Aktivieren des manuellen Modus deaktiviert die Einstellungen „Tage bis zur Erholung“ und „Tage bis zur Verfügbarkeit“.",
       daysToWhite:
         "<bold>{{label}}</bold> — wie viele Tage vergehen, bis eine Injektionsstelle wieder als vollständig frei (weiß) gilt. Ein niedrigerer Wert komprimiert das Farbschema auf diesen Zeitraum.",
       daysToAvailable:
@@ -269,9 +280,11 @@ export const de: AppLocale = {
       white_few: "Frei (seit {{count}}+ Tagen ungenutzt)",
       white_many: "Frei (seit {{count}}+ Tagen ungenutzt)",
       white_other: "Frei (seit {{count}}+ Tagen ungenutzt)",
+      whiteManual: "Frei",
       maroon: "Gerade eben (Tag 0)",
       black: "Vom System wegen häufiger Nutzung gesperrt",
       gray: "Manuell gesperrt (Verletzung/Bluterguss)",
+      marked: "Markiert — bis zum Löschen gesperrt (manueller Modus)",
     },
   },
 };

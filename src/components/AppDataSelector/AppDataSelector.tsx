@@ -12,12 +12,13 @@ const MARKS_LABEL_KEY: Record<ExportMarksKey, TranslationKey> = {
 const SETTING_LABEL_KEY: Record<ExportSettingKey, TranslationKey> = {
   [ExportSettingKey.Mirrored]: "menu.mirrorRow",
   [ExportSettingKey.AutoLock]: "menu.autoLockRow",
+  [ExportSettingKey.EnabledZones]: "menu.zonesRow",
+  [ExportSettingKey.ZonePointCounts]: "menu.zonePointsRow",
+  [ExportSettingKey.PointRestoreMode]: "menu.pointRestoreModeRow",
   [ExportSettingKey.DaysToWhite]: "menu.daysToWhiteRow",
   [ExportSettingKey.DaysToAvailable]: "menu.daysToAvailableRow",
-  [ExportSettingKey.Theme]: "menu.themeRow",
   [ExportSettingKey.Language]: "menu.languageRow",
-  [ExportSettingKey.ZonePointCounts]: "menu.zonePointsRow",
-  [ExportSettingKey.EnabledZones]: "menu.zonesRow",
+  [ExportSettingKey.Theme]: "menu.themeRow",
 };
 
 interface Props {

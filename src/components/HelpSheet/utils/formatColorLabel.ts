@@ -12,12 +12,16 @@ export function formatColorLabel(
   switch (descriptor.type) {
     case ColorLabelType.White:
       return t("stateMachine.colorLabel.white", { count: descriptor.count });
+    case ColorLabelType.WhiteManual:
+      return t("stateMachine.colorLabel.whiteManual");
     case ColorLabelType.Maroon:
       return t("stateMachine.colorLabel.maroon");
     case ColorLabelType.Black:
       return t("stateMachine.colorLabel.black");
     case ColorLabelType.Gray:
       return t("stateMachine.colorLabel.gray");
+    case ColorLabelType.Marked:
+      return t("stateMachine.colorLabel.marked");
     case ColorLabelType.Days:
       return t("common.daysCount", { count: descriptor.count });
   }

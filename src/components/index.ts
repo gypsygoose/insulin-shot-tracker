@@ -3,6 +3,7 @@ export { DaysToWhiteDialog } from "./DaysToWhiteDialog";
 export { DaysToAvailableDialog } from "./DaysToAvailableDialog";
 export { LanguageDialog } from "./LanguageDialog";
 export { MarkDialog } from "./MarkDialog";
+export { PointRestoreModeDialog } from "./PointRestoreModeDialog";
 export { ThemeDialog } from "./ThemeDialog";
 export { AppDataSelector, isSelectionEmpty, SETTING_KEYS } from "./AppDataSelector";
 export { BottomMenu } from "./BottomMenu";

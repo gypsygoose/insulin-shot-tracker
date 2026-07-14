@@ -85,6 +85,11 @@ export const tr: AppLocale = {
     settingsRow: "Ayarlar",
     mirrorRow: "Görünümü aynala",
     autoLockRow: "Arayüzü otomatik kilitle",
+    pointRestoreModeRow: "Nokta kurtarma modu",
+    pointRestoreMode: {
+      auto: "Otomatik",
+      manual: "Manuel",
+    },
     daysToWhiteRow: "Noktanın iyileşmesine kalan gün sayısı",
     daysToAvailableRow: "Noktanın tekrar kullanılabilir olmasına kalan gün sayısı",
     zonePointsRow: "Bölge nokta düzeni",
@@ -107,8 +112,12 @@ export const tr: AppLocale = {
     },
     daysToAvailableDialog: {
       message:
-        "Son işaretlemeden sonra bir noktanın, renk döngüsüne ek olarak, tekrar işaretlenmek üzere kaç gün devre dışı kalacağı. \"Noktanın iyileşmesine kalan gün sayısı\" değerini aşamaz. 0'da (varsayılan), bir nokta bu ayar var olmadan önce olduğu gibi her zaman yeniden işaretlenebilir.",
+        "Son işaretlemeden sonra bir noktanın, renk döngüsüne ek olarak, tekrar işaretlenmek üzere kaç gün devre dışı kalacağı. \"Noktanın iyileşmesine kalan gün sayısı\" değerini aşamaz. 0'da (varsayılan), bir nokta her zaman yeniden işaretlenebilir.",
       fieldLabel: "Gün",
+    },
+    pointRestoreModeDialog: {
+      message:
+        "Otomatik modda, bir noktanın rengi zamanla değişir. Manuel modda, bir nokta kullanıldığı anda siyaha döner ve yeniden işaretlenmek üzere devre dışı kalır — tekrar işaretlemek için önce temizleyin.",
     },
     zonePointsDialog: {
       message:
@@ -248,6 +257,8 @@ export const tr: AppLocale = {
       mirror: "<bold>{{label}}</bold> — vücut silüetini yatay olarak çevirir.",
       autoLock:
         "<bold>{{label}}</bold> — bir enjeksiyon işaretlendikten belirli bir süre sonra ve elle kilit açıldıktan sonra kilitlemeyi otomatik olarak etkinleştirir. Satıra dokunmak gecikme ayarlarını açar.",
+      pointRestoreMode:
+        "<bold>{{label}}</bold> — enjeksiyon noktalarının nasıl kurtarılacağını seçin. Otomatik modda, noktanın rengi zamanla değişir. Manuel modda, bir nokta kullanılır kullanılmaz siyaha döner ve yeniden işaretlenmek üzere devre dışı kalır — tekrar işaretlemek için elle temizlemeniz gerekir. Manuel modu etkinleştirmek, \"iyileşmeye kalan gün\" ve \"kullanılabilir olmaya kalan gün\" ayarlarını devre dışı bırakır.",
       daysToWhite:
         "<bold>{{label}}</bold> — bir enjeksiyon noktasının tekrar tamamen serbest (beyaz) sayılması için kaç gün geçmesi gerektiği. Değeri düşürmek renk şemasını bu süreye sıkıştırır.",
       daysToAvailable:
@@ -273,9 +284,11 @@ export const tr: AppLocale = {
       white_few: "Serbest ({{count}}+ gündür kullanılmadı)",
       white_many: "Serbest ({{count}}+ gündür kullanılmadı)",
       white_other: "Serbest ({{count}}+ gündür kullanılmadı)",
+      whiteManual: "Serbest",
       maroon: "Az önce (gün 0)",
       black: "Sık kullanım nedeniyle sistem tarafından engellendi",
       gray: "Elle engellendi (yaralanma/morluk)",
+      marked: "İşaretlendi — temizlenene kadar devre dışı (manuel mod)",
     },
   },
 };

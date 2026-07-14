@@ -41,4 +41,8 @@ export const COLOR_HEX: Record<PointColor, string> = {
   [PointColor.Green]: "#16A34A",
   [PointColor.Black]: "#111111",
   [PointColor.Gray]: "#6B7280",
+  // Same near-black hex as PointColor.Black (Point restore mode: Manual's
+  // own "used" state) — coincidental value match, distinct meaning, so kept
+  // as its own constant rather than reusing PointColor.Black's entry.
+  [PointColor.Marked]: "#111111",
 };

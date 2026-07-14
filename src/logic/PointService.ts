@@ -1,5 +1,9 @@
-import { PointColor, StoredPointState } from "../types";
-import { DEFAULT_DAYS_TO_AVAILABLE, DEFAULT_DAYS_TO_WHITE } from "../constants";
+import { PointColor, PointRestoreMode, StoredPointState } from "../types";
+import {
+  DEFAULT_DAYS_TO_AVAILABLE,
+  DEFAULT_DAYS_TO_WHITE,
+  DEFAULT_POINT_RESTORE_MODE,
+} from "../constants";
 import {
   activeCycleColors,
   daysBetween,
@@ -38,8 +42,18 @@ export class PointService {
     state: StoredPointState,
     now: number,
     daysToWhite: number = DEFAULT_DAYS_TO_WHITE,
+    pointRestoreMode: PointRestoreMode = DEFAULT_POINT_RESTORE_MODE,
   ): PointColor {
     if (state.isManuallyBlocked) return PointColor.Gray;
+
+    // Manual restore mode ignores the day-based cycle entirely: a point is
+    // either never used (White) or permanently marked (Marked) until the
+    // user clears it — see CLAUDE.md's "Point restore mode" section.
+    if (pointRestoreMode === PointRestoreMode.Manual) {
+      return state.lastInjectionAt === undefined
+        ? PointColor.White
+        : PointColor.Marked;
+    }
 
     const hasBlackout =
       state.blackoutStartedAt !== undefined &&
@@ -88,10 +102,15 @@ export class PointService {
     now: number,
     daysToWhite: number = DEFAULT_DAYS_TO_WHITE,
     daysToAvailable: number = DEFAULT_DAYS_TO_AVAILABLE,
+    pointRestoreMode: PointRestoreMode = DEFAULT_POINT_RESTORE_MODE,
   ): number | undefined {
+    // Manual restore mode has no partial-day gating — a point is either
+    // available (White) or blocked outright (Marked/Gray), the latter
+    // already conveyed by its color, not this separate countdown.
+    if (pointRestoreMode === PointRestoreMode.Manual) return undefined;
     if (daysToAvailable <= 0) return undefined;
 
-    const color = PointService.computePointColor(state, now, daysToWhite);
+    const color = PointService.computePointColor(state, now, daysToWhite, pointRestoreMode);
     if (
       color === PointColor.White ||
       color === PointColor.Gray ||
@@ -135,17 +154,43 @@ export class PointService {
     now: number,
     daysToWhite: number = DEFAULT_DAYS_TO_WHITE,
     daysToAvailable: number = DEFAULT_DAYS_TO_AVAILABLE,
+    pointRestoreMode: PointRestoreMode = DEFAULT_POINT_RESTORE_MODE,
   ): PressResult {
-    const color = PointService.computePointColor(state, now, daysToWhite);
+    const color = PointService.computePointColor(
+      state,
+      now,
+      daysToWhite,
+      pointRestoreMode,
+    );
 
-    if (color === PointColor.Gray || color === PointColor.Black)
+    if (
+      color === PointColor.Gray ||
+      color === PointColor.Black ||
+      color === PointColor.Marked
+    )
       return { type: PressResultType.Blocked };
+
+    // Manual restore mode: computePointColor only ever returns White here
+    // (Gray/Marked are handled above) — mark it, with no blackout/
+    // availability logic since neither applies in this mode.
+    if (pointRestoreMode === PointRestoreMode.Manual) {
+      return {
+        type: PressResultType.Injection,
+        newState: {
+          ...state,
+          lastInjectionAt: now,
+          blackoutStartedAt: undefined,
+          blackoutDurationDays: undefined,
+        },
+      };
+    }
 
     const daysRemaining = PointService.daysUntilAvailable(
       state,
       now,
       daysToWhite,
       daysToAvailable,
+      pointRestoreMode,
     );
     if (daysRemaining !== undefined)
       return { type: PressResultType.Unavailable, daysRemaining };
@@ -180,20 +225,28 @@ export class PointService {
   }
 
   // Descriptor for when a color is reached, dependent on the daysToWhite
-  // setting for colors that are part of the injection cycle.
+  // setting for colors that are part of the injection cycle. White's label
+  // drops the "unused for N+ days" count in Manual restore mode, since
+  // White there just means "never marked" — there's no day-based cycle to
+  // report a count against (see CLAUDE.md's "Point restore mode" section).
   static colorLabel(
     color: PointColor,
     daysToWhite: number = DEFAULT_DAYS_TO_WHITE,
+    pointRestoreMode: PointRestoreMode = DEFAULT_POINT_RESTORE_MODE,
   ): ColorLabelDescriptor {
     switch (color) {
       case PointColor.White:
-        return { type: ColorLabelType.White, count: daysToWhite };
+        return pointRestoreMode === PointRestoreMode.Manual
+          ? { type: ColorLabelType.WhiteManual }
+          : { type: ColorLabelType.White, count: daysToWhite };
       case PointColor.Maroon:
         return { type: ColorLabelType.Maroon };
       case PointColor.Black:
         return { type: ColorLabelType.Black };
       case PointColor.Gray:
         return { type: ColorLabelType.Gray };
+      case PointColor.Marked:
+        return { type: ColorLabelType.Marked };
       default: {
         const days = PointService.activeCycleColors(daysToWhite).indexOf(color);
         return { type: ColorLabelType.Days, count: days };

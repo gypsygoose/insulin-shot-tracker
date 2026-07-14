@@ -8,10 +8,15 @@ import {
   ExportedAppData,
   LanguageMode,
   PointDefinition,
+  PointRestoreMode,
   ThemeMode,
   ZonePointCounts,
 } from "../types";
-import { DEFAULT_DAYS_TO_AVAILABLE, DEFAULT_DAYS_TO_WHITE } from "../constants";
+import {
+  DEFAULT_DAYS_TO_AVAILABLE,
+  DEFAULT_DAYS_TO_WHITE,
+  DEFAULT_POINT_RESTORE_MODE,
+} from "../constants";
 import { DEFAULT_ZONE_POINT_COUNTS, DEFAULT_ENABLED_ZONES } from "../data";
 import {
   defaultStorage,
@@ -32,6 +37,7 @@ import {
   AUTO_LOCK_KEY,
   DAYS_TO_WHITE_KEY,
   DAYS_TO_AVAILABLE_KEY,
+  POINT_RESTORE_MODE_KEY,
   THEME_MODE_KEY,
   LANGUAGE_MODE_KEY,
   ZONE_POINT_COUNTS_KEY,
@@ -43,6 +49,7 @@ import {
   IOS_JSON_UTI,
   THEME_MODES,
   LANGUAGE_MODES,
+  POINT_RESTORE_MODES,
 } from "./constants";
 import { ImportResult, ImportResultType, StoredAutoLock } from "./types";
 
@@ -137,6 +144,21 @@ export class StorageService {
       DAYS_TO_AVAILABLE_KEY,
       String(clampDaysToAvailable(days)),
     );
+  }
+
+  static async loadPointRestoreMode(): Promise<PointRestoreMode> {
+    try {
+      const raw = await AsyncStorage.getItem(POINT_RESTORE_MODE_KEY);
+      if (raw && POINT_RESTORE_MODES.includes(raw as PointRestoreMode))
+        return raw as PointRestoreMode;
+      return DEFAULT_POINT_RESTORE_MODE;
+    } catch {
+      return DEFAULT_POINT_RESTORE_MODE;
+    }
+  }
+
+  static async savePointRestoreMode(mode: PointRestoreMode): Promise<void> {
+    await AsyncStorage.setItem(POINT_RESTORE_MODE_KEY, mode);
   }
 
   static async loadThemeMode(): Promise<ThemeMode> {

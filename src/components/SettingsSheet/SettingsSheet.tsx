@@ -2,9 +2,13 @@ import { Text, TouchableOpacity, View, Switch, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 import { BottomSheet } from "../common";
 import { useTheme } from "../../theme";
-import { LanguageMode, ThemeMode } from "../../types";
+import { LanguageMode, PointRestoreMode, ThemeMode } from "../../types";
 import { formatDuration } from "./utils";
-import { LANGUAGE_MODE_KEY, THEME_MODE_KEY } from "./constants";
+import {
+  LANGUAGE_MODE_KEY,
+  POINT_RESTORE_MODE_KEY,
+  THEME_MODE_KEY,
+} from "./constants";
 
 interface Props {
   visible: boolean;
@@ -16,6 +20,8 @@ interface Props {
   autoLockAfterUnlockSeconds: number;
   onToggleAutoLocked: (value: boolean) => void;
   onEditAutoLockSettings: () => void;
+  pointRestoreMode: PointRestoreMode;
+  onEditPointRestoreMode: () => void;
   daysToWhite: number;
   onEditDaysToWhite: () => void;
   daysToAvailable: number;
@@ -38,6 +44,8 @@ export function SettingsSheet({
   autoLockAfterUnlockSeconds,
   onToggleAutoLocked,
   onEditAutoLockSettings,
+  pointRestoreMode,
+  onEditPointRestoreMode,
   daysToWhite,
   onEditDaysToWhite,
   daysToAvailable,
@@ -51,9 +59,14 @@ export function SettingsSheet({
 }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const isManualRestoreMode = pointRestoreMode === PointRestoreMode.Manual;
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} title={t("menu.settingsRow")}>
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      title={t("menu.settingsRow")}
+    >
       <View style={styles.row}>
         <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
           {t("menu.mirrorRow")}
@@ -61,7 +74,10 @@ export function SettingsSheet({
         <Switch
           value={mirrored}
           onValueChange={onToggleMirrored}
-          trackColor={{ false: colors.switchTrackOff, true: colors.switchTrackOn }}
+          trackColor={{
+            false: colors.switchTrackOff,
+            true: colors.switchTrackOn,
+          }}
           thumbColor={colors.switchThumb}
         />
       </View>
@@ -87,34 +103,21 @@ export function SettingsSheet({
         <Switch
           value={autoLockEnabled}
           onValueChange={onToggleAutoLocked}
-          trackColor={{ false: colors.switchTrackOff, true: colors.switchTrackOn }}
+          trackColor={{
+            false: colors.switchTrackOff,
+            true: colors.switchTrackOn,
+          }}
           thumbColor={colors.switchThumb}
         />
       </View>
 
       <TouchableOpacity
         style={styles.row}
-        onPress={onEditDaysToWhite}
+        onPress={onEditZones}
         activeOpacity={0.7}
       >
         <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
-          {t("menu.daysToWhiteRow")}
-        </Text>
-        <Text style={[styles.rowValue, { color: colors.mutedText }]}>
-          {t("common.daysCount", { count: daysToWhite })}
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.row}
-        onPress={onEditDaysToAvailable}
-        activeOpacity={0.7}
-      >
-        <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
-          {t("menu.daysToAvailableRow")}
-        </Text>
-        <Text style={[styles.rowValue, { color: colors.mutedText }]}>
-          {t("common.daysCount", { count: daysToAvailable })}
+          {t("menu.zonesRow")}
         </Text>
       </TouchableOpacity>
 
@@ -128,18 +131,44 @@ export function SettingsSheet({
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.row} onPress={onEditZones} activeOpacity={0.7}>
+      <TouchableOpacity
+        style={styles.row}
+        onPress={onEditPointRestoreMode}
+        activeOpacity={0.7}
+      >
         <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
-          {t("menu.zonesRow")}
+          {t("menu.pointRestoreModeRow")}
+        </Text>
+        <Text style={[styles.rowValue, { color: colors.mutedText }]}>
+          {t(POINT_RESTORE_MODE_KEY[pointRestoreMode])}
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.row} onPress={onEditTheme} activeOpacity={0.7}>
+      <TouchableOpacity
+        style={[styles.row, isManualRestoreMode && styles.rowDisabled]}
+        onPress={isManualRestoreMode ? undefined : onEditDaysToWhite}
+        disabled={isManualRestoreMode}
+        activeOpacity={0.7}
+      >
         <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
-          {t("menu.themeRow")}
+          {t("menu.daysToWhiteRow")}
         </Text>
         <Text style={[styles.rowValue, { color: colors.mutedText }]}>
-          {t(THEME_MODE_KEY[themeMode])}
+          {t("common.daysCount", { count: daysToWhite })}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.row, isManualRestoreMode && styles.rowDisabled]}
+        onPress={isManualRestoreMode ? undefined : onEditDaysToAvailable}
+        disabled={isManualRestoreMode}
+        activeOpacity={0.7}
+      >
+        <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
+          {t("menu.daysToAvailableRow")}
+        </Text>
+        <Text style={[styles.rowValue, { color: colors.mutedText }]}>
+          {t("common.daysCount", { count: daysToAvailable })}
         </Text>
       </TouchableOpacity>
 
@@ -153,6 +182,19 @@ export function SettingsSheet({
         </Text>
         <Text style={[styles.rowValue, { color: colors.mutedText }]}>
           {t(LANGUAGE_MODE_KEY[languageMode])}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.row}
+        onPress={onEditTheme}
+        activeOpacity={0.7}
+      >
+        <Text style={[styles.rowLabel, { color: colors.primaryText }]}>
+          {t("menu.themeRow")}
+        </Text>
+        <Text style={[styles.rowValue, { color: colors.mutedText }]}>
+          {t(THEME_MODE_KEY[themeMode])}
         </Text>
       </TouchableOpacity>
     </BottomSheet>
@@ -177,6 +219,9 @@ const styles = StyleSheet.create({
   autoLockInfo: {
     flex: 1,
     paddingRight: 12,
+  },
+  rowDisabled: {
+    opacity: 0.4,
   },
   rowDescription: {
     fontSize: 13,

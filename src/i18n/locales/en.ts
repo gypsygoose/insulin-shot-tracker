@@ -81,6 +81,11 @@ export const en = {
     settingsRow: "Settings",
     mirrorRow: "Mirror display",
     autoLockRow: "Auto-lock interface",
+    pointRestoreModeRow: "Point restore mode",
+    pointRestoreMode: {
+      auto: "Auto",
+      manual: "Manual",
+    },
     daysToWhiteRow: "Days until point recovers",
     daysToAvailableRow: "Days until point is available again",
     zonePointsRow: "Zone point layout",
@@ -103,8 +108,12 @@ export const en = {
     },
     daysToAvailableDialog: {
       message:
-        "How many days after the last mark a point stays disabled for re-marking, on top of the color cycle. Can't exceed \"Days until point recovers\". At 0 (default), a point can be re-marked at any time, same as before this setting existed.",
+        "How many days after the last mark a point stays disabled for re-marking, on top of the color cycle. Can't exceed \"Days until point recovers\". At 0 (default), a point can be re-marked at any time.",
       fieldLabel: "Days",
+    },
+    pointRestoreModeDialog: {
+      message:
+        "In Auto mode, a point's color cycles over time. In Manual mode, a point turns black and stays disabled for re-marking the moment it's used — clear it to mark it again.",
     },
     zonePointsDialog: {
       message:
@@ -244,6 +253,8 @@ export const en = {
       mirror: "<bold>{{label}}</bold> — flip the body silhouette horizontally.",
       autoLock:
         "<bold>{{label}}</bold> — automatically enable locking after a set time following an injection mark, and after a manual unlock. Tapping the row opens the delay settings.",
+      pointRestoreMode:
+        "<bold>{{label}}</bold> — choose how injection points recover. In Auto mode, a point's color cycles over time. In Manual mode, a point turns black and stays disabled for re-marking the moment it's used — clear it to mark it again. Enabling Manual mode disables the days-to-recovery and days-to-available settings.",
       daysToWhite:
         "<bold>{{label}}</bold> — how many days until an injection point is considered fully free (white) again. Lowering the value compresses the color scheme into that timeframe.",
       daysToAvailable:
@@ -269,9 +280,11 @@ export const en = {
       white_few: "Free (unused for {{count}}+ days)",
       white_many: "Free (unused for {{count}}+ days)",
       white_other: "Free (unused for {{count}}+ days)",
+      whiteManual: "Free",
       maroon: "Just now (day 0)",
       black: "Blocked by the system due to frequent use",
       gray: "Manually blocked (injury/bruise)",
+      marked: "Marked — disabled until cleared (manual restore mode)",
     },
   },
 };

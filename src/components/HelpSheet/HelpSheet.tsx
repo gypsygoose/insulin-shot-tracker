@@ -1,7 +1,7 @@
 import { ScrollView, Text, View, StyleSheet } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import { Trans, useTranslation } from "react-i18next";
-import { PointColor, ZoneType } from "../../types";
+import { PointColor, PointRestoreMode, ZoneType } from "../../types";
 import { COLOR_HEX, PointService } from "../../logic";
 import { BottomSheet } from "../common";
 import { UNAVAILABLE_OVERLAY_COLOR } from "../InjectionPoint";
@@ -14,10 +14,17 @@ interface Props {
   visible: boolean;
   onClose: () => void;
   daysToWhite: number;
+  pointRestoreMode: PointRestoreMode;
 }
 
-export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
+export function HelpSheet({
+  visible,
+  onClose,
+  daysToWhite,
+  pointRestoreMode,
+}: Props) {
   const { t } = useTranslation();
+  const isManualRestoreMode = pointRestoreMode === PointRestoreMode.Manual;
   const { colors } = useTheme();
   const sectionTitleStyle = [
     styles.sectionTitle,
@@ -71,7 +78,7 @@ export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
         })}
 
         <Text style={sectionTitleStyle}>{t("help.sectionColorScheme")}</Text>
-        {colorOrder(daysToWhite).map((color) => (
+        {colorOrder(daysToWhite, pointRestoreMode).map((color) => (
           <View key={color} style={styles.colorRow}>
             <View
               style={[
@@ -83,35 +90,40 @@ export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
               ]}
             />
             <Text style={[styles.colorLabel, { color: colors.secondaryText }]}>
-              {formatColorLabel(t, PointService.colorLabel(color, daysToWhite))}
+              {formatColorLabel(
+                t,
+                PointService.colorLabel(color, daysToWhite, pointRestoreMode),
+              )}
             </Text>
           </View>
         ))}
-        <View style={styles.colorRow}>
-          <Svg
-            width={COLOR_SWATCH_SIZE}
-            height={COLOR_SWATCH_SIZE}
-            style={[styles.swatch, { borderWidth: 0 }]}
-          >
-            <Circle
-              cx={COLOR_SWATCH_SIZE / 2}
-              cy={COLOR_SWATCH_SIZE / 2}
-              r={COLOR_SWATCH_SIZE / 2}
-              fill={COLOR_HEX[PointColor.Yellow]}
-            />
-            <Path
-              d={topRightHalfCirclePath(
-                COLOR_SWATCH_SIZE / 2,
-                COLOR_SWATCH_SIZE / 2,
-                COLOR_SWATCH_SIZE / 2,
-              )}
-              fill={UNAVAILABLE_OVERLAY_COLOR}
-            />
-          </Svg>
-          <Text style={[styles.colorLabel, { color: colors.secondaryText }]}>
-            {t("help.colorScheme.unavailableExample")}
-          </Text>
-        </View>
+        {isManualRestoreMode ? null : (
+          <View style={styles.colorRow}>
+            <Svg
+              width={COLOR_SWATCH_SIZE}
+              height={COLOR_SWATCH_SIZE}
+              style={[styles.swatch, { borderWidth: 0 }]}
+            >
+              <Circle
+                cx={COLOR_SWATCH_SIZE / 2}
+                cy={COLOR_SWATCH_SIZE / 2}
+                r={COLOR_SWATCH_SIZE / 2}
+                fill={COLOR_HEX[PointColor.Yellow]}
+              />
+              <Path
+                d={topRightHalfCirclePath(
+                  COLOR_SWATCH_SIZE / 2,
+                  COLOR_SWATCH_SIZE / 2,
+                  COLOR_SWATCH_SIZE / 2,
+                )}
+                fill={UNAVAILABLE_OVERLAY_COLOR}
+              />
+            </Svg>
+            <Text style={[styles.colorLabel, { color: colors.secondaryText }]}>
+              {t("help.colorScheme.unavailableExample")}
+            </Text>
+          </View>
+        )}
 
         <Text style={sectionTitleStyle}>
           {t("help.sectionRecommendations")}
@@ -204,6 +216,27 @@ export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
         </Text>
         <Text style={hintStyle}>
           <Trans
+            i18nKey="help.menuItems.zones"
+            values={{ label: t("menu.zonesRow") }}
+            components={boldComponents}
+          />
+        </Text>
+        <Text style={hintStyle}>
+          <Trans
+            i18nKey="help.menuItems.zonePoints"
+            values={{ label: t("menu.zonePointsRow") }}
+            components={boldComponents}
+          />
+        </Text>
+        <Text style={hintStyle}>
+          <Trans
+            i18nKey="help.menuItems.pointRestoreMode"
+            values={{ label: t("menu.pointRestoreModeRow") }}
+            components={boldComponents}
+          />
+        </Text>
+        <Text style={hintStyle}>
+          <Trans
             i18nKey="help.menuItems.daysToWhite"
             values={{ label: t("menu.daysToWhiteRow") }}
             components={boldComponents}
@@ -218,15 +251,8 @@ export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
         </Text>
         <Text style={hintStyle}>
           <Trans
-            i18nKey="help.menuItems.zonePoints"
-            values={{ label: t("menu.zonePointsRow") }}
-            components={boldComponents}
-          />
-        </Text>
-        <Text style={hintStyle}>
-          <Trans
-            i18nKey="help.menuItems.zones"
-            values={{ label: t("menu.zonesRow") }}
+            i18nKey="help.menuItems.language"
+            values={{ label: t("menu.languageRow") }}
             components={boldComponents}
           />
         </Text>
@@ -234,13 +260,6 @@ export function HelpSheet({ visible, onClose, daysToWhite }: Props) {
           <Trans
             i18nKey="help.menuItems.theme"
             values={{ label: t("menu.themeRow") }}
-            components={boldComponents}
-          />
-        </Text>
-        <Text style={hintStyle}>
-          <Trans
-            i18nKey="help.menuItems.language"
-            values={{ label: t("menu.languageRow") }}
             components={boldComponents}
           />
         </Text>

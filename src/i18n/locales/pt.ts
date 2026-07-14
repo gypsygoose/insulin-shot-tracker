@@ -85,6 +85,11 @@ export const pt: AppLocale = {
     settingsRow: "Configurações",
     mirrorRow: "Espelhar exibição",
     autoLockRow: "Bloqueio automático da interface",
+    pointRestoreModeRow: "Modo de recuperação dos pontos",
+    pointRestoreMode: {
+      auto: "Automático",
+      manual: "Manual",
+    },
     daysToWhiteRow: "Dias até o ponto se recuperar",
     daysToAvailableRow: "Dias até o ponto ficar disponível novamente",
     zonePointsRow: "Disposição de pontos na zona",
@@ -107,8 +112,12 @@ export const pt: AppLocale = {
     },
     daysToAvailableDialog: {
       message:
-        "Quantos dias após a última marca um ponto permanece desabilitado para uma nova marcação, além do ciclo de cores. Não pode exceder \"Dias até o ponto se recuperar\". Em 0 (padrão), um ponto pode ser marcado novamente a qualquer momento, como antes de esta configuração existir.",
+        "Quantos dias após a última marca um ponto permanece desabilitado para uma nova marcação, além do ciclo de cores. Não pode exceder \"Dias até o ponto se recuperar\". Em 0 (padrão), um ponto pode ser marcado novamente a qualquer momento.",
       fieldLabel: "Dias",
+    },
+    pointRestoreModeDialog: {
+      message:
+        "No modo Automático, a cor de um ponto muda com o tempo. No modo Manual, um ponto fica preto e permanece desabilitado para uma nova marcação assim que é usado — limpe-o para poder marcá-lo novamente.",
     },
     zonePointsDialog: {
       message:
@@ -248,6 +257,8 @@ export const pt: AppLocale = {
       mirror: "<bold>{{label}}</bold> — inverte a silhueta do corpo horizontalmente.",
       autoLock:
         "<bold>{{label}}</bold> — ativa automaticamente o bloqueio após um tempo definido depois de marcar uma injeção e após um desbloqueio manual. Tocar na linha abre as configurações de atraso.",
+      pointRestoreMode:
+        "<bold>{{label}}</bold> — escolha como os pontos de injeção se recuperam. No modo automático, a cor do ponto muda com o tempo. No modo manual, um ponto fica preto e permanece desabilitado para nova marcação assim que é usado — é preciso limpá-lo manualmente para marcá-lo novamente. Ativar o modo manual desabilita as configurações de dias até a recuperação e dias até a disponibilidade.",
       daysToWhite:
         "<bold>{{label}}</bold> — quantos dias até um ponto de injeção ser considerado totalmente livre (branco) novamente. Diminuir o valor comprime o esquema de cores nesse período.",
       daysToAvailable:
@@ -273,9 +284,11 @@ export const pt: AppLocale = {
       white_few: "Livre (sem uso há {{count}}+ dias)",
       white_many: "Livre (sem uso há {{count}}+ dias)",
       white_other: "Livre (sem uso há {{count}}+ dias)",
+      whiteManual: "Livre",
       maroon: "Agora mesmo (dia 0)",
       black: "Bloqueado pelo sistema por uso frequente",
       gray: "Bloqueado manualmente (lesão/hematoma)",
+      marked: "Marcado — desabilitado até ser limpo (modo manual)",
     },
   },
 };

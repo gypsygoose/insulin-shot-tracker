@@ -19,10 +19,12 @@ export type PressResult =
 // (HelpSheet.tsx) formats it via t('stateMachine.colorLabel.*', { count }).
 export enum ColorLabelType {
   White = "white",
+  WhiteManual = "whiteManual",
   Maroon = "maroon",
   Black = "black",
   Gray = "gray",
   Days = "days",
+  Marked = "marked",
 }
 
 export interface ColorLabelDescriptor {

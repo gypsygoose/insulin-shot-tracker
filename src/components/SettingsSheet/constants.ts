@@ -1,4 +1,4 @@
-import { LanguageMode, ThemeMode } from "../../types";
+import { LanguageMode, PointRestoreMode, ThemeMode } from "../../types";
 import type { TranslationKey } from "../../i18n";
 
 // Shared with ThemeDialog.tsx, which offers the same three options — values
@@ -19,4 +19,11 @@ export const LANGUAGE_MODE_KEY: Record<LanguageMode, TranslationKey> = {
   [LanguageMode.Turkish]: "menu.languageDialog.turkish",
   [LanguageMode.Portuguese]: "menu.languageDialog.portuguese",
   [LanguageMode.System]: "menu.languageDialog.system",
+};
+
+// Shared with SettingsSheet.tsx's row label and PointRestoreModeDialog.tsx,
+// which offers the same two options.
+export const POINT_RESTORE_MODE_KEY: Record<PointRestoreMode, TranslationKey> = {
+  [PointRestoreMode.Auto]: "menu.pointRestoreMode.auto",
+  [PointRestoreMode.Manual]: "menu.pointRestoreMode.manual",
 };
