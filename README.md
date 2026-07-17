@@ -71,4 +71,8 @@ See [CLAUDE.md](CLAUDE.md) for full architecture notes, the point color/rotation
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+This repository is public for portfolio/reference purposes only. It is
+**not** open source: no permission is granted to copy, modify, redistribute,
+or publish this software or any derivative of it (including to the Apple
+App Store or Google Play Store) without the author's prior written
+permission. See [LICENSE](LICENSE) (PolyForm Strict License 1.0.0).
