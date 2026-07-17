@@ -35,8 +35,12 @@ Other useful scripts:
 ```bash
 npm test           # run unit tests (state machine logic)
 npx tsc --noEmit   # type-check the project
-npm run ios        # run on iOS simulator/device
-npm run android    # run on Android emulator/device
+npm run dev:ios      # run on iOS simulator
+npm run dev:android  # run on Android emulator
+npm run debug:ios    # build + run a Debug build on a connected iOS device (needs Metro running)
+npm run debug:android # build + run a Debug build on a connected Android device (needs Metro running)
+npm run device:ios    # build + run a Release build on a connected iOS device (JS bundle embedded, no Metro needed)
+npm run device:android # build + run a Release build on a connected Android device (JS bundle embedded, no Metro needed)
 ```
 
 ## Project structure
