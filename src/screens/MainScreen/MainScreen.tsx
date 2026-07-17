@@ -75,6 +75,25 @@ export function MainScreen() {
       [showToast, t],
     ),
   );
+  const {
+    pointStates,
+    now,
+    daysToWhite,
+    daysToAvailable,
+    pointRestoreMode,
+    interfaceLocked,
+    zoneData,
+    isLoaded,
+    gender,
+    mirrored,
+    enabledZones,
+    lastInGroup,
+    events,
+    autoLockEnabled,
+    autoLockAfterMarkSeconds,
+    autoLockAfterUnlockSeconds,
+    zonePointCounts,
+  } = state;
 
   // ThemeProvider/LanguageProvider are mounted in App.tsx, above MainScreen,
   // so they're read through context here like any other descendant.
@@ -89,10 +108,10 @@ export function MainScreen() {
   const handlePress = useCallback(
     (id: string) => {
       const color = PointService.computePointColor({
-        state: state.pointStates[id],
-        now: state.now,
-        daysToWhite: state.daysToWhite,
-        pointRestoreMode: state.pointRestoreMode,
+        state: pointStates[id],
+        now,
+        daysToWhite,
+        pointRestoreMode,
       });
 
       if (
@@ -108,7 +127,7 @@ export function MainScreen() {
         return;
       }
 
-      if (state.interfaceLocked) {
+      if (interfaceLocked) {
         showToast({
           message: t("toast.interfaceLocked"),
           status: ToastStatus.Info,
@@ -118,11 +137,11 @@ export function MainScreen() {
       }
 
       const daysUntilAvailable = PointService.daysUntilAvailable({
-        state: state.pointStates[id],
-        now: state.now,
-        daysToWhite: state.daysToWhite,
-        daysToAvailable: state.daysToAvailable,
-        pointRestoreMode: state.pointRestoreMode,
+        state: pointStates[id],
+        now,
+        daysToWhite,
+        daysToAvailable,
+        pointRestoreMode,
       });
       if (daysUntilAvailable !== undefined) {
         showToast({
@@ -139,13 +158,13 @@ export function MainScreen() {
         t,
         locale: i18n.language,
         pointId: id,
-        pointState: state.pointStates[id],
+        pointState: pointStates[id],
         timestamp,
-        daysToWhite: state.daysToWhite,
-        daysToAvailable: state.daysToAvailable,
-        pointMap: state.zoneData.pointMap,
-        pointAddress: state.zoneData.pointAddress,
-        pointRestoreMode: state.pointRestoreMode,
+        daysToWhite,
+        daysToAvailable,
+        pointMap: zoneData.pointMap,
+        pointAddress: zoneData.pointAddress,
+        pointRestoreMode,
       });
       if (toast)
         showToast({
@@ -156,13 +175,13 @@ export function MainScreen() {
     },
     [
       actions,
-      state.pointStates,
-      state.now,
-      state.daysToWhite,
-      state.daysToAvailable,
-      state.pointRestoreMode,
-      state.interfaceLocked,
-      state.zoneData,
+      pointStates,
+      now,
+      daysToWhite,
+      daysToAvailable,
+      pointRestoreMode,
+      interfaceLocked,
+      zoneData,
       showToast,
       t,
       i18n.language,
@@ -171,34 +190,32 @@ export function MainScreen() {
   const handleLongPress = useCallback((id: string) => setMenuPointId(id), []);
 
   const menuZone = menuPointId
-    ? ZONE_MAP[state.zoneData.pointMap[menuPointId]?.zoneId]
+    ? ZONE_MAP[zoneData.pointMap[menuPointId]?.zoneId]
     : undefined;
   const menuZoneLabel = menuZone ? t(ZONE_LABEL_KEY[menuZone.id]) : undefined;
-  const menuPointState = menuPointId
-    ? state.pointStates[menuPointId]
-    : undefined;
+  const menuPointState = menuPointId ? pointStates[menuPointId] : undefined;
   const menuPointColor = menuPointState
     ? PointService.computePointColor({
         state: menuPointState,
-        now: state.now,
-        daysToWhite: state.daysToWhite,
-        pointRestoreMode: state.pointRestoreMode,
+        now,
+        daysToWhite,
+        pointRestoreMode,
       })
     : undefined;
   const menuDaysUntilAvailable = menuPointState
     ? PointService.daysUntilAvailable({
         state: menuPointState,
-        now: state.now,
-        daysToWhite: state.daysToWhite,
-        daysToAvailable: state.daysToAvailable,
-        pointRestoreMode: state.pointRestoreMode,
+        now,
+        daysToWhite,
+        daysToAvailable,
+        pointRestoreMode,
       })
     : undefined;
   const menuPointAddress = menuPointId
-    ? state.zoneData.pointAddress[menuPointId]
+    ? zoneData.pointAddress[menuPointId]
     : undefined;
 
-  if (!state.isLoaded) {
+  if (!isLoaded) {
     return (
       <View style={[styles.loading, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.icon} />
@@ -232,14 +249,11 @@ export function MainScreen() {
       {/* Body image + points overlay */}
       <View style={styles.bodyWrap}>
         <View style={styles.imageContainer}>
-          <BodyImage gender={state.gender} style={[styles.image]} />
+          <BodyImage gender={gender} style={[styles.image]} />
         </View>
 
         <View
-          style={[
-            styles.sideLabels,
-            state.mirrored && styles.sideLabelsMirrored,
-          ]}
+          style={[styles.sideLabels, mirrored && styles.sideLabelsMirrored]}
         >
           <Text style={[styles.sideLabel, { color: colors.sectionLabel }]}>
             {t("mainScreen.rightSideLabel")}
@@ -249,32 +263,32 @@ export function MainScreen() {
           </Text>
         </View>
 
-        {ZONES.filter((zone) => state.enabledZones[zone.id]).map((zone) => (
+        {ZONES.filter((zone) => enabledZones[zone.id]).map((zone) => (
           <ZoneContainer
             key={zone.id}
             zoneId={zone.id}
-            mirrored={state.mirrored}
-            zoneLayout={state.zoneData.zoneLayout}
-            pointsByZone={state.zoneData.pointsByZone}
+            mirrored={mirrored}
+            zoneLayout={zoneData.zoneLayout}
+            pointsByZone={zoneData.pointsByZone}
             getColor={(pointId) =>
               PointService.computePointColor({
-                state: state.pointStates[pointId],
-                now: state.now,
-                daysToWhite: state.daysToWhite,
-                pointRestoreMode: state.pointRestoreMode,
+                state: pointStates[pointId],
+                now,
+                daysToWhite,
+                pointRestoreMode,
               })
             }
             isCheckmarked={(pointId) =>
-              state.lastInGroup[ZoneGroup.Thighs] === pointId ||
-              state.lastInGroup[ZoneGroup.ShouldersAndBelly] === pointId
+              lastInGroup[ZoneGroup.Thighs] === pointId ||
+              lastInGroup[ZoneGroup.ShouldersAndBelly] === pointId
             }
             isUnavailable={(pointId) =>
               PointService.daysUntilAvailable({
-                state: state.pointStates[pointId],
-                now: state.now,
-                daysToWhite: state.daysToWhite,
-                daysToAvailable: state.daysToAvailable,
-                pointRestoreMode: state.pointRestoreMode,
+                state: pointStates[pointId],
+                now,
+                daysToWhite,
+                daysToAvailable,
+                pointRestoreMode,
               }) !== undefined
             }
             onPress={handlePress}
@@ -285,14 +299,14 @@ export function MainScreen() {
 
       {/* Bottom menu */}
       <BottomMenu
-        canUndo={state.events.length > 0}
+        canUndo={events.length > 0}
         onUndo={actions.undo}
         onClear={actions.clearSelected}
-        mirrored={state.mirrored}
+        mirrored={mirrored}
         onToggleMirrored={actions.setMirrored}
-        interfaceLocked={state.interfaceLocked}
+        interfaceLocked={interfaceLocked}
         onToggleInterfaceLocked={() => {
-          const nextLocked = !state.interfaceLocked;
+          const nextLocked = !interfaceLocked;
           actions.setInterfaceLocked(nextLocked);
           showToast({
             message: nextLocked
@@ -301,23 +315,23 @@ export function MainScreen() {
             status: ToastStatus.Info,
           });
         }}
-        autoLockEnabled={state.autoLockEnabled}
-        autoLockAfterMarkSeconds={state.autoLockAfterMarkSeconds}
-        autoLockAfterUnlockSeconds={state.autoLockAfterUnlockSeconds}
+        autoLockEnabled={autoLockEnabled}
+        autoLockAfterMarkSeconds={autoLockAfterMarkSeconds}
+        autoLockAfterUnlockSeconds={autoLockAfterUnlockSeconds}
         onEnableAutoLock={actions.enableAutoLock}
         onDisableAutoLock={actions.disableAutoLock}
         onUpdateAutoLockTimes={actions.updateAutoLockTimes}
-        daysToWhite={state.daysToWhite}
+        daysToWhite={daysToWhite}
         onSetDaysToWhite={actions.setDaysToWhite}
-        daysToAvailable={state.daysToAvailable}
+        daysToAvailable={daysToAvailable}
         onSetDaysToAvailable={actions.setDaysToAvailable}
-        pointRestoreMode={state.pointRestoreMode}
+        pointRestoreMode={pointRestoreMode}
         onSetPointRestoreMode={actions.setPointRestoreMode}
-        gender={state.gender}
+        gender={gender}
         onSetGender={actions.setGender}
-        zonePointCounts={state.zonePointCounts}
+        zonePointCounts={zonePointCounts}
         onSetZonePointCounts={actions.setZonePointCounts}
-        enabledZones={state.enabledZones}
+        enabledZones={enabledZones}
         onSetEnabledZones={actions.setEnabledZones}
         themeMode={themeMode}
         onSetThemeMode={onSetThemeMode}
@@ -350,7 +364,7 @@ export function MainScreen() {
         color={menuPointColor}
         pointState={menuPointState}
         address={menuPointAddress}
-        now={state.now}
+        now={now}
         daysUntilAvailable={menuDaysUntilAvailable}
         onBlock={() => {
           if (menuPointId) {
@@ -358,8 +372,8 @@ export function MainScreen() {
             const addressSuffix = buildPointAddressSuffix({
               t,
               pointId: menuPointId,
-              pointMap: state.zoneData.pointMap,
-              pointAddress: state.zoneData.pointAddress,
+              pointMap: zoneData.pointMap,
+              pointAddress: zoneData.pointAddress,
             });
             if (addressSuffix) {
               showToast({
@@ -379,8 +393,8 @@ export function MainScreen() {
             const addressSuffix = buildPointAddressSuffix({
               t,
               pointId: menuPointId,
-              pointMap: state.zoneData.pointMap,
-              pointAddress: state.zoneData.pointAddress,
+              pointMap: zoneData.pointMap,
+              pointAddress: zoneData.pointAddress,
             });
             if (addressSuffix) {
               showToast({
@@ -408,9 +422,7 @@ export function MainScreen() {
       <MarkDialog
         visible={markPointId !== null}
         minDate={
-          markPointId
-            ? state.pointStates[markPointId]?.lastInjectionAt
-            : undefined
+          markPointId ? pointStates[markPointId]?.lastInjectionAt : undefined
         }
         onConfirm={(timestamp) => {
           if (markPointId) {
@@ -418,13 +430,13 @@ export function MainScreen() {
               t,
               locale: i18n.language,
               pointId: markPointId,
-              pointState: state.pointStates[markPointId],
+              pointState: pointStates[markPointId],
               timestamp,
-              daysToWhite: state.daysToWhite,
-              daysToAvailable: state.daysToAvailable,
-              pointMap: state.zoneData.pointMap,
-              pointAddress: state.zoneData.pointAddress,
-              pointRestoreMode: state.pointRestoreMode,
+              daysToWhite,
+              daysToAvailable,
+              pointMap: zoneData.pointMap,
+              pointAddress: zoneData.pointAddress,
+              pointRestoreMode,
             });
             actions.markPointAt(markPointId, timestamp);
             if (toast)
@@ -446,8 +458,8 @@ export function MainScreen() {
             const addressSuffix = buildPointAddressSuffix({
               t,
               pointId: clearPointId,
-              pointMap: state.zoneData.pointMap,
-              pointAddress: state.zoneData.pointAddress,
+              pointMap: zoneData.pointMap,
+              pointAddress: zoneData.pointAddress,
             });
             if (addressSuffix) {
               showToast({
