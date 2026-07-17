@@ -1,10 +1,5 @@
 import { PointColor, PointRestoreMode, StoredPointState } from "../types";
 import {
-  DEFAULT_DAYS_TO_AVAILABLE,
-  DEFAULT_DAYS_TO_WHITE,
-  DEFAULT_POINT_RESTORE_MODE,
-} from "../constants";
-import {
   activeCycleColors,
   daysBetween,
   daysSinceCycleStart,
@@ -41,8 +36,8 @@ export class PointService {
   static computePointColor(
     state: StoredPointState,
     now: number,
-    daysToWhite: number = DEFAULT_DAYS_TO_WHITE,
-    pointRestoreMode: PointRestoreMode = DEFAULT_POINT_RESTORE_MODE,
+    daysToWhite: number,
+    pointRestoreMode: PointRestoreMode,
   ): PointColor {
     if (state.isManuallyBlocked) return PointColor.Gray;
 
@@ -100,9 +95,9 @@ export class PointService {
   static daysUntilAvailable(
     state: StoredPointState,
     now: number,
-    daysToWhite: number = DEFAULT_DAYS_TO_WHITE,
-    daysToAvailable: number = DEFAULT_DAYS_TO_AVAILABLE,
-    pointRestoreMode: PointRestoreMode = DEFAULT_POINT_RESTORE_MODE,
+    daysToWhite: number,
+    daysToAvailable: number,
+    pointRestoreMode: PointRestoreMode,
   ): number | undefined {
     // Manual restore mode has no partial-day gating — a point is either
     // available (White) or blocked outright (Marked/Gray), the latter
@@ -152,9 +147,9 @@ export class PointService {
   static onPress(
     state: StoredPointState,
     now: number,
-    daysToWhite: number = DEFAULT_DAYS_TO_WHITE,
-    daysToAvailable: number = DEFAULT_DAYS_TO_AVAILABLE,
-    pointRestoreMode: PointRestoreMode = DEFAULT_POINT_RESTORE_MODE,
+    daysToWhite: number,
+    daysToAvailable: number,
+    pointRestoreMode: PointRestoreMode,
   ): PressResult {
     const color = PointService.computePointColor(
       state,
@@ -231,8 +226,8 @@ export class PointService {
   // report a count against (see CLAUDE.md's "Point restore mode" section).
   static colorLabel(
     color: PointColor,
-    daysToWhite: number = DEFAULT_DAYS_TO_WHITE,
-    pointRestoreMode: PointRestoreMode = DEFAULT_POINT_RESTORE_MODE,
+    daysToWhite: number,
+    pointRestoreMode: PointRestoreMode,
   ): ColorLabelDescriptor {
     switch (color) {
       case PointColor.White:

@@ -132,6 +132,7 @@ export function MainScreen() {
         state.pointStates[id],
         timestamp,
         state.daysToWhite,
+        state.daysToAvailable,
         state.zoneData.pointMap,
         state.zoneData.pointAddress,
         state.pointRestoreMode,
@@ -245,6 +246,7 @@ export function MainScreen() {
                 state.pointStates[pointId],
                 state.now,
                 state.daysToWhite,
+                state.pointRestoreMode,
               )
             }
             isCheckmarked={(pointId) =>
@@ -257,6 +259,7 @@ export function MainScreen() {
                 state.now,
                 state.daysToWhite,
                 state.daysToAvailable,
+                state.pointRestoreMode,
               ) !== undefined
             }
             onPress={handlePress}
@@ -403,6 +406,7 @@ export function MainScreen() {
               state.pointStates[markPointId],
               timestamp,
               state.daysToWhite,
+              state.daysToAvailable,
               state.zoneData.pointMap,
               state.zoneData.pointAddress,
               state.pointRestoreMode,
