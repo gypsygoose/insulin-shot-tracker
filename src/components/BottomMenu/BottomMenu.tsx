@@ -151,7 +151,6 @@ export function BottomMenu({
 
   const handleToggleAutoLock = (value: boolean) => {
     if (value) {
-      setShowSettings(false);
       setAutoLockDialogIntent(AutoLockDialogMode.Enable);
     } else {
       onDisableAutoLock();
@@ -160,47 +159,38 @@ export function BottomMenu({
   };
 
   const handleEditAutoLockSettings = () => {
-    setShowSettings(false);
     setAutoLockDialogIntent(AutoLockDialogMode.Edit);
   };
 
   const handleEditPointRestoreMode = () => {
-    setShowSettings(false);
     setShowPointRestoreModeDialog(true);
   };
 
   const handleEditGender = () => {
-    setShowSettings(false);
     setShowGenderDialog(true);
   };
 
   const handleEditDaysToWhite = () => {
-    setShowSettings(false);
     setShowDaysToWhiteDialog(true);
   };
 
   const handleEditDaysToAvailable = () => {
-    setShowSettings(false);
     setShowDaysToAvailableDialog(true);
   };
 
   const handleEditZonePointCounts = () => {
-    setShowSettings(false);
     setShowZonePointsDialog(true);
   };
 
   const handleEditZones = () => {
-    setShowSettings(false);
     setShowZonesDialog(true);
   };
 
   const handleEditTheme = () => {
-    setShowSettings(false);
     setShowThemeDialog(true);
   };
 
   const handleEditLanguage = () => {
-    setShowSettings(false);
     setShowLanguageDialog(true);
   };
 
